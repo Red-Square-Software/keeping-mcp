@@ -16,7 +16,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 
 ## Phases
 
-- [ ] **Phase 1: Foundation & Scaffolding** — Project skeleton, KeepingClient, stderr-only logger, fail-fast token validation, CI pipeline green. No MCP tools yet; server does not start. Observable output: CI workflow exits green on every push.
+- [x] **Phase 1: Foundation & Scaffolding** — Project skeleton, KeepingClient, stderr-only logger, fail-fast token validation, CI pipeline green. No MCP tools yet; server does not start. Observable output: CI workflow exits green on every push. (completed 2026-06-09)
 - [ ] **Phase 2: Read Tools & Schema Discovery** — Server runnable via `npx keeping-mcp`; all identity, metadata, and read tools operational; live-API session locks POST body schema and probes timer endpoint; rate-limit, retry, and identity caching in place.
 - [ ] **Phase 3: Write Tools + Conditional Timers** — Full CRUD (`add`, `update`, `delete`) with dry-run gate, tool annotations, Amsterdam timezone default, and `purpose` field. Timer tools shipped if Phase 2 probe returned non-404.
 - [ ] **Phase 4: Distribution & Release Pipeline** — `files` whitelist, `npm pack --dry-run` audit, dual-platform README, GitHub Actions OIDC publish to npm + MCP Registry on `v*` tag, provenance attestation verified.
@@ -42,7 +42,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 **Plans**: 3 plans
 - [x] 01-01-PLAN.md — Project skeleton: package.json (mcpName, files whitelist, MIT, Node ≥22), tsconfig, tsup, biome (noConsole), vitest, .gitignore, .gitattributes (LF), LICENSE, README placeholder; `npm install` produces lockfile.
 - [x] 01-02-PLAN.md — Source files + tests: src/config.ts (Zod 4 env loader, exact D-05 message), src/logger.ts (stderr factory + token redaction), bin/keeping-mcp.ts (loadConfig + exit, no MCP boot per D-02), test/logger.test.ts (vitest D-16). Local D-13 smoke proven.
-- [ ] 01-03-PLAN.md — CI workflow (matrix [ubuntu, windows] × [22, 24], lint → typecheck → test → build → smoke asserting D-13 a/b/c) + first commit/push to red-square-software/keeping-mcp + `gh repo edit` (D-18 description + homepage) + branch protection on main after first green CI run (D-20).
+- [x] 01-03-PLAN.md — CI workflow (matrix [ubuntu, windows] × [22, 24], lint → typecheck → test → build → smoke asserting D-13 a/b/c) + first commit/push to red-square-software/keeping-mcp + `gh repo edit` (D-18 description + homepage) + branch protection on main after first green CI run (D-20).
 
 ---
 
@@ -107,7 +107,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Scaffolding | 2/3 | In Progress|  |
+| 1. Foundation & Scaffolding | 3/3 | Complete    | 2026-06-09 |
 | 2. Read Tools & Schema Discovery | 0/? | Not started | - |
 | 3. Write Tools + Conditional Timers | 0/? | Not started | - |
 | 4. Distribution & Release Pipeline | 0/? | Not started | - |

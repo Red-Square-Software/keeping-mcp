@@ -7,17 +7,17 @@
 
 ### Distribution
 
-- [ ] **DIST-01**: Server is installable and runnable via `npx keeping-mcp` with no prior global install
-- [ ] **DIST-02**: npm package name is `keeping-mcp` and `package.json` contains `"mcpName": "io.github.red-square-software/keeping-mcp"` for MCP Registry verification
-- [ ] **DIST-03**: Bin entry has a shebang and works cross-platform (macOS, Linux, Windows 11)
+- [x] **DIST-01**: Server is installable and runnable via `npx keeping-mcp` with no prior global install
+- [x] **DIST-02**: npm package name is `keeping-mcp` and `package.json` contains `"mcpName": "io.github.red-square-software/keeping-mcp"` for MCP Registry verification
+- [x] **DIST-03**: Bin entry has a shebang and works cross-platform (macOS, Linux, Windows 11)
 - [ ] **DIST-04**: Published artifact uses a `"files"` whitelist in `package.json` (no `.npmignore`) so secrets, fixtures, and dotfiles cannot leak via `npm publish`
 - [ ] **DIST-05**: Server is registered in the official MCP Registry under namespace `io.github.red-square-software/keeping-mcp`
 
 ### Authentication & Configuration
 
-- [ ] **AUTH-01**: Server reads personal access token from `KEEPING_TOKEN` env var
-- [ ] **AUTH-02**: Missing or empty `KEEPING_TOKEN` fails fast at startup with a clear stderr message before the stdio transport connects
-- [ ] **AUTH-03**: Token value is never written to stdout, never echoed in tool responses, never included in error messages, and never logged at any level
+- [x] **AUTH-01**: Server reads personal access token from `KEEPING_TOKEN` env var
+- [x] **AUTH-02**: Missing or empty `KEEPING_TOKEN` fails fast at startup with a clear stderr message before the stdio transport connects
+- [x] **AUTH-03**: Token value is never written to stdout, never echoed in tool responses, never included in error messages, and never logged at any level
 - [ ] **AUTH-04**: `KEEPING_REQUIRE_CONFIRM` env var defaults to `true`; setting it to `false` allows writes without per-call `confirm: true`
 - [ ] **AUTH-05**: Optional `KEEPING_ORG_ID` env var pins all operations to one organisation when set
 
@@ -56,7 +56,7 @@
 
 ### Safety & Reliability
 
-- [ ] **SAFE-01**: All log output goes to stderr; no `console.log` or library write to stdout (verified by a CI smoke test that pipes an `initialize` request and asserts stdout is valid JSON-RPC)
+- [x] **SAFE-01**: All log output goes to stderr; no `console.log` or library write to stdout (verified by a CI smoke test that pipes an `initialize` request and asserts stdout is valid JSON-RPC)
 - [ ] **SAFE-02**: HTTP client respects Keeping's 120 req/min rate limit via a proactive token bucket (2 req/s, burst 10)
 - [ ] **SAFE-03**: Read requests retry on 429 honouring `Retry-After`; write requests do not retry
 - [ ] **SAFE-04**: HTTP errors are surfaced as `isError: true` tool responses with the Keeping error message; the tool never throws
@@ -64,7 +64,7 @@
 
 ### Release Pipeline & Docs
 
-- [ ] **REL-01**: GitHub repo at `red-square-software/keeping-mcp` with MIT license file
+- [x] **REL-01**: GitHub repo at `red-square-software/keeping-mcp` with MIT license file
 - [ ] **REL-02**: GitHub Actions release workflow triggers on `v*` tags, publishes to npm with provenance via OIDC (no `NPM_TOKEN` secret), and publishes to the MCP Registry via `mcp-publisher login github-oidc`
 - [ ] **REL-03**: `server.json` version is derived from `package.json` at release time (not hand-edited)
 - [ ] **REL-04**: README documents token setup (enable developer features in Keeping prefs → generate access token), Claude Code config snippets for **both** Windows (`{ "command": "cmd", "args": ["/c", "npx", "-y", "keeping-mcp"] }`) and macOS/Linux (`{ "command": "npx", "args": ["-y", "keeping-mcp"] }`), env var reference, and the dry-run workflow with an example transcript
@@ -106,14 +106,14 @@ Phase mapping populated during roadmap creation (2026-06-09).
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DIST-01 | Phase 1 | Pending |
-| DIST-02 | Phase 1 | Pending |
-| DIST-03 | Phase 1 | Pending |
+| DIST-01 | Phase 1 | Complete |
+| DIST-02 | Phase 1 | Complete |
+| DIST-03 | Phase 1 | Complete |
 | DIST-04 | Phase 4 | Pending |
 | DIST-05 | Phase 4 | Pending |
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
 | AUTH-04 | Phase 2 | Pending |
 | AUTH-05 | Phase 2 | Pending |
 | IDENT-01 | Phase 2 | Pending |
@@ -134,12 +134,12 @@ Phase mapping populated during roadmap creation (2026-06-09).
 | WRITE-08 | Phase 3 | Pending |
 | TIMER-01 | Phase 3 | Pending |
 | TIMER-02 | Phase 3 | Pending |
-| SAFE-01 | Phase 1 | Pending |
+| SAFE-01 | Phase 1 | Complete |
 | SAFE-02 | Phase 2 | Pending |
 | SAFE-03 | Phase 2 | Pending |
 | SAFE-04 | Phase 2 | Pending |
 | SAFE-05 | Phase 2 | Pending |
-| REL-01 | Phase 1 | Pending |
+| REL-01 | Phase 1 | Complete |
 | REL-02 | Phase 4 | Pending |
 | REL-03 | Phase 4 | Pending |
 | REL-04 | Phase 4 | Pending |
