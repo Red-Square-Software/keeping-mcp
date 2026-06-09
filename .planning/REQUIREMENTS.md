@@ -102,26 +102,55 @@ Deferred to a future release. Tracked but not in current roadmap.
 
 ## Traceability
 
-Phase mapping populated during roadmap creation.
+Phase mapping populated during roadmap creation (2026-06-09).
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DIST-01..05 | TBD | Pending |
-| AUTH-01..05 | TBD | Pending |
-| IDENT-01..03 | TBD | Pending |
-| META-01..02 | TBD | Pending |
-| READ-01..03 | TBD | Pending |
-| WRITE-01..08 | TBD | Pending |
-| TIMER-01..02 | TBD | Pending |
-| SAFE-01..05 | TBD | Pending |
-| REL-01..05 | TBD | Pending |
+| DIST-01 | Phase 1 | Pending |
+| DIST-02 | Phase 1 | Pending |
+| DIST-03 | Phase 1 | Pending |
+| DIST-04 | Phase 4 | Pending |
+| DIST-05 | Phase 4 | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| AUTH-04 | Phase 2 | Pending |
+| AUTH-05 | Phase 2 | Pending |
+| IDENT-01 | Phase 2 | Pending |
+| IDENT-02 | Phase 2 | Pending |
+| IDENT-03 | Phase 2 | Pending |
+| META-01 | Phase 2 | Pending |
+| META-02 | Phase 2 | Pending |
+| READ-01 | Phase 2 | Pending |
+| READ-02 | Phase 2 | Pending |
+| READ-03 | Phase 2 | Pending |
+| WRITE-01 | Phase 3 | Pending |
+| WRITE-02 | Phase 3 | Pending |
+| WRITE-03 | Phase 3 | Pending |
+| WRITE-04 | Phase 3 | Pending |
+| WRITE-05 | Phase 3 | Pending |
+| WRITE-06 | Phase 3 | Pending |
+| WRITE-07 | Phase 3 | Pending |
+| WRITE-08 | Phase 3 | Pending |
+| TIMER-01 | Phase 3 | Pending |
+| TIMER-02 | Phase 3 | Pending |
+| SAFE-01 | Phase 1 | Pending |
+| SAFE-02 | Phase 2 | Pending |
+| SAFE-03 | Phase 2 | Pending |
+| SAFE-04 | Phase 2 | Pending |
+| SAFE-05 | Phase 2 | Pending |
+| REL-01 | Phase 1 | Pending |
+| REL-02 | Phase 4 | Pending |
+| REL-03 | Phase 4 | Pending |
+| REL-04 | Phase 4 | Pending |
+| REL-05 | Phase 4 | Pending |
 
 **Coverage:**
 
-- v1 requirements: 32 total (timer pair is conditional)
-- Mapped to phases: 0 (populated by roadmapper)
-- Unmapped: 32 ⚠️ (resolved at roadmap step)
+- v1 requirements: 38 total (note: REQUIREMENTS.md header originally stated 32; actual enumerated count is 38; timer pair is conditional on Phase 2 API probe)
+- Mapped to phases: 38 ✓
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-06-08*
-*Last updated: 2026-06-08 after initial definition*
+*Last updated: 2026-06-09 — traceability table populated by roadmapper*
