@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: CI (${{ matrix.os }}, Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [22, 24]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint and format check
+        run: npx biome check .
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npx vitest run
+
+      - name: Build
+        run: npm run build
+
+      - name: Smoke test — missing KEEPING_TOKEN exits non-zero with empty stdout
+        shell: bash
+        env:
+          KEEPING_TOKEN: ""
+        run: |
+          set +e
+          STDOUT=$(node dist/bin/keeping-mcp.js 2>/tmp/smoke_stderr)
+          EXIT_CODE=$?
+          STDERR=$(cat /tmp/smoke_stderr)
+          set -e
+
+          if [ "$EXIT_CODE" -eq 0 ]; then
+            echo "FAIL: expected non-zero exit code, got 0"
+            exit 1
+          fi
+
+          if [ -n "$STDOUT" ]; then
+            echo "FAIL: expected empty stdout, got: $STDOUT"
+            exit 1
+          fi
+
+          EXPECTED="[keeping-mcp] Configuration error: KEEPING_TOKEN must not be empty"
+          if ! echo "$STDERR" | grep -qF "$EXPECTED"; then
+            echo "FAIL: stderr does not contain expected message"
+            echo "Expected: $EXPECTED"
+            echo "Actual stderr: $STDERR"
+            exit 1
+          fi
+
+          echo "Smoke test PASSED: exit_code=$EXIT_CODE, stdout_empty=true, stderr_contains_expected=true"
