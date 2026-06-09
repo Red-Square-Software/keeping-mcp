@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createLogger } from "../src/logger.js";
 
 const FAKE_TOKEN = "kp_test_FAKE_token_value";
