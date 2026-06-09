@@ -39,7 +39,10 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 4. GitHub repo exists at `redsquare-nl/keeping-mcp` with MIT `LICENSE` file committed and CI workflow passing on push to `main`.
 5. A unit test asserts that no tool handler output or error path contains the string value of a known fake test token (`kp_test_FAKE`), verifying token redaction from day one.
 
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 01-01-PLAN.md — Project skeleton: package.json (mcpName, files whitelist, MIT, Node ≥22), tsconfig, tsup, biome (noConsole), vitest, .gitignore, .gitattributes (LF), LICENSE, README placeholder; `npm install` produces lockfile.
+- [ ] 01-02-PLAN.md — Source files + tests: src/config.ts (Zod 4 env loader, exact D-05 message), src/logger.ts (stderr factory + token redaction), bin/keeping-mcp.ts (loadConfig + exit, no MCP boot per D-02), test/logger.test.ts (vitest D-16). Local D-13 smoke proven.
+- [ ] 01-03-PLAN.md — CI workflow (matrix [ubuntu, windows] × [22, 24], lint → typecheck → test → build → smoke asserting D-13 a/b/c) + first commit/push to redsquare-nl/keeping-mcp + `gh repo edit` (D-18 description + homepage) + branch protection on main after first green CI run (D-20).
 
 ---
 
