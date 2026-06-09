@@ -1,0 +1,51 @@
+{
+  "name": "keeping-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for the Keeping time-tracking API",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "bin": {
+    "keeping-mcp": "./dist/bin/keeping-mcp.js"
+  },
+  "exports": {
+    ".": "./dist/bin/keeping-mcp.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "test": "vitest run",
+    "dev": "node dist/bin/keeping-mcp.js"
+  },
+  "keywords": [
+    "mcp",
+    "keeping",
+    "time-tracking",
+    "model-context-protocol"
+  ],
+  "author": "Bart Vanlier <bart@redsquare.nl>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/redsquare-nl/keeping-mcp.git"
+  },
+  "homepage": "https://github.com/redsquare-nl/keeping-mcp",
+  "mcpName": "io.github.redsquare-nl/keeping-mcp",
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
+    "@types/node": "^22.15.0",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}
