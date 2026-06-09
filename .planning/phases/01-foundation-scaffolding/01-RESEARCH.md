@@ -1122,22 +1122,16 @@ This is the minimal dependency graph for the executor. Files listed before their
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **`@types/node` version to pin**
-   - What we know: latest is 25.9.2; 22.x series exists
-   - What's unclear: exact latest 22.x patch version
-   - Recommendation: Run `npm view @types/node versions --json | node -e "const v=require('fs').readFileSync('/dev/stdin','utf8'); const vs=JSON.parse(v).filter(x=>x.startsWith('22.')); console.log(vs.at(-1))"` during Wave 1 to get the exact latest 22.x version before writing `package.json`.
+1. **`@types/node` version to pin** — **RESOLVED**
+   - Pin `^22.15.0` as a known-good 22.x minor floor. Wave 1 task may bump to the current 22.x latest with `npm view @types/node versions` if available, but `^22.15.0` is the documented contract.
 
-2. **Smoke test Windows `/tmp` behavior**
-   - What we know: Git Bash maps `/tmp` to the Windows temp directory
-   - What's unclear: whether GitHub Actions `windows-latest` Git Bash respects `/tmp` correctly
-   - Recommendation: The CI workflow provides `/tmp/smoke_stderr`. If first CI run fails on the Windows smoke step, replace with `$RUNNER_TEMP/smoke_stderr`. Both variants are documented in the CI spec above.
+2. **Smoke test Windows `/tmp` behavior** — **RESOLVED**
+   - Use `/tmp/smoke_stderr` as the primary path; Git Bash on `windows-latest` maps `/tmp` to the runner's temp directory. If a first CI run surfaces a write failure, switch to `$RUNNER_TEMP/smoke_stderr` (both variants are documented in the CI spec above, treat the second as a documented fallback).
 
-3. **Exact status check names for branch protection**
-   - What we know: Job name template is `CI (${{ matrix.os }}, Node ${{ matrix.node }})`
-   - What's unclear: GitHub may display these differently in the Checks UI
-   - Recommendation: After first green CI run, check the PR/commit status panel to copy the exact check names before running the branch protection API call.
+3. **Exact status check names for branch protection** — **RESOLVED**
+   - Phase 1 path: after the first green CI run on `main`, query `gh api repos/redsquare-nl/keeping-mcp/commits/main/check-runs --jq '.check_runs[].name'` to copy the exact check names, then PUT the branch protection payload referencing those names. This is the documented Plan 01-03 Task 4 path.
 
 ---
 
