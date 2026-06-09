@@ -1,4 +1,4 @@
-# Stack Research
+﻿# Stack Research
 
 **Domain:** TypeScript MCP server (stdio transport, npm distribution)
 **Researched:** 2026-06-08
@@ -111,7 +111,7 @@ export default defineConfig({
   "exports": { ".": "./dist/index.js" },
   "files": ["dist"],
   "engines": { "node": ">=22" },
-  "mcpName": "io.github.redsquare-nl/keeping-mcp"
+  "mcpName": "io.github.red-square-software/keeping-mcp"
 }
 ```
 
@@ -171,12 +171,12 @@ Schema version: `2025-12-11` (latest at research date).
 ```json
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.redsquare-nl/keeping-mcp",
+  "name": "io.github.red-square-software/keeping-mcp",
   "description": "MCP server for Keeping time-tracking — log billable hours from Claude Code",
   "title": "Keeping MCP",
   "version": "1.0.0",
   "repository": {
-    "url": "https://github.com/redsquare-nl/keeping-mcp",
+    "url": "https://github.com/red-square-software/keeping-mcp",
     "source": "github"
   },
   "packages": [
@@ -249,7 +249,7 @@ npm trusted publishing (OIDC) is generally available as of 2025-07-31. Configure
   run: ./mcp-publisher publish
 ```
 
-With `id-token: write` permission, no secrets are required for the registry publish step. The `mcp-publisher` binary is downloaded from the registry repo's GitHub releases (always latest). Namespace ownership (`io.github.redsquare-nl`) is verified via GitHub OIDC — the workflow must run in the `redsquare-nl` GitHub org's repo.
+With `id-token: write` permission, no secrets are required for the registry publish step. The `mcp-publisher` binary is downloaded from the registry repo's GitHub releases (always latest). Namespace ownership (`io.github.red-square-software`) is verified via GitHub OIDC — the workflow must run in the `red-square-software` GitHub org's repo.
 
 ---
 

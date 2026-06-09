@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "keeping-mcp",
   "version": "0.1.0",
   "description": "MCP server for the Keeping time-tracking API",
@@ -34,10 +34,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/redsquare-nl/keeping-mcp.git"
+    "url": "https://github.com/red-square-software/keeping-mcp.git"
   },
-  "homepage": "https://github.com/redsquare-nl/keeping-mcp",
-  "mcpName": "io.github.redsquare-nl/keeping-mcp",
+  "homepage": "https://github.com/red-square-software/keeping-mcp",
+  "mcpName": "io.github.red-square-software/keeping-mcp",
   "dependencies": {
     "zod": "^4.4.3"
   },

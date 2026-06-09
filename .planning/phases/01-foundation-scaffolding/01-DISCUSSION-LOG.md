@@ -1,4 +1,4 @@
-# Phase 1: Foundation & Scaffolding - Discussion Log
+﻿# Phase 1: Foundation & Scaffolding - Discussion Log
 
 > **Audit trail only.** Do not use as input to planning, research, or execution agents.
 > Decisions are captured in CONTEXT.md — this log preserves the alternatives considered.
@@ -105,7 +105,7 @@
 | Option | Description | Selected |
 |--------|-------------|----------|
 | Exists empty — I push | Repo already created, add remote and push | |
-| Need to create (Recommended) | Run `gh repo create redsquare-nl/keeping-mcp --public --license MIT` | |
+| Need to create (Recommended) | Run `gh repo create red-square-software/keeping-mcp --public --license MIT` | |
 | Create later | Skip until Phase 4 | |
 | **User freeform** | **"Bestaat al maar voeg eventueel omschrijving licentie readme etc toe."** | ✓ |
 

@@ -1,9 +1,9 @@
----
+﻿---
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-06-09T12:51:48.357Z"
+last_updated: "2026-06-09T12:53:49.951Z"
 progress:
   total_phases: 5
   completed_phases: 0
@@ -31,6 +31,8 @@ progress:
 
 ## Current Position
 
+Phase: 1 (Foundation & Scaffolding) — EXECUTING
+Plan: 1 of 3
 | Field | Value |
 |-------|-------|
 | Current phase | Phase 1 — Foundation & Scaffolding |
@@ -74,7 +76,7 @@ Phase 1 [░░░░░] · Phase 2 [░░░░░] · Phase 3 [░░░░�
 | Decision | Rationale |
 |----------|-----------|
 | Stack locked | TS, @modelcontextprotocol/sdk ^1.29, zod ^3.25, p-retry, p-throttle, tsup, vitest, biome, Node 22 |
-| Distribution locked | npm + npx + MCP Registry via GitHub Actions OIDC, MIT license, namespace io.github.redsquare-nl/keeping-mcp |
+| Distribution locked | npm + npx + MCP Registry via GitHub Actions OIDC, MIT license, namespace io.github.red-square-software/keeping-mcp |
 | Architecture locked | 5-layer: bin → server.ts → tools/*.ts → keeping/client.ts → fetch |
 | 4-phase roadmap (not 6) | Timer work folded into Phase 3 as conditional; coarse granularity target met |
 | Read before write (hard dependency) | Keeping POST body field names unknown until `keeping_list_entries` runs against real API |

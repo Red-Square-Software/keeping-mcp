@@ -1,4 +1,4 @@
----
+﻿---
 phase: "01-foundation-scaffolding"
 plan: "03"
 subsystem: "ci-remote-branch-protection"
@@ -82,7 +82,7 @@ Execution stopped at `checkpoint:human-verify` (Task 2). The following issues ne
 
 `gh` is not on the PATH in the Bash execution environment. The executor cannot run:
 - `gh auth status`
-- `gh repo view redsquare-nl/keeping-mcp --json viewerCanAdminister,viewerPermission`
+- `gh repo view red-square-software/keeping-mcp --json viewerCanAdminister,viewerPermission`
 
 The human must verify `gh` authentication manually.
 
@@ -95,11 +95,11 @@ https://github.com/ElBart00/keeping-mcp.git
 
 The plan (`01-03-PLAN.md`) specifies:
 ```
-git@github.com:redsquare-nl/keeping-mcp.git
+git@github.com:red-square-software/keeping-mcp.git
 ```
-(or HTTPS: `https://github.com/redsquare-nl/keeping-mcp.git`)
+(or HTTPS: `https://github.com/red-square-software/keeping-mcp.git`)
 
-**Human must confirm:** Is `redsquare-nl/keeping-mcp` the correct destination, or should this push to `ElBart00/keeping-mcp`? The remote must be updated (or confirmed correct) before the push.
+**Human must confirm:** Is `red-square-software/keeping-mcp` the correct destination, or should this push to `ElBart00/keeping-mcp`? The remote must be updated (or confirmed correct) before the push.
 
 ## Pending Tasks
 
@@ -114,7 +114,7 @@ None.
 
 ### Pre-existing Deviation (not caused by this plan)
 
-**Remote URL:** The repository already has `origin` set to `https://github.com/ElBart00/keeping-mcp.git`. The plan assumes `redsquare-nl/keeping-mcp`. Human must clarify the correct remote before Task 3 proceeds.
+**Remote URL:** The repository already has `origin` set to `https://github.com/ElBart00/keeping-mcp.git`. The plan assumes `red-square-software/keeping-mcp`. Human must clarify the correct remote before Task 3 proceeds.
 
 ## Known Stubs
 

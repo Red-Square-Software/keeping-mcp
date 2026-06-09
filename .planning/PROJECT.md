@@ -1,4 +1,4 @@
-# keeping-mcp
+﻿# keeping-mcp
 
 ## What This Is
 
@@ -34,7 +34,7 @@ A Claude Code (or any MCP client) user can log a reviewed time entry into their 
 - [ ] Dry-run-by-default writes: `keeping_add_entry` (and the other write tools) return a preview unless `confirm: true` is passed. Controlled by `KEEPING_REQUIRE_CONFIRM` env var (default `true`)
 - [ ] Multi-organisation handling: auto-detect single org; require explicit `organisation_id` when user has multiple
 - [ ] Rate-limit aware (Keeping API caps at 120 req/min) — back off cleanly instead of failing the whole tool call
-- [ ] Published to npm under a name compatible with the MCP registry namespace `io.github.redsquare-nl/keeping-mcp`
+- [ ] Published to npm under a name compatible with the MCP registry namespace `io.github.red-square-software/keeping-mcp`
 - [ ] Published to the official MCP registry so clients can discover it
 - [ ] GitHub Actions release pipeline: pushing a version tag publishes to npm and to the MCP registry (OIDC, no long-lived tokens)
 - [ ] README documents: token setup, env vars, Claude Code config snippet, and the dry-run workflow
@@ -57,14 +57,14 @@ A Claude Code (or any MCP client) user can log a reviewed time entry into their 
 - **Auth model**: Personal access tokens generated in Keeping preferences after enabling "Show features for developers". Bearer header. Rate limit 120 req/min.
 - **Known schema unknowns**: Exact field names for the time-entry POST body (day vs date, hours vs starting_time/ending_time, project_id, task_id, description, purpose) were not retrievable from the Keeping docs SPA in prior research. v1 strategy is best-guess from docs + iterate using `keeping_list_entries` against a real entry to confirm the wire format.
 - **Use case**: At the end of a Claude Code session, the user asks Claude to summarise the work done; Claude proposes a time entry (duration, project, description); user reviews; the server posts to Keeping only after explicit confirmation.
-- **Registry**: Official MCP Registry uses reverse-DNS namespaces tied to verified GitHub orgs. Repo lives under the GitHub org `redsquare-nl`, giving namespace `io.github.redsquare-nl/keeping-mcp`.
+- **Registry**: Official MCP Registry uses reverse-DNS namespaces tied to verified GitHub orgs. Repo lives under the GitHub org `red-square-software`, giving namespace `io.github.red-square-software/keeping-mcp`.
 - **Distribution**: TypeScript + official MCP SDK, published to npm so users add it to Claude Code with a single `npx` command. Bundled with a GitHub Actions workflow that publishes both to npm and the MCP registry on tagged release.
 
 ## Constraints
 
 - **Tech stack**: TypeScript on Node.js, official `@modelcontextprotocol/sdk`, Zod for tool input schemas. — User's first MCP server; matches the dominant ecosystem and registry tooling.
 - **License**: MIT. — Standard for MCP servers; permissive enough for downstream packaging.
-- **Hosting / namespace**: GitHub repo under the `redsquare-nl` org; npm package name aligns with `io.github.redsquare-nl/keeping-mcp` registry namespace. — Required by the MCP registry's GitHub-verified namespace model.
+- **Hosting / namespace**: GitHub repo under the `red-square-software` org; npm package name aligns with `io.github.red-square-software/keeping-mcp` registry namespace. — Required by the MCP registry's GitHub-verified namespace model.
 - **Security**: Personal access token must never appear in logs, tool output, or commits. Read only from env var. — Billable-hours data and a write-capable API token; leak is high-impact.
 - **API**: Must respect Keeping's 120 req/min rate limit, and must scope writes to the authenticated user (only admins can write other users' entries; v1 deliberately does not target that path).
 - **Platform**: User runs Claude Code on Windows 11. Server must work on Windows + macOS + Linux (Node.js + npx covers this, but path/env handling needs to stay portable).
@@ -80,7 +80,7 @@ A Claude Code (or any MCP client) user can log a reviewed time entry into their 
 | Personal access token only in v1 | Solo-developer scope; OAuth is overkill and adds a hosted-callback surface that does not exist locally | — Pending |
 | Dry-run-by-default writes (`KEEPING_REQUIRE_CONFIRM=true`) | Billable hours; an unintended write is materially worse than an extra round-trip | — Pending |
 | Auto-detect single org, require explicit id on multi-org | Most users have one org; forcing the id on every call is friction without value when there is only one | — Pending |
-| GitHub org `redsquare-nl` for namespace | MCP registry ties namespace to verified GitHub org; user already operates under redsquare.nl | — Pending |
+| GitHub org `red-square-software` for namespace | MCP registry ties namespace to verified GitHub org; user already operates under redsquare.nl | — Pending |
 | MIT license | Lowest friction for adoption and downstream packaging | — Pending |
 | GitHub Actions OIDC release on tag | Removes long-lived npm/registry tokens from the repo; one tag = one published release | — Pending |
 | Schema-by-iteration for time-entry POST body | Keeping docs SPA was not parseable in prior research; safest path is to confirm wire format against a real `keeping_list_entries` response before locking | — Pending |

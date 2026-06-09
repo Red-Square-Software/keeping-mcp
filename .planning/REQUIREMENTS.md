@@ -1,4 +1,4 @@
-# Requirements: keeping-mcp
+﻿# Requirements: keeping-mcp
 
 **Defined:** 2026-06-08
 **Core Value:** A Claude Code (or any MCP client) user can log a reviewed time entry into their Keeping account through a single tool call, with explicit confirmation before anything is written.
@@ -8,10 +8,10 @@
 ### Distribution
 
 - [ ] **DIST-01**: Server is installable and runnable via `npx keeping-mcp` with no prior global install
-- [ ] **DIST-02**: npm package name is `keeping-mcp` and `package.json` contains `"mcpName": "io.github.redsquare-nl/keeping-mcp"` for MCP Registry verification
+- [ ] **DIST-02**: npm package name is `keeping-mcp` and `package.json` contains `"mcpName": "io.github.red-square-software/keeping-mcp"` for MCP Registry verification
 - [ ] **DIST-03**: Bin entry has a shebang and works cross-platform (macOS, Linux, Windows 11)
 - [ ] **DIST-04**: Published artifact uses a `"files"` whitelist in `package.json` (no `.npmignore`) so secrets, fixtures, and dotfiles cannot leak via `npm publish`
-- [ ] **DIST-05**: Server is registered in the official MCP Registry under namespace `io.github.redsquare-nl/keeping-mcp`
+- [ ] **DIST-05**: Server is registered in the official MCP Registry under namespace `io.github.red-square-software/keeping-mcp`
 
 ### Authentication & Configuration
 
@@ -64,7 +64,7 @@
 
 ### Release Pipeline & Docs
 
-- [ ] **REL-01**: GitHub repo at `redsquare-nl/keeping-mcp` with MIT license file
+- [ ] **REL-01**: GitHub repo at `red-square-software/keeping-mcp` with MIT license file
 - [ ] **REL-02**: GitHub Actions release workflow triggers on `v*` tags, publishes to npm with provenance via OIDC (no `NPM_TOKEN` secret), and publishes to the MCP Registry via `mcp-publisher login github-oidc`
 - [ ] **REL-03**: `server.json` version is derived from `package.json` at release time (not hand-edited)
 - [ ] **REL-04**: README documents token setup (enable developer features in Keeping prefs → generate access token), Claude Code config snippets for **both** Windows (`{ "command": "cmd", "args": ["/c", "npx", "-y", "keeping-mcp"] }`) and macOS/Linux (`{ "command": "npx", "args": ["-y", "keeping-mcp"] }`), env var reference, and the dry-run workflow with an example transcript

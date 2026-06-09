@@ -1,4 +1,4 @@
-# Phase 1: Foundation & Scaffolding - Context
+﻿# Phase 1: Foundation & Scaffolding - Context
 
 **Gathered:** 2026-06-09
 **Status:** Ready for planning
@@ -18,7 +18,7 @@ Requirements covered: DIST-01, DIST-02, DIST-03, AUTH-01, AUTH-02, AUTH-03, SAFE
 ### Source Layout
 - **D-01:** Use the research-recommended `src/` shape: `bin/keeping-mcp.ts` (entrypoint), `src/config.ts` (env validation + types), `src/logger.ts` (stderr wrapper). `src/keeping/client.ts`, `src/server.ts`, `src/tools/` are NOT created in Phase 1 — they appear when implemented in Phase 2/3 (bare-minimum rule, no empty stubs).
 - **D-02:** `bin/keeping-mcp.ts` is the only published bin entry. Its job in Phase 1: call `loadConfig()` from `src/config.ts`; on validation failure, write the error to stderr and `process.exit(1)` before any further imports. Do NOT call `connect(transport)` yet — the MCP server doesn't exist in Phase 1.
-- **D-03:** `package.json` ships ESM only (`"type": "module"`), `"engines": { "node": ">=22.0.0" }`, `"bin": { "keeping-mcp": "./dist/bin/keeping-mcp.js" }`, `"mcpName": "io.github.redsquare-nl/keeping-mcp"`, MIT license declared.
+- **D-03:** `package.json` ships ESM only (`"type": "module"`), `"engines": { "node": ">=22.0.0" }`, `"bin": { "keeping-mcp": "./dist/bin/keeping-mcp.js" }`, `"mcpName": "io.github.red-square-software/keeping-mcp"`, MIT license declared.
 
 ### Config Loader
 - **D-04:** `src/config.ts` reads `process.env.KEEPING_TOKEN` (required), `process.env.KEEPING_REQUIRE_CONFIRM` (default `"true"`), `process.env.KEEPING_ORG_ID` (optional). Validation via Zod (already in dep tree for Phase 2 tool schemas — no extra dep cost).
@@ -45,7 +45,7 @@ Requirements covered: DIST-01, DIST-02, DIST-03, AUTH-01, AUTH-02, AUTH-03, SAFE
 - **D-17:** Same test runs `npm pack --dry-run` parse stub later in Phase 4; in Phase 1 just the logger contract is enforced.
 
 ### GitHub Repo & Branch Protection
-- **D-18:** Remote `redsquare-nl/keeping-mcp` already exists but is empty. Phase 1 tasks: (a) add as `origin`, (b) push current local commits, (c) `gh repo edit` to set description "Open-source MCP server for the Keeping time-tracking API" and homepage. (d) write `LICENSE` (MIT, copyright Bart Vanlier / RedSquare) and placeholder `README.md` to root.
+- **D-18:** Remote `red-square-software/keeping-mcp` already exists but is empty. Phase 1 tasks: (a) add as `origin`, (b) push current local commits, (c) `gh repo edit` to set description "Open-source MCP server for the Keeping time-tracking API" and homepage. (d) write `LICENSE` (MIT, copyright Bart Vanlier / RedSquare) and placeholder `README.md` to root.
 - **D-19:** Placeholder `README.md` scope: project name as H1, one-line description, badge slot (CI), "Status: work in progress — see [.planning/ROADMAP.md](.planning/ROADMAP.md) for current phase". The full install/usage README is REL-04 in Phase 4.
 - **D-20:** Branch protection on `main` configured AFTER first successful CI run on the remote: require `ci` workflow status check + require linear history. No required reviewers (solo dev). Direct push to `main` blocked once protection active — Phase 2+ uses feature branches and self-merged PRs.
 - **D-21:** `.gitignore` augmented in Phase 1 with `node_modules/`, `dist/`, `coverage/`, `.env`, `.env.*`, `*.log`. `.idea/` is already untracked.

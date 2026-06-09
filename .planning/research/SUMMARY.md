@@ -1,4 +1,4 @@
-# Project Research Summary
+﻿# Project Research Summary
 
 **Project:** keeping-mcp
 **Domain:** TypeScript MCP server — HTTP REST API wrapper for Keeping time-tracking (npm, stdio transport)
@@ -32,7 +32,7 @@ Stack locked by PROJECT.md decisions and confirmed by research. No open choices 
 
 **Registry-mandatory fields:**
 
-- `package.json` must include `"mcpName": "io.github.redsquare-nl/keeping-mcp"` — registry verifies this against `server.json`; missing it fails publication.
+- `package.json` must include `"mcpName": "io.github.red-square-software/keeping-mcp"` — registry verifies this against `server.json`; missing it fails publication.
 - `server.json` version must be derived from `package.json` at publish time. Registry versions are immutable.
 
 **Logging discipline:** stderr-only (`process.stderr.write`, `console.error`). Any `console.log` corrupts the JSON-RPC stream and breaks the client.

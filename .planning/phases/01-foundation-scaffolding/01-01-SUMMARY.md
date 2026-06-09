@@ -1,4 +1,4 @@
----
+﻿---
 phase: "01-foundation-scaffolding"
 plan: "01"
 subsystem: "project-skeleton"
@@ -100,7 +100,7 @@ TypeScript project skeleton with ESM build pipeline, Biome 2.x linting, and Vite
 | Check | Command | Result |
 |-------|---------|--------|
 | File existence | node inline script | ALL CHECKS PASSED |
-| mcpName correct | node inline check | `io.github.redsquare-nl/keeping-mcp` |
+| mcpName correct | node inline check | `io.github.red-square-software/keeping-mcp` |
 | bin path correct | node inline check | `./dist/bin/keeping-mcp.js` |
 | files whitelist | node inline check | `["dist", "README.md", "LICENSE"]` |
 | noConsole allow | node inline check | `["error"]` |

@@ -1,4 +1,4 @@
-# Phase 1: Foundation & Scaffolding - Research
+﻿# Phase 1: Foundation & Scaffolding - Research
 
 **Researched:** 2026-06-09
 **Domain:** TypeScript npm package skeleton, Zod env validation, tsup ESM build, Biome 2.x lint, Vitest, GitHub Actions CI matrix, branch protection
@@ -15,7 +15,7 @@
 
 **D-02:** `bin/keeping-mcp.ts` job in Phase 1: call `loadConfig()` from `src/config.ts`; on validation failure write error to stderr and `process.exit(1)`. Do NOT call `connect(transport)` — no MCP server in Phase 1.
 
-**D-03:** `package.json` ships ESM only (`"type": "module"`), `"engines": { "node": ">=22.0.0" }`, `"bin": { "keeping-mcp": "./dist/bin/keeping-mcp.js" }`, `"mcpName": "io.github.redsquare-nl/keeping-mcp"`, MIT license.
+**D-03:** `package.json` ships ESM only (`"type": "module"`), `"engines": { "node": ">=22.0.0" }`, `"bin": { "keeping-mcp": "./dist/bin/keeping-mcp.js" }`, `"mcpName": "io.github.red-square-software/keeping-mcp"`, MIT license.
 
 **D-04:** `src/config.ts` reads `KEEPING_TOKEN` (required), `KEEPING_REQUIRE_CONFIRM` (default `"true"`), `KEEPING_ORG_ID` (optional). Validation via Zod.
 
@@ -45,7 +45,7 @@
 
 **D-17:** Phase 1 enforces logger contract only.
 
-**D-18:** Remote `redsquare-nl/keeping-mcp` already exists empty. Phase 1: add as origin, push, `gh repo edit` for description and homepage, write `LICENSE` and `README.md`.
+**D-18:** Remote `red-square-software/keeping-mcp` already exists empty. Phase 1: add as origin, push, `gh repo edit` for description and homepage, write `LICENSE` and `README.md`.
 
 **D-19:** Placeholder `README.md`: H1, one-line description, badge slot, "Status: work in progress — see .planning/ROADMAP.md".
 
@@ -76,13 +76,13 @@
 | ID | Description | Research Support |
 |----|-------------|------------------|
 | DIST-01 | Server installable and runnable via `npx keeping-mcp` with no prior global install | `package.json` `"bin"` + `"files"` whitelist + tsup bundle to `dist/bin/keeping-mcp.js` |
-| DIST-02 | npm package name `keeping-mcp` + `"mcpName": "io.github.redsquare-nl/keeping-mcp"` | `package.json` shape with `mcpName` field — required for MCP Registry namespace verification |
+| DIST-02 | npm package name `keeping-mcp` + `"mcpName": "io.github.red-square-software/keeping-mcp"` | `package.json` shape with `mcpName` field — required for MCP Registry namespace verification |
 | DIST-03 | Bin entry has shebang, works cross-platform | tsup `banner: { js: "#!/usr/bin/env node" }` injects shebang; npm wraps in `.cmd` for Windows |
 | AUTH-01 | Server reads token from `KEEPING_TOKEN` env var | `src/config.ts` Zod schema reads `process.env.KEEPING_TOKEN` |
 | AUTH-02 | Missing/empty `KEEPING_TOKEN` fails fast with clear stderr message | `loadConfig()` calls `schema.safeParse`, writes exact D-05 message to stderr, `process.exit(1)` |
 | AUTH-03 | Token never written to stdout, never echoed in tool responses, never logged | Token redaction in `src/logger.ts` + biome `noConsole` rule + CI smoke verifies stdout empty |
 | SAFE-01 | All log output to stderr; no `console.log` or library write to stdout; verified by CI smoke | biome `noConsole` allow `["error"]` + smoke test asserts stdout empty bytes on binary run |
-| REL-01 | GitHub repo at `redsquare-nl/keeping-mcp` with MIT license file | `LICENSE` file at repo root + `gh repo edit` to configure description + branch protection after CI green |
+| REL-01 | GitHub repo at `red-square-software/keeping-mcp` with MIT license file | `LICENSE` file at repo root + `gh repo edit` to configure description + branch protection after CI green |
 </phase_requirements>
 
 ---
@@ -421,10 +421,10 @@ process.exit(0);
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/redsquare-nl/keeping-mcp.git"
+    "url": "https://github.com/red-square-software/keeping-mcp.git"
   },
-  "homepage": "https://github.com/redsquare-nl/keeping-mcp",
-  "mcpName": "io.github.redsquare-nl/keeping-mcp",
+  "homepage": "https://github.com/red-square-software/keeping-mcp",
+  "mcpName": "io.github.red-square-software/keeping-mcp",
   "dependencies": {
     "zod": "^4.4.3"
   },
@@ -874,7 +874,7 @@ SOFTWARE.
 
 Open-source MCP server for the [Keeping](https://keeping.nl) time-tracking API.
 
-![CI](https://github.com/redsquare-nl/keeping-mcp/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/red-square-software/keeping-mcp/actions/workflows/ci.yml/badge.svg)
 
 **Status:** work in progress — see [.planning/ROADMAP.md](.planning/ROADMAP.md) for current phase.
 ```
@@ -918,22 +918,22 @@ Notes:
 ### Step 1: Add remote and push
 
 ```bash
-git remote add origin git@github.com:redsquare-nl/keeping-mcp.git
+git remote add origin git@github.com:red-square-software/keeping-mcp.git
 git push -u origin main
 ```
 
 Or HTTPS if SSH key not configured:
 ```bash
-git remote add origin https://github.com/redsquare-nl/keeping-mcp.git
+git remote add origin https://github.com/red-square-software/keeping-mcp.git
 git push -u origin main
 ```
 
 ### Step 2: Edit repo metadata via `gh`
 
 ```bash
-gh repo edit redsquare-nl/keeping-mcp \
+gh repo edit red-square-software/keeping-mcp \
   --description "Open-source MCP server for the Keeping time-tracking API (api.keeping.nl)" \
-  --homepage "https://github.com/redsquare-nl/keeping-mcp"
+  --homepage "https://github.com/red-square-software/keeping-mcp"
 ```
 
 **Verified flags:** `-d`/`--description` and `--homepage` are confirmed `gh repo edit` flags. [CITED: cli.github.com/manual/gh_repo_edit]
@@ -947,7 +947,7 @@ Wait for at least one successful CI run on `main` before setting branch protecti
 ```bash
 gh api \
   --method PUT \
-  repos/redsquare-nl/keeping-mcp/branches/main/protection \
+  repos/red-square-software/keeping-mcp/branches/main/protection \
   --header "Accept: application/vnd.github+json" \
   --input - <<'EOF'
 {
@@ -1131,7 +1131,7 @@ This is the minimal dependency graph for the executor. Files listed before their
    - Use `/tmp/smoke_stderr` as the primary path; Git Bash on `windows-latest` maps `/tmp` to the runner's temp directory. If a first CI run surfaces a write failure, switch to `$RUNNER_TEMP/smoke_stderr` (both variants are documented in the CI spec above, treat the second as a documented fallback).
 
 3. **Exact status check names for branch protection** — **RESOLVED**
-   - Phase 1 path: after the first green CI run on `main`, query `gh api repos/redsquare-nl/keeping-mcp/commits/main/check-runs --jq '.check_runs[].name'` to copy the exact check names, then PUT the branch protection payload referencing those names. This is the documented Plan 01-03 Task 4 path.
+   - Phase 1 path: after the first green CI run on `main`, query `gh api repos/red-square-software/keeping-mcp/commits/main/check-runs --jq '.check_runs[].name'` to copy the exact check names, then PUT the branch protection payload referencing those names. This is the documented Plan 01-03 Task 4 path.
 
 ---
 
