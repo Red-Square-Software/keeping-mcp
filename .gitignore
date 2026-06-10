@@ -6,3 +6,5 @@ coverage/
 *.log
 *.tsbuildinfo
 .idea/
+.planning/research/.live-capture-raw.json
+.planning/research/.probe-raw-*.json
