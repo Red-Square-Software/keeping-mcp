@@ -24,13 +24,13 @@
 ### Identity Tools
 
 - [x] **IDENT-01**: `keeping_me` tool returns the authenticated user's `user_id` per organisation
-- [ ] **IDENT-02**: `keeping_organisations` tool returns the list of organisations the token can access, including each org's enabled feature flags (`projects`, `tasks`, `timesheet_mode`)
+- [x] **IDENT-02**: `keeping_organisations` tool returns the list of organisations the token can access, including each org's enabled feature flags (`projects`, `tasks`, `timesheet_mode`)
 - [x] **IDENT-03**: When `KEEPING_ORG_ID` is unset and the token only has access to one org, write tools auto-use that org id; when multiple, write tools require an explicit `organisation_id` input
 
 ### Metadata Tools
 
-- [ ] **META-01**: `keeping_projects` tool returns the list of projects for a given organisation (gracefully empty if the projects feature is disabled)
-- [ ] **META-02**: `keeping_tasks` tool returns the list of tasks for a given organisation (gracefully empty if the tasks feature is disabled)
+- [x] **META-01**: `keeping_projects` tool returns the list of projects for a given organisation (gracefully empty if the projects feature is disabled)
+- [x] **META-02**: `keeping_tasks` tool returns the list of tasks for a given organisation (gracefully empty if the tasks feature is disabled)
 
 ### Read Tools
 
@@ -117,10 +117,10 @@ Phase mapping populated during roadmap creation (2026-06-09).
 | AUTH-04 | Phase 2 | Complete |
 | AUTH-05 | Phase 2 | Complete |
 | IDENT-01 | Phase 2 | Complete |
-| IDENT-02 | Phase 2 | Pending |
+| IDENT-02 | Phase 2 | Complete |
 | IDENT-03 | Phase 2 | Complete |
-| META-01 | Phase 2 | Pending |
-| META-02 | Phase 2 | Pending |
+| META-01 | Phase 2 | Complete |
+| META-02 | Phase 2 | Complete |
 | READ-01 | Phase 2 | Pending |
 | READ-02 | Phase 2 | Pending |
 | READ-03 | Phase 2 | Complete |
