@@ -3,19 +3,19 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-06-10T10:02:48.654Z"
+last_updated: "2026-06-10T10:59:55.425Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 9
-  completed_plans: 3
+  completed_plans: 4
   percent: 20
 ---
 
 # Project State: keeping-mcp
 
-**Last updated:** 2026-06-09  
-**Session boundary:** Post-roadmap creation
+**Last updated:** 2026-06-10  
+**Session boundary:** Phase 2 Plan 01 complete (install + leaf contracts)
 
 ---
 
@@ -31,18 +31,16 @@ progress:
 
 ## Current Position
 
-Phase: 2
-Plan: Not started
 | Field | Value |
 |-------|-------|
-| Current phase | Phase 1 — Foundation & Scaffolding |
-| Current plan | None (phase not yet planned) |
-| Phase status | Pending (not started) |
-| Overall progress | 0 / 4 phases complete |
+| Current phase | Phase 2 — Read Tools & Schema Discovery |
+| Current plan | 02-02-PLAN.md (next) |
+| Phase status | In Progress (1 of 6 plans complete) |
+| Overall progress | 1 / 4 phases complete; 4 / 9 plans complete |
 
 ```
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
-Phase 1 [░░░░░] · Phase 2 [░░░░░] · Phase 3 [░░░░░] · Phase 4 [░░░░░]
+Progress: [████░░░░░░] 44%
+Phase 1 [█████] · Phase 2 [█░░░░] · Phase 3 [░░░░░] · Phase 4 [░░░░░]
 ```
 
 ---
@@ -51,8 +49,8 @@ Phase 1 [░░░░░] · Phase 2 [░░░░░] · Phase 3 [░░░░�
 
 | Phase | Name | Status | Requirements |
 |-------|------|--------|-------------|
-| 1 | Foundation & Scaffolding | Not started | DIST-01..03, AUTH-01..03, SAFE-01, REL-01 |
-| 2 | Read Tools & Schema Discovery | Not started | AUTH-04..05, IDENT-01..03, META-01..02, READ-01..03, SAFE-02..05 |
+| 1 | Foundation & Scaffolding | Complete (2026-06-09) | DIST-01..03, AUTH-01..03, SAFE-01, REL-01 |
+| 2 | Read Tools & Schema Discovery | In Progress (1/6 plans) | AUTH-04..05, IDENT-01..03, META-01..02, READ-01..03, SAFE-02..05 |
 | 3 | Write Tools + Conditional Timers | Not started | WRITE-01..08, TIMER-01..02 |
 | 4 | Distribution & Release Pipeline | Not started | DIST-04..05, REL-02..05 |
 
@@ -62,12 +60,14 @@ Phase 1 [░░░░░] · Phase 2 [░░░░░] · Phase 3 [░░░░�
 
 | Metric | Value |
 |--------|-------|
-| Phases completed | 0 / 4 |
+| Phases completed | 1 / 4 |
 | Requirements mapped | 38 / 38 |
-| Plans created | 0 |
-| Plans completed | 0 |
+| Plans created | 9 (3 Phase 1 + 6 Phase 2) |
+| Plans completed | 4 (3 Phase 1 + 1 Phase 2) |
 
----
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 02-read-tools-schema-discovery P01 | 3min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -82,6 +82,10 @@ Phase 1 [░░░░░] · Phase 2 [░░░░░] · Phase 3 [░░░░�
 | Read before write (hard dependency) | Keeping POST body field names unknown until `keeping_list_entries` runs against real API |
 | Timer conditional on 404 probe | Phase 2 probes timer endpoint; TIMER-01/02 ship in Phase 3 only if probe non-404 |
 | Dry-run-by-default | `KEEPING_REQUIRE_CONFIRM=true`; all write tools return preview unless `confirm: true` |
+| D-25 wording locked (Plan 02-01) | `KeepingAuthError.message` is byte-identical to "Keeping rejected the token. Verify KEEPING_TOKEN and restart the MCP server." — tests assert with `.toBe()` |
+| D-27 template locked (Plan 02-01) | `MultiOrgError.message` template byte-identical to "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: <id> (<name>), <id> (<name>)." |
+| Phase 2 deps pinned (Plan 02-01) | `@modelcontextprotocol/sdk@1.29.0`, `p-throttle@8.1.0`, `p-retry@8.0.0`, `tsx@4.22.4` (dev). Slopcheck-fallback human-verified |
+| D-37 raw-capture gitignore (Plan 02-01) | `.planning/research/.live-capture-raw.json` and `.planning/research/.probe-raw-*.json` blocked before any code can write them |
 
 ### Open Questions (resolve during execution)
 
@@ -100,11 +104,17 @@ Phase 1 [░░░░░] · Phase 2 [░░░░░] · Phase 3 [░░░░�
 
 ### Todos
 
-- [ ] Start Phase 1: run `/gsd:plan-phase 1`
+- [x] Phase 1: Foundation & Scaffolding (completed 2026-06-09)
+- [x] Phase 2 Plan 01: install + leaf contracts (completed 2026-06-10)
+- [ ] Phase 2 Plan 02: KeepingClient + server.ts + bin wiring + keeping_me tool
+- [ ] Phase 2 Plan 03: keeping_organisations + keeping_projects + keeping_tasks
+- [ ] Phase 2 Plan 04: keeping_list_entries + CI initialize-handshake smoke
+- [ ] Phase 2 Plan 05: scripts/probe-live.ts
+- [ ] Phase 2 Plan 06: human-verify probe-live results + commit LIVE-API.md
 
 ### Blockers
 
-None at roadmap creation.
+None.
 
 ---
 
@@ -115,10 +125,14 @@ None at roadmap creation.
 1. Read `.planning/ROADMAP.md` — phase goals and success criteria
 2. Read `.planning/PROJECT.md` — core value and locked decisions
 3. Read `.planning/REQUIREMENTS.md` — requirement IDs and traceability
-4. Check current phase plan in `.planning/phases/phase-1/PLAN.md` (once created)
-5. Continue with the current plan node
+4. Read `.planning/phases/02-read-tools-schema-discovery/02-01-SUMMARY.md` for the last completed plan
+5. Continue with `.planning/phases/02-read-tools-schema-discovery/02-02-PLAN.md`
 
-**Next action:** `/gsd:plan-phase 1`
+**Last session:** 2026-06-10T10:57:46Z  
+**Stopped at:** Completed 02-01-PLAN.md  
+**Resume file:** `.planning/phases/02-read-tools-schema-discovery/02-02-PLAN.md`  
+**Next action:** `/gsd:execute-phase 2` (or resume at Plan 02-02)
 
 ---
 *State initialized: 2026-06-09 after roadmap creation*
+*Last updated: 2026-06-10 after Phase 2 Plan 01 completion*

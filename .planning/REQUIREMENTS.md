@@ -59,7 +59,7 @@
 - [x] **SAFE-01**: All log output goes to stderr; no `console.log` or library write to stdout (verified by a CI smoke test that pipes an `initialize` request and asserts stdout is valid JSON-RPC)
 - [ ] **SAFE-02**: HTTP client respects Keeping's 120 req/min rate limit via a proactive token bucket (2 req/s, burst 10)
 - [ ] **SAFE-03**: Read requests retry on 429 honouring `Retry-After`; write requests do not retry
-- [ ] **SAFE-04**: HTTP errors are surfaced as `isError: true` tool responses with the Keeping error message; the tool never throws
+- [x] **SAFE-04**: HTTP errors are surfaced as `isError: true` tool responses with the Keeping error message; the tool never throws
 - [ ] **SAFE-05**: `/users/me` and `/organisations` responses are cached in-memory for server lifetime so a long session does not exhaust the rate limit on repeated identity lookups
 
 ### Release Pipeline & Docs
@@ -137,7 +137,7 @@ Phase mapping populated during roadmap creation (2026-06-09).
 | SAFE-01 | Phase 1 | Complete |
 | SAFE-02 | Phase 2 | Pending |
 | SAFE-03 | Phase 2 | Pending |
-| SAFE-04 | Phase 2 | Pending |
+| SAFE-04 | Phase 2 | Complete |
 | SAFE-05 | Phase 2 | Pending |
 | REL-01 | Phase 1 | Complete |
 | REL-02 | Phase 4 | Pending |
