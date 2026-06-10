@@ -3,20 +3,20 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-06-10T11:39:49.434Z"
+stopped_at: Completed 02-05-PLAN.md
+last_updated: "2026-06-10T11:51:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 9
-  completed_plans: 7
-  percent: 78
+  completed_plans: 8
+  percent: 89
 ---
 
 # Project State: keeping-mcp
 
 **Last updated:** 2026-06-10  
-**Session boundary:** Phase 2 Plan 04 complete (keeping_list_entries + CI initialize-handshake smoke; all five Phase 2 read tools shipped, D-15 satisfied)
+**Session boundary:** Phase 2 Plan 05 complete (scripts/probe-live.ts + anonymise() walker + npm run probe-live wiring; tool in tree, ready for Plan 02-06 human-verify run)
 
 ---
 
@@ -35,13 +35,13 @@ progress:
 | Field | Value |
 |-------|-------|
 | Current phase | Phase 2 — Read Tools & Schema Discovery |
-| Current plan | 02-05-PLAN.md (next) |
-| Phase status | In Progress (4 of 6 plans complete) |
-| Overall progress | 1 / 4 phases complete; 7 / 9 plans complete |
+| Current plan | 02-06-PLAN.md (next — human-verify gate) |
+| Phase status | In Progress (5 of 6 plans complete) |
+| Overall progress | 1 / 4 phases complete; 8 / 9 plans complete |
 
 ```
-Progress: [████████░░] 78%
-Phase 1 [█████] · Phase 2 [████░░] · Phase 3 [░░░░░] · Phase 4 [░░░░░]
+Progress: [█████████░] 89%
+Phase 1 [█████] · Phase 2 [█████░] · Phase 3 [░░░░░] · Phase 4 [░░░░░]
 ```
 
 ---
@@ -51,7 +51,7 @@ Phase 1 [█████] · Phase 2 [████░░] · Phase 3 [░░░�
 | Phase | Name | Status | Requirements |
 |-------|------|--------|-------------|
 | 1 | Foundation & Scaffolding | Complete (2026-06-09) | DIST-01..03, AUTH-01..03, SAFE-01, REL-01 |
-| 2 | Read Tools & Schema Discovery | In Progress (4/6 plans) | AUTH-04..05, IDENT-01..03, META-01..02, READ-01..03, SAFE-02..05 |
+| 2 | Read Tools & Schema Discovery | In Progress (5/6 plans) | AUTH-04..05, IDENT-01..03, META-01..02, READ-01..03, SAFE-02..05 |
 | 3 | Write Tools + Conditional Timers | Not started | WRITE-01..08, TIMER-01..02 |
 | 4 | Distribution & Release Pipeline | Not started | DIST-04..05, REL-02..05 |
 
@@ -64,7 +64,7 @@ Phase 1 [█████] · Phase 2 [████░░] · Phase 3 [░░░�
 | Phases completed | 1 / 4 |
 | Requirements mapped | 38 / 38 |
 | Plans created | 9 (3 Phase 1 + 6 Phase 2) |
-| Plans completed | 7 (3 Phase 1 + 4 Phase 2) |
+| Plans completed | 8 (3 Phase 1 + 5 Phase 2) |
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
@@ -72,6 +72,7 @@ Phase 1 [█████] · Phase 2 [████░░] · Phase 3 [░░░�
 | Phase 02-read-tools-schema-discovery P02 | 6min | 2 tasks | 6 files |
 | Phase 02 P03 | 4min | 2 tasks | 7 files |
 | Phase 02 P04 | 3min | 2 tasks | 4 files |
+| Phase 02 P05 | 4min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,10 @@ Phase 1 [█████] · Phase 2 [████░░] · Phase 3 [░░░�
 | Sibling-pattern copy locked (Plan 02-03) | `src/tools/tasks.ts` is a verbatim sibling of `src/tools/projects.ts` with only six string substitutions. Intentional duplication preserves the per-tool divergence point for Phase 3 write tools — no abstraction layer. |
 | Raw pass-through wire shape (Plan 02-04, D-34 strict reading) | `keeping_list_entries` returns `{ entries: <raw array>, count: <number> }`. Top-level normalisation only — `Array.isArray(raw) ? raw : (raw.entries ?? [])` discards wrapper fields like `meta`; inner array items pass through verbatim including any future custom_field_x. NO outputSchema. The tool's response IS the schema-discovery surface for Phase 3 write tools. |
 | CI initialize-handshake smoke locked (Plan 02-04, D-15) | New CI step appended after Phase 1 missing-token smoke (Phase 1 step UNTOUCHED). Pipes `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"ci-smoke","version":"1.0.0"}}}` into `node dist/bin/keeping-mcp.js` with fake `KEEPING_TOKEN=kp_test_FAKE_token_value`. Three assertions: (a) stdout-only-JSON via per-line `JSON.parse`, (b) stderr does NOT contain the fake token, (c) first frame has `result.serverInfo.name === "keeping-mcp"` + non-empty `result.protocolVersion`. Runs across [ubuntu, windows] × [22, 24]. |
+| Anonymise denylist locked at six keys (Plan 02-05, D-35 step 3) | `ANONYMISE_KEYS` is a frozen `Set<string>` of exactly: `description`, `project_name`, `task_name`, `client_name`, `user_name`, `user_email`. Test 9 in `test/scripts/anonymise.test.ts` asserts `ANONYMISE_KEYS.size === 6` AND each name present once — adding a key without revisiting CONTEXT.md trips the test (T-02-05-02 mitigation). Denylist over allowlist because allowlist silently drops new fields; denylist surfaces them for developer eyeball during Plan 02-06 review. |
+| Q1 contingency probe = raw fetch, not client.me() (Plan 02-05) | `scripts/probe-live.ts` issues a raw `fetch` to `/v1/users/me` (not via `KeepingClient.me()`) so that: (a) cache is never poisoned, (b) actual HTTP status is captured verbatim — not masked by `KeepingAuthError`, (c) probe continues regardless of result. The status feeds the LIVE-API.md `## /v1/users/me path probe` section that Plan 02-06 Task 3 reads to decide whether to switch `KeepingClient.me()` to the org-scoped path. |
+| Probe-live pre-check + loadConfig double layer (Plan 02-05) | Script emits byte-identical `[probe-live] KEEPING_TOKEN must be set in env or .env before running probe-live` to stderr + `process.exit(1)` BEFORE calling `loadConfig()`. `loadConfig()` then runs as the regular validator for the rest of the env. Both messages may appear in some edge cases; the probe-specific one is the user's primary cue. Verified via manual smoke. |
+| Probe-live source-isolation (Plan 02-05) | `scripts/probe-live.ts` and the npm script entry are the only artefacts; `bin/` and `src/` are line-for-line untouched. Verified via `git diff HEAD~3 HEAD -- bin/ src/` returning empty. Q1 contingency code change (if needed) is Plan 02-06 Task 3's responsibility. `tsup.config.ts` is NOT changed — the probe never bundles into `dist/`. `tsconfig.json` adds `scripts/**/*` to `include` so `npx tsc --noEmit` typechecks the probe. |
 
 ### Open Questions (resolve during execution)
 
@@ -121,7 +126,7 @@ Phase 1 [█████] · Phase 2 [████░░] · Phase 3 [░░░�
 - [x] Phase 2 Plan 02: KeepingClient + server.ts + bin wiring + keeping_me tool (completed 2026-06-10)
 - [x] Phase 2 Plan 03: keeping_organisations + keeping_projects + keeping_tasks (completed 2026-06-10)
 - [x] Phase 2 Plan 04: keeping_list_entries + CI initialize-handshake smoke (completed 2026-06-10)
-- [ ] Phase 2 Plan 05: scripts/probe-live.ts
+- [x] Phase 2 Plan 05: scripts/probe-live.ts + anonymise() walker + npm run probe-live (completed 2026-06-10)
 - [ ] Phase 2 Plan 06: human-verify probe-live results + commit LIVE-API.md
 
 ### Blockers
@@ -137,14 +142,14 @@ None.
 1. Read `.planning/ROADMAP.md` — phase goals and success criteria
 2. Read `.planning/PROJECT.md` — core value and locked decisions
 3. Read `.planning/REQUIREMENTS.md` — requirement IDs and traceability
-4. Read `.planning/phases/02-read-tools-schema-discovery/02-04-SUMMARY.md` for the last completed plan
-5. Continue with `.planning/phases/02-read-tools-schema-discovery/02-05-PLAN.md`
+4. Read `.planning/phases/02-read-tools-schema-discovery/02-05-SUMMARY.md` for the last completed plan
+5. Continue with `.planning/phases/02-read-tools-schema-discovery/02-06-PLAN.md` (human-verify gate — user runs the probe)
 
-**Last session:** 2026-06-10T11:39:49.434Z
-**Stopped at:** Completed 02-04-PLAN.md
-**Resume file:** `.planning/phases/02-read-tools-schema-discovery/02-05-PLAN.md`
-**Next action:** `/gsd:execute-phase 2` (or resume at Plan 02-05)
+**Last session:** 2026-06-10T11:51:00.000Z
+**Stopped at:** Completed 02-05-PLAN.md
+**Resume file:** `.planning/phases/02-read-tools-schema-discovery/02-06-PLAN.md`
+**Next action:** `/gsd:execute-phase 2` (or resume at Plan 02-06)
 
 ---
 *State initialized: 2026-06-09 after roadmap creation*
-*Last updated: 2026-06-10 after Phase 2 Plan 04 completion*
+*Last updated: 2026-06-10 after Phase 2 Plan 05 completion*

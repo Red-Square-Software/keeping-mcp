@@ -132,7 +132,7 @@ Phase mapping populated during roadmap creation (2026-06-09).
 | WRITE-06 | Phase 3 | Pending |
 | WRITE-07 | Phase 3 | Pending |
 | WRITE-08 | Phase 3 | Pending |
-| TIMER-01 | Phase 3 | Pending |
+| TIMER-01 | Phase 3 | Pending — probe-live tool shipped in Plan 02-05; Plan 02-06 will run it against a real KEEPING_TOKEN and update this row to either `verified — endpoint <path>` or `deferred — 404 on all probes` |
 | TIMER-02 | Phase 3 | Pending |
 | SAFE-01 | Phase 1 | Complete |
 | SAFE-02 | Phase 2 | Complete |
