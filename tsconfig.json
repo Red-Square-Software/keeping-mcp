@@ -13,6 +13,6 @@
     "declaration": false,
     "lib": ["ES2023"]
   },
-  "include": ["bin/**/*", "src/**/*", "test/**/*", "*.ts"],
+  "include": ["bin/**/*", "src/**/*", "scripts/**/*", "test/**/*", "*.ts"],
   "exclude": ["dist", "node_modules"]
 }
