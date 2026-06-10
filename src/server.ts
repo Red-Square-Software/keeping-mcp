@@ -12,6 +12,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { KeepingConfig } from "./config.js";
 import type { KeepingClient } from "./keeping/client.js";
+import { registerEntriesList } from "./tools/entries-list.js";
 import { registerMe } from "./tools/me.js";
 import { registerOrganisations } from "./tools/organisations.js";
 import { registerProjects } from "./tools/projects.js";
@@ -35,7 +36,10 @@ export function createServer(
   registerOrganisations(server, client);
   registerProjects(server, client);
   registerTasks(server, client);
-  // Plan 02-04 appends more register* calls here (keeping_list_entries).
+  registerEntriesList(server, client);
+  // All five Phase 2 read tools now registered. Phase 3 will append write
+  // tools (keeping_add_entry, keeping_update_entry, keeping_delete_entry,
+  // and conditional keeping_*_timer) here.
 
   return server;
 }
