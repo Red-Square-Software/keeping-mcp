@@ -18,14 +18,14 @@
 - [x] **AUTH-01**: Server reads personal access token from `KEEPING_TOKEN` env var
 - [x] **AUTH-02**: Missing or empty `KEEPING_TOKEN` fails fast at startup with a clear stderr message before the stdio transport connects
 - [x] **AUTH-03**: Token value is never written to stdout, never echoed in tool responses, never included in error messages, and never logged at any level
-- [ ] **AUTH-04**: `KEEPING_REQUIRE_CONFIRM` env var defaults to `true`; setting it to `false` allows writes without per-call `confirm: true`
-- [ ] **AUTH-05**: Optional `KEEPING_ORG_ID` env var pins all operations to one organisation when set
+- [x] **AUTH-04**: `KEEPING_REQUIRE_CONFIRM` env var defaults to `true`; setting it to `false` allows writes without per-call `confirm: true`
+- [x] **AUTH-05**: Optional `KEEPING_ORG_ID` env var pins all operations to one organisation when set
 
 ### Identity Tools
 
-- [ ] **IDENT-01**: `keeping_me` tool returns the authenticated user's `user_id` per organisation
+- [x] **IDENT-01**: `keeping_me` tool returns the authenticated user's `user_id` per organisation
 - [ ] **IDENT-02**: `keeping_organisations` tool returns the list of organisations the token can access, including each org's enabled feature flags (`projects`, `tasks`, `timesheet_mode`)
-- [ ] **IDENT-03**: When `KEEPING_ORG_ID` is unset and the token only has access to one org, write tools auto-use that org id; when multiple, write tools require an explicit `organisation_id` input
+- [x] **IDENT-03**: When `KEEPING_ORG_ID` is unset and the token only has access to one org, write tools auto-use that org id; when multiple, write tools require an explicit `organisation_id` input
 
 ### Metadata Tools
 
@@ -36,7 +36,7 @@
 
 - [ ] **READ-01**: `keeping_list_entries` tool returns time entries for a given user and date range
 - [ ] **READ-02**: `keeping_list_entries` exposes the raw API field names in its response so it can serve as the live-API schema-discovery tool that unblocks write tools
-- [ ] **READ-03**: Read tools are annotated `readOnlyHint: true`
+- [x] **READ-03**: Read tools are annotated `readOnlyHint: true`
 
 ### Write Tools
 
@@ -57,10 +57,10 @@
 ### Safety & Reliability
 
 - [x] **SAFE-01**: All log output goes to stderr; no `console.log` or library write to stdout (verified by a CI smoke test that pipes an `initialize` request and asserts stdout is valid JSON-RPC)
-- [ ] **SAFE-02**: HTTP client respects Keeping's 120 req/min rate limit via a proactive token bucket (2 req/s, burst 10)
-- [ ] **SAFE-03**: Read requests retry on 429 honouring `Retry-After`; write requests do not retry
+- [x] **SAFE-02**: HTTP client respects Keeping's 120 req/min rate limit via a proactive token bucket (2 req/s, burst 10)
+- [x] **SAFE-03**: Read requests retry on 429 honouring `Retry-After`; write requests do not retry
 - [x] **SAFE-04**: HTTP errors are surfaced as `isError: true` tool responses with the Keeping error message; the tool never throws
-- [ ] **SAFE-05**: `/users/me` and `/organisations` responses are cached in-memory for server lifetime so a long session does not exhaust the rate limit on repeated identity lookups
+- [x] **SAFE-05**: `/users/me` and `/organisations` responses are cached in-memory for server lifetime so a long session does not exhaust the rate limit on repeated identity lookups
 
 ### Release Pipeline & Docs
 
@@ -114,16 +114,16 @@ Phase mapping populated during roadmap creation (2026-06-09).
 | AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 1 | Complete |
-| AUTH-04 | Phase 2 | Pending |
-| AUTH-05 | Phase 2 | Pending |
-| IDENT-01 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Complete |
+| AUTH-05 | Phase 2 | Complete |
+| IDENT-01 | Phase 2 | Complete |
 | IDENT-02 | Phase 2 | Pending |
-| IDENT-03 | Phase 2 | Pending |
+| IDENT-03 | Phase 2 | Complete |
 | META-01 | Phase 2 | Pending |
 | META-02 | Phase 2 | Pending |
 | READ-01 | Phase 2 | Pending |
 | READ-02 | Phase 2 | Pending |
-| READ-03 | Phase 2 | Pending |
+| READ-03 | Phase 2 | Complete |
 | WRITE-01 | Phase 3 | Pending |
 | WRITE-02 | Phase 3 | Pending |
 | WRITE-03 | Phase 3 | Pending |
@@ -135,10 +135,10 @@ Phase mapping populated during roadmap creation (2026-06-09).
 | TIMER-01 | Phase 3 | Pending |
 | TIMER-02 | Phase 3 | Pending |
 | SAFE-01 | Phase 1 | Complete |
-| SAFE-02 | Phase 2 | Pending |
-| SAFE-03 | Phase 2 | Pending |
+| SAFE-02 | Phase 2 | Complete |
+| SAFE-03 | Phase 2 | Complete |
 | SAFE-04 | Phase 2 | Complete |
-| SAFE-05 | Phase 2 | Pending |
+| SAFE-05 | Phase 2 | Complete |
 | REL-01 | Phase 1 | Complete |
 | REL-02 | Phase 4 | Pending |
 | REL-03 | Phase 4 | Pending |

@@ -3,19 +3,19 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-06-10T10:59:55.425Z"
+last_updated: "2026-06-10T11:10:49Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 9
-  completed_plans: 4
-  percent: 20
+  completed_plans: 5
+  percent: 30
 ---
 
 # Project State: keeping-mcp
 
 **Last updated:** 2026-06-10  
-**Session boundary:** Phase 2 Plan 01 complete (install + leaf contracts)
+**Session boundary:** Phase 2 Plan 02 complete (KeepingClient + server + keeping_me first vertical slice)
 
 ---
 
@@ -34,13 +34,13 @@ progress:
 | Field | Value |
 |-------|-------|
 | Current phase | Phase 2 — Read Tools & Schema Discovery |
-| Current plan | 02-02-PLAN.md (next) |
-| Phase status | In Progress (1 of 6 plans complete) |
-| Overall progress | 1 / 4 phases complete; 4 / 9 plans complete |
+| Current plan | 02-03-PLAN.md (next) |
+| Phase status | In Progress (2 of 6 plans complete) |
+| Overall progress | 1 / 4 phases complete; 5 / 9 plans complete |
 
 ```
-Progress: [████░░░░░░] 44%
-Phase 1 [█████] · Phase 2 [█░░░░] · Phase 3 [░░░░░] · Phase 4 [░░░░░]
+Progress: [█████░░░░░] 55%
+Phase 1 [█████] · Phase 2 [██░░░░] · Phase 3 [░░░░░] · Phase 4 [░░░░░]
 ```
 
 ---
@@ -50,7 +50,7 @@ Phase 1 [█████] · Phase 2 [█░░░░] · Phase 3 [░░░░�
 | Phase | Name | Status | Requirements |
 |-------|------|--------|-------------|
 | 1 | Foundation & Scaffolding | Complete (2026-06-09) | DIST-01..03, AUTH-01..03, SAFE-01, REL-01 |
-| 2 | Read Tools & Schema Discovery | In Progress (1/6 plans) | AUTH-04..05, IDENT-01..03, META-01..02, READ-01..03, SAFE-02..05 |
+| 2 | Read Tools & Schema Discovery | In Progress (2/6 plans) | AUTH-04..05, IDENT-01..03, META-01..02, READ-01..03, SAFE-02..05 |
 | 3 | Write Tools + Conditional Timers | Not started | WRITE-01..08, TIMER-01..02 |
 | 4 | Distribution & Release Pipeline | Not started | DIST-04..05, REL-02..05 |
 
@@ -63,11 +63,12 @@ Phase 1 [█████] · Phase 2 [█░░░░] · Phase 3 [░░░░�
 | Phases completed | 1 / 4 |
 | Requirements mapped | 38 / 38 |
 | Plans created | 9 (3 Phase 1 + 6 Phase 2) |
-| Plans completed | 4 (3 Phase 1 + 1 Phase 2) |
+| Plans completed | 5 (3 Phase 1 + 2 Phase 2) |
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 02-read-tools-schema-discovery P01 | 3min | 3 tasks | 6 files |
+| Phase 02-read-tools-schema-discovery P02 | 6min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,10 @@ Phase 1 [█████] · Phase 2 [█░░░░] · Phase 3 [░░░░�
 | D-27 template locked (Plan 02-01) | `MultiOrgError.message` template byte-identical to "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: <id> (<name>), <id> (<name>)." |
 | Phase 2 deps pinned (Plan 02-01) | `@modelcontextprotocol/sdk@1.29.0`, `p-throttle@8.1.0`, `p-retry@8.0.0`, `tsx@4.22.4` (dev). Slopcheck-fallback human-verified |
 | D-37 raw-capture gitignore (Plan 02-01) | `.planning/research/.live-capture-raw.json` and `.planning/research/.probe-raw-*.json` blocked before any code can write them |
+| Token field storage (Plan 02-02) | KeepingClient.token installed via `Object.defineProperty(this, "token", { enumerable: false, ... })` — TS `private` is erasure-only and a plain class field would still leak via JSON.stringify(client). Test 15 is the regression gate. |
+| me() global path unconditional (Plan 02-02) | `KeepingClient.me()` calls GET /v1/users/me regardless of multi-org status. Plan 02-06 Task 3 owns the contingency switch to /organisations/<id>/users/me iff the Plan 02-05 live probe returns 404. No runtime branching in client.ts. |
+| p-retry tuned for fast tests (Plan 02-02) | `retries:3, minTimeout:0, factor:1` — Retry-After is the only delay honoured, slept for explicitly inside onFailedAttempt and guarded to GETs so non-GET 429s reject without delay. |
+| Manual initialize-smoke contract locked (Plan 02-02) | `printf JSON-RPC | KEEPING_TOKEN=kp_test_FAKE node dist/bin/keeping-mcp.js` must produce one stdout frame with serverInfo.name="keeping-mcp" + protocolVersion="2025-11-25" and clean stderr. Byte-aligned with Plan 02-04 Task 2 CI smoke. |
 
 ### Open Questions (resolve during execution)
 
@@ -106,7 +111,7 @@ Phase 1 [█████] · Phase 2 [█░░░░] · Phase 3 [░░░░�
 
 - [x] Phase 1: Foundation & Scaffolding (completed 2026-06-09)
 - [x] Phase 2 Plan 01: install + leaf contracts (completed 2026-06-10)
-- [ ] Phase 2 Plan 02: KeepingClient + server.ts + bin wiring + keeping_me tool
+- [x] Phase 2 Plan 02: KeepingClient + server.ts + bin wiring + keeping_me tool (completed 2026-06-10)
 - [ ] Phase 2 Plan 03: keeping_organisations + keeping_projects + keeping_tasks
 - [ ] Phase 2 Plan 04: keeping_list_entries + CI initialize-handshake smoke
 - [ ] Phase 2 Plan 05: scripts/probe-live.ts
@@ -125,14 +130,14 @@ None.
 1. Read `.planning/ROADMAP.md` — phase goals and success criteria
 2. Read `.planning/PROJECT.md` — core value and locked decisions
 3. Read `.planning/REQUIREMENTS.md` — requirement IDs and traceability
-4. Read `.planning/phases/02-read-tools-schema-discovery/02-01-SUMMARY.md` for the last completed plan
-5. Continue with `.planning/phases/02-read-tools-schema-discovery/02-02-PLAN.md`
+4. Read `.planning/phases/02-read-tools-schema-discovery/02-02-SUMMARY.md` for the last completed plan
+5. Continue with `.planning/phases/02-read-tools-schema-discovery/02-03-PLAN.md`
 
-**Last session:** 2026-06-10T10:57:46Z  
-**Stopped at:** Completed 02-01-PLAN.md  
-**Resume file:** `.planning/phases/02-read-tools-schema-discovery/02-02-PLAN.md`  
-**Next action:** `/gsd:execute-phase 2` (or resume at Plan 02-02)
+**Last session:** 2026-06-10T11:10:49Z  
+**Stopped at:** Completed 02-02-PLAN.md  
+**Resume file:** `.planning/phases/02-read-tools-schema-discovery/02-03-PLAN.md`  
+**Next action:** `/gsd:execute-phase 2` (or resume at Plan 02-03)
 
 ---
 *State initialized: 2026-06-09 after roadmap creation*
-*Last updated: 2026-06-10 after Phase 2 Plan 01 completion*
+*Last updated: 2026-06-10 after Phase 2 Plan 02 completion*
