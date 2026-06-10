@@ -13,6 +13,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { KeepingConfig } from "./config.js";
 import type { KeepingClient } from "./keeping/client.js";
 import { registerMe } from "./tools/me.js";
+import { registerOrganisations } from "./tools/organisations.js";
 
 type Logger = ReturnType<typeof import("./logger.js").createLogger>;
 
@@ -29,7 +30,8 @@ export function createServer(
   const server = new McpServer({ name: "keeping-mcp", version: "0.1.0" });
 
   registerMe(server, client);
-  // Plans 02-03 / 02-04 append more register* calls here.
+  registerOrganisations(server, client);
+  // Plan 02-04 appends more register* calls here (keeping_list_entries).
 
   return server;
 }
