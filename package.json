@@ -22,7 +22,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "test": "vitest run",
-    "dev": "node dist/bin/keeping-mcp.js"
+    "dev": "node dist/bin/keeping-mcp.js",
+    "probe-live": "tsx --env-file-if-exists=.env scripts/probe-live.ts"
   },
   "keywords": [
     "mcp",
