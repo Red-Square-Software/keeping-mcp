@@ -61,7 +61,13 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 5. All read tools carry the `readOnlyHint: true` annotation; HTTP errors surface as `isError: true` tool responses with the Keeping error message; no tool throws an unhandled exception.
 6. Timer endpoint probe result is documented (either: path confirmed, non-404 → timer tools will ship in Phase 3; or: 404 → timer tools deferred/dropped and documented in PROJECT.md).
 
-**Plans**: TBD
+**Plans**: 6 plans
+- [ ] 02-01-PLAN.md — Install Phase 2 deps (slopcheck human-verify) + .gitignore augment (D-37) + leaf contracts: src/keeping/types.ts (loose per D-34) + src/keeping/errors.ts (D-25, D-27 byte-identical messages)
+- [ ] 02-02-PLAN.md — KeepingClient (throttle, retry, cache, sanitisation, resolveOrgId per D-22..29) + src/server.ts + bin/keeping-mcp.ts StdioServerTransport boot + keeping_me tool + first vertical slice
+- [ ] 02-03-PLAN.md — keeping_organisations (IDENT-02) + keeping_projects (META-01) + keeping_tasks (META-02) with graceful-empty for feature-disabled orgs
+- [ ] 02-04-PLAN.md — keeping_list_entries raw pass-through (READ-01/02, D-34) + CI smoke upgrade (D-15 initialize handshake assertion)
+- [ ] 02-05-PLAN.md — scripts/probe-live.ts (D-30..D-35) + tested anonymise() walker (D-35 step 3) + npm run probe-live entry
+- [ ] 02-06-PLAN.md — autonomous:false human-verify gate: user runs probe-live, reviews LIVE-API.md + fixture for PII, updates REQUIREMENTS TIMER-01 row, commits three approved files
 
 ---
 
@@ -108,7 +114,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Scaffolding | 3/3 | Complete    | 2026-06-09 |
-| 2. Read Tools & Schema Discovery | 0/? | Not started | - |
+| 2. Read Tools & Schema Discovery | 0/6 | Not started | - |
 | 3. Write Tools + Conditional Timers | 0/? | Not started | - |
 | 4. Distribution & Release Pipeline | 0/? | Not started | - |
 
