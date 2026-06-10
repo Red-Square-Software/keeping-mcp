@@ -75,3 +75,59 @@ jobs:
           fi
 
           echo "Smoke test PASSED: exit_code=$EXIT_CODE, stdout_empty=true, stderr_contains_expected=true"
+
+      - name: Smoke test — MCP initialize handshake produces only valid JSON-RPC on stdout
+        shell: bash
+        env:
+          KEEPING_TOKEN: kp_test_FAKE_token_value
+        run: |
+          set +e
+          REQ='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"ci-smoke","version":"1.0.0"}}}'
+          # Pipe initialize, capture stdout into OUTPUT and stderr to /tmp/init_stderr.
+          # The server stays alive after initialize; closed-stdin EOF makes the stdio
+          # transport exit cleanly. Same on Git Bash (windows-latest) per Phase 1 D-14.
+          OUTPUT=$(printf '%s\n' "$REQ" | node dist/bin/keeping-mcp.js 2>/tmp/init_stderr)
+          EXIT_CODE=$?
+          STDERR=$(cat /tmp/init_stderr)
+          set -e
+
+          # Assertion 1: stdout MUST be one or more valid JSON-RPC lines (parse each).
+          if [ -z "$OUTPUT" ]; then
+            echo "FAIL: no stdout produced; server did not respond to initialize"
+            echo "stderr was: $STDERR"
+            exit 1
+          fi
+          while IFS= read -r LINE; do
+            [ -z "$LINE" ] && continue
+            echo "$LINE" | node -e "JSON.parse(require('fs').readFileSync(0,'utf8'))" >/dev/null 2>&1 || {
+              echo "FAIL: stdout contained non-JSON line: $LINE"
+              exit 1
+            }
+          done <<< "$OUTPUT"
+
+          # Assertion 2: stderr MUST NOT contain the fake token (D-08 redaction + AUTH-03).
+          if echo "$STDERR" | grep -qF "kp_test_FAKE_token_value"; then
+            echo "FAIL: fake KEEPING_TOKEN leaked to stderr"
+            echo "stderr was: $STDERR"
+            exit 1
+          fi
+
+          # Assertion 3: First stdout line MUST be a valid initialize response.
+          FIRST=$(printf '%s' "$OUTPUT" | head -n1)
+          echo "$FIRST" | node -e "
+            const r = JSON.parse(require('fs').readFileSync(0,'utf8'));
+            if (r.jsonrpc !== '2.0' || r.id !== 1 || !r.result) {
+              console.error('FAIL: not a valid JSON-RPC response to id=1:', JSON.stringify(r));
+              process.exit(1);
+            }
+            if (!r.result.serverInfo || r.result.serverInfo.name !== 'keeping-mcp') {
+              console.error('FAIL: serverInfo.name is not keeping-mcp:', JSON.stringify(r));
+              process.exit(1);
+            }
+            if (!r.result.protocolVersion) {
+              console.error('FAIL: missing protocolVersion in initialize response:', JSON.stringify(r));
+              process.exit(1);
+            }
+          " || exit 1
+
+          echo "Initialize smoke PASSED: clean stdout, no token leak, valid initialize response"
