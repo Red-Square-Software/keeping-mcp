@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { KeepingClient } from "../../src/keeping/client.js";
-import {
-  KeepingApiError,
-  KeepingAuthError,
-  MultiOrgError,
-} from "../../src/keeping/errors.js";
+import { KeepingApiError, KeepingAuthError, MultiOrgError } from "../../src/keeping/errors.js";
 import { createLogger } from "../../src/logger.js";
 
 const FAKE_TOKEN = "kp_test_FAKE_token_value";
@@ -70,9 +66,11 @@ describe("KeepingClient", () => {
   // ---------- Throttle wiring (SAFE-02, D-22) ----------
 
   it("Test 4: throttle wiring does not stall consecutive GETs (one underlying fetch each)", async () => {
+    // A Response body can only be consumed once, so return a FRESH Response per
+    // call rather than mockResolvedValue (which would hand back the same one).
     const fetchSpy = vi
       .spyOn(global, "fetch")
-      .mockResolvedValue(jsonResponse(200, { ok: true }));
+      .mockImplementation(async () => jsonResponse(200, { ok: true }));
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
     await client.get("/x");
@@ -129,8 +127,7 @@ describe("KeepingClient", () => {
 
     await expect(client.me()).rejects.toMatchObject({
       name: "KeepingAuthError",
-      message:
-        "Keeping rejected the token. Verify KEEPING_TOKEN and restart the MCP server.",
+      message: "Keeping rejected the token. Verify KEEPING_TOKEN and restart the MCP server.",
     });
   });
 
