@@ -94,7 +94,7 @@ describe("keeping_projects tool", () => {
   it("Test 5: tools/list reports readOnlyHint: true on keeping_projects (READ-03)", async () => {
     const mockClient: Partial<KeepingClient> = {
       resolveOrgId: async () => "org_abc",
-      get: async () => [],
+      get: async <T>(): Promise<T> => [] as T,
     };
     const client = await buildClient(mockClient);
 

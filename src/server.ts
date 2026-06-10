@@ -14,6 +14,8 @@ import type { KeepingConfig } from "./config.js";
 import type { KeepingClient } from "./keeping/client.js";
 import { registerMe } from "./tools/me.js";
 import { registerOrganisations } from "./tools/organisations.js";
+import { registerProjects } from "./tools/projects.js";
+import { registerTasks } from "./tools/tasks.js";
 
 type Logger = ReturnType<typeof import("./logger.js").createLogger>;
 
@@ -31,6 +33,8 @@ export function createServer(
 
   registerMe(server, client);
   registerOrganisations(server, client);
+  registerProjects(server, client);
+  registerTasks(server, client);
   // Plan 02-04 appends more register* calls here (keeping_list_entries).
 
   return server;
