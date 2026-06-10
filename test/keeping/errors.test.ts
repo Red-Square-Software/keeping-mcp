@@ -31,10 +31,7 @@ describe("KeepingClient error contracts (D-25, D-27, Pitfall G)", () => {
   });
 
   it("sanitiseBody scrubs every token occurrence (Pitfall G primitive)", () => {
-    const out = sanitiseBody(
-      `response with ${FAKE_TOKEN} inline`,
-      FAKE_TOKEN,
-    );
+    const out = sanitiseBody(`response with ${FAKE_TOKEN} inline`, FAKE_TOKEN);
     expect(out).toBe("response with *** inline");
     expect(out).not.toContain(FAKE_TOKEN);
   });
