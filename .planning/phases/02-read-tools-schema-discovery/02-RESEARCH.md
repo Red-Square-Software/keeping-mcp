@@ -1096,22 +1096,19 @@ on first run. The act of running `npm run probe-live` resolves them from `[ASSUM
 `[VERIFIED]` for Phase 3. Phase 2 PLANs should NOT depend on these being verified before
 shipping — the probe is the last task, not a precondition.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should `keeping_me` be the org-scoped `/v1/organisations/:org_id/users/me` or the global `/v1/users/me`?**
+   - RESOLVED: COMMIT to the global `GET /v1/users/me` form as the default in `KeepingClient.me()` for Phase 2. The cache shape (one user object) is identical regardless of which path serves it, so the public KeepingClient surface does not change.
+   - Contingency (documented Phase 2 sub-task, NOT a runtime surprise): if the live probe in Plan 02-06 returns 404 on `/v1/users/me`, the Plan 02-06 REQUIREMENTS-update task includes a follow-up code fix to switch `KeepingClient.me()` to the org-scoped form `/v1/organisations/${orgId}/users/me` (resolving `orgId` via the existing `resolveOrgId()` precedence). The contingency is captured as an explicit acceptance criterion in Plan 02-06 Task 3 so the path discrepancy cannot ship un-handled.
    - What we know: FEATURES.md research notes both shapes are plausible, no docs were retrievable.
-   - What's unclear: Whether `/v1/users/me` exists at all, or whether Keeping requires the org-scope path.
-   - Recommendation: Probe both in the `probe-live` script (or as a quick exploratory addition to it). Land Phase 2 with the global form first; if 404, fix the path and re-run. Either way, the cache shape (one user object) doesn't change.
+   - What we no longer treat as unclear: cache shape (one user object regardless of which path serves it). The path choice is now committed-with-contingency, not deferred-to-runtime.
 
 2. **Does Keeping pagination use `page`/`per_page` (offset-based) or a cursor scheme?**
-   - What we know: FEATURES.md research notes both are common patterns; UNVERIFIED.
-   - What's unclear: Pagination params for `keeping_list_entries`.
-   - Recommendation: Phase 2 ships with `limit` only (no `page`/`cursor`). If the probe-live capture shows a `next_cursor` or `meta.total_pages`, Phase 3 adds pagination input. Acceptable for v1 because typical session-summary workflow asks for a single day's worth of entries.
+   - RESOLVED: deferred to Phase 3 explicitly per CONTEXT D-34. Phase 2 ships `keeping_list_entries` with `limit` only — no `page`, no `cursor` input. The probe-live capture in Plan 02-06 will record whatever pagination metadata Keeping returns (`next_cursor`, `meta.total_pages`, `Link` header, etc.) into LIVE-API.md `## Pagination scheme observed` so Phase 3 can pick the exact pagination shape from real evidence. Acceptable for v1 because typical session-summary workflow asks for a single day's worth of entries, well below any reasonable default page size.
 
 3. **Does the SDK's `Client.callTool()` return shape exactly match `CallToolResult` from the schema, including handling of `isError` and `content`?**
-   - What we know: SDK 1.29 test file at L1340-1350 calls `result.isError` and `result.content`. So yes.
-   - What's unclear: Nothing — confirmed by source inspection.
-   - Recommendation: Move from Open to resolved.
+   - RESOLVED: yes — confirmed by direct source inspection of SDK 1.29 `test/server/mcp.test.ts` L1340-1350 which calls `result.isError` and `result.content` against the standard `CallToolResultSchema`. No code change needed; tool tests in Plan 02-02 Task 2 / Plan 02-03 / Plan 02-04 may rely on the schema shape directly.
 
 ## Environment Availability
 
