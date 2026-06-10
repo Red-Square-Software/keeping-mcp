@@ -34,8 +34,8 @@
 
 ### Read Tools
 
-- [ ] **READ-01**: `keeping_list_entries` tool returns time entries for a given user and date range
-- [ ] **READ-02**: `keeping_list_entries` exposes the raw API field names in its response so it can serve as the live-API schema-discovery tool that unblocks write tools
+- [x] **READ-01**: `keeping_list_entries` tool returns time entries for a given user and date range
+- [x] **READ-02**: `keeping_list_entries` exposes the raw API field names in its response so it can serve as the live-API schema-discovery tool that unblocks write tools
 - [x] **READ-03**: Read tools are annotated `readOnlyHint: true`
 
 ### Write Tools
@@ -121,8 +121,8 @@ Phase mapping populated during roadmap creation (2026-06-09).
 | IDENT-03 | Phase 2 | Complete |
 | META-01 | Phase 2 | Complete |
 | META-02 | Phase 2 | Complete |
-| READ-01 | Phase 2 | Pending |
-| READ-02 | Phase 2 | Pending |
+| READ-01 | Phase 2 | Complete |
+| READ-02 | Phase 2 | Complete |
 | READ-03 | Phase 2 | Complete |
 | WRITE-01 | Phase 3 | Pending |
 | WRITE-02 | Phase 3 | Pending |
