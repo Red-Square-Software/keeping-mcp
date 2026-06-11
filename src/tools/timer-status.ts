@@ -58,7 +58,9 @@ const TimerStatusInput = z.object({
 function extractTimeEntry(raw: unknown): Record<string, unknown> | null {
   if (raw === null || typeof raw !== "object") return null;
   const candidate = (raw as Record<string, unknown>).time_entry;
-  if (candidate === null || typeof candidate !== "object") return null;
+  if (candidate === null || typeof candidate !== "object" || Array.isArray(candidate)) {
+    return null;
+  }
   return candidate as Record<string, unknown>;
 }
 
