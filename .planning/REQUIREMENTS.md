@@ -51,7 +51,7 @@
 
 ### Timer Tools (conditional)
 
-- [ ] **TIMER-01**: Timer functionality is verified-in-scope per the 2026-06-11 live probe (D-32-R). The v1 API exposes the full timer lifecycle via the existing `time-entries` resource: `GET /{org_id}/time-entries/last` + the `ongoing` flag for read; `POST /{org_id}/time-entries/{id}/stop` and `POST /{org_id}/time-entries/{id}/resume` for write. `keeping_timer_status` ships in Phase 2.5 (read-only); `keeping_start_timer` / `keeping_stop_timer` / `keeping_resume_timer` ship with the other writes in Phase 3 to keep the dry-run pattern consistent (D-33-R)
+- [ ] **TIMER-01**: Timer functionality is verified-in-scope per the 2026-06-11 live probe (D-32-R). The v1 API exposes the full timer lifecycle via the existing `time-entries` resource: `GET /{org_id}/time-entries/last` + the `ongoing` flag for read; `POST /{org_id}/time-entries/{id}/stop` and `POST /{org_id}/time-entries/{id}/resume` for write. **Status-read portion COMPLETE 2026-06-11** (`keeping_timer_status` shipped in Phase 2.5 Plan 01 — see `.planning/phases/02.5-timer-status-read-tool/02.5-01-SUMMARY.md`). `keeping_start_timer` / `keeping_stop_timer` / `keeping_resume_timer` ship with the other writes in Phase 3 to keep the dry-run pattern consistent (D-33-R)
 - [ ] **TIMER-02**: When shipped, timer tools use `X-Server-Time-Ms` from response headers to compute elapsed time correctly
 
 ### Safety & Reliability
@@ -132,7 +132,7 @@ Phase mapping populated during roadmap creation (2026-06-09).
 | WRITE-06 | Phase 3 | Pending |
 | WRITE-07 | Phase 3 | Pending |
 | WRITE-08 | Phase 3 | Pending |
-| TIMER-01 | Phase 2.5 (status) / Phase 3 (start/stop/resume) | Pending — verified-in-scope 2026-06-11 (D-32-R): backed by `GET /{org_id}/time-entries/last` + `ongoing` flag + `POST /{id}/stop` + `POST /{id}/resume` |
+| TIMER-01 | Phase 2.5 (status) / Phase 3 (start/stop/resume) | Partial — status-read portion COMPLETE (2026-06-11, `keeping_timer_status` shipped in Phase 2.5 Plan 01); start/stop/resume Pending in Phase 3 |
 | TIMER-02 | Phase 3 | Pending |
 | SAFE-01 | Phase 1 | Complete |
 | SAFE-02 | Phase 2 | Complete |

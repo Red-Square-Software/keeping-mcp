@@ -3,20 +3,20 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_plan
-stopped_at: Phase 2.5 context gathered
-last_updated: "2026-06-11T17:16:55.893Z"
+stopped_at: Phase 2.5 Plan 01 complete (keeping_timer_status shipped)
+last_updated: "2026-06-11T17:22:20Z"
 progress:
   total_phases: 6
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 10
-  completed_plans: 9
-  percent: 33
+  completed_plans: 10
+  percent: 50
 ---
 
 # Project State: keeping-mcp
 
-**Last updated:** 2026-06-10  
-**Session boundary:** Phase 2 Plan 05 complete (scripts/probe-live.ts + anonymise() walker + npm run probe-live wiring; tool in tree, ready for Plan 02-06 human-verify run)
+**Last updated:** 2026-06-11  
+**Session boundary:** Phase 2.5 Plan 01 complete (keeping_timer_status read tool shipped — RED → GREEN → WIRE vertical slice; 10 new tests; 77/77 total; src/keeping/ untouched; D-2.5-09 invariant preserved)
 
 ---
 
@@ -32,16 +32,19 @@ progress:
 
 ## Current Position
 
+Phase: 02.5 (timer-status-read-tool) — COMPLETE
+Plan: 1 of 1 complete
+
 | Field | Value |
 |-------|-------|
-| Current phase | Phase 2 — Read Tools & Schema Discovery |
-| Current plan | 02-06-PLAN.md (next — human-verify gate) |
-| Phase status | In Progress (5 of 6 plans complete) |
-| Overall progress | 1 / 4 phases complete; 8 / 9 plans complete |
+| Current phase | Phase 3 — Write Tools + Conditional Timers (next) |
+| Current plan | TBD (Phase 3 plans not yet drafted) |
+| Phase status | Phase 2.5 Complete (1 of 1 plans complete) |
+| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 10 / 10 plans through Phase 2.5 |
 
 ```
-Progress: [█████████░] 89%
-Phase 1 [█████] · Phase 2 [█████░] · Phase 3 [░░░░░] · Phase 4 [░░░░░]
+Progress: [██████████] 100% through Phase 2.5
+Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [░░░░░] · Phase 4 [░░░░░]
 ```
 
 ---
@@ -51,8 +54,9 @@ Phase 1 [█████] · Phase 2 [█████░] · Phase 3 [░░░�
 | Phase | Name | Status | Requirements |
 |-------|------|--------|-------------|
 | 1 | Foundation & Scaffolding | Complete (2026-06-09) | DIST-01..03, AUTH-01..03, SAFE-01, REL-01 |
-| 2 | Read Tools & Schema Discovery | In Progress (5/6 plans) | AUTH-04..05, IDENT-01..03, META-01..02, READ-01..03, SAFE-02..05 |
-| 3 | Write Tools + Conditional Timers | Not started | WRITE-01..08, TIMER-01..02 |
+| 2 | Read Tools & Schema Discovery | Complete (2026-06-11) | AUTH-04..05, IDENT-01..03, META-01..02, READ-01..03, SAFE-02..05 |
+| 2.5 | Timer Status Read Tool | Complete (2026-06-11) | TIMER-01 (status-read portion) |
+| 3 | Write Tools + Conditional Timers | Not started | WRITE-01..08, TIMER-01 (start/stop/resume), TIMER-02 |
 | 4 | Distribution & Release Pipeline | Not started | DIST-04..05, REL-02..05 |
 
 ---
@@ -61,10 +65,10 @@ Phase 1 [█████] · Phase 2 [█████░] · Phase 3 [░░░�
 
 | Metric | Value |
 |--------|-------|
-| Phases completed | 1 / 4 |
+| Phases completed | 3 / 4 (Phase 1, 2, 2.5) |
 | Requirements mapped | 38 / 38 |
-| Plans created | 9 (3 Phase 1 + 6 Phase 2) |
-| Plans completed | 8 (3 Phase 1 + 5 Phase 2) |
+| Plans created | 10 (3 Phase 1 + 6 Phase 2 + 1 Phase 2.5) |
+| Plans completed | 10 (3 Phase 1 + 6 Phase 2 + 1 Phase 2.5) |
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
@@ -73,6 +77,7 @@ Phase 1 [█████] · Phase 2 [█████░] · Phase 3 [░░░�
 | Phase 02 P03 | 4min | 2 tasks | 7 files |
 | Phase 02 P04 | 3min | 2 tasks | 4 files |
 | Phase 02 P05 | 4min | 2 tasks | 5 files |
+| Phase 02.5-timer-status-read-tool P01 | 3min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -103,6 +108,8 @@ Phase 1 [█████] · Phase 2 [█████░] · Phase 3 [░░░�
 | Q1 contingency probe = raw fetch, not client.me() (Plan 02-05) | `scripts/probe-live.ts` issues a raw `fetch` to `/v1/users/me` (not via `KeepingClient.me()`) so that: (a) cache is never poisoned, (b) actual HTTP status is captured verbatim — not masked by `KeepingAuthError`, (c) probe continues regardless of result. The status feeds the LIVE-API.md `## /v1/users/me path probe` section that Plan 02-06 Task 3 reads to decide whether to switch `KeepingClient.me()` to the org-scoped path. |
 | Probe-live pre-check + loadConfig double layer (Plan 02-05) | Script emits byte-identical `[probe-live] KEEPING_TOKEN must be set in env or .env before running probe-live` to stderr + `process.exit(1)` BEFORE calling `loadConfig()`. `loadConfig()` then runs as the regular validator for the rest of the env. Both messages may appear in some edge cases; the probe-specific one is the user's primary cue. Verified via manual smoke. |
 | Probe-live source-isolation (Plan 02-05) | `scripts/probe-live.ts` and the npm script entry are the only artefacts; `bin/` and `src/` are line-for-line untouched. Verified via `git diff HEAD~3 HEAD -- bin/ src/` returning empty. Q1 contingency code change (if needed) is Plan 02-06 Task 3's responsibility. `tsup.config.ts` is NOT changed — the probe never bundles into `dist/`. `tsconfig.json` adds `scripts/**/*` to `include` so `npx tsc --noEmit` typechecks the probe. |
+| Strict wrapper extractor locked (Plan 02.5-01, D-2.5-05a) | `src/tools/timer-status.ts:extractTimeEntry(raw)` accepts ONLY when `raw && typeof raw === 'object' && raw.time_entry && typeof raw.time_entry === 'object'`. No multi-key fallback (`entries[0]`, bare-array, aliases). Differs intentionally from `entries-list.ts:normaliseEntries` because the OpenAPI spec now authoritatively locks the singular `time_entry` wrapper post-Plan-02-06. Drift fails loudly via D-2.5-13 tests 5/6 (`toEqual({ time_entry: null, ... })`) rather than being masked. |
+| 404-as-graceful-empty pattern locked (Plan 02.5-01, D-2.5-03 + D-2.5-04a) | `keeping_timer_status` catches `err instanceof KeepingApiError && err.status === 404` and returns `{ time_entry: null, is_running: false }` with NO `isError` key. Same payload as the strict-extractor "no usable time_entry" branch — one empty-state surface regardless of cause. Sibling pattern to Phase 2's "feature not enabled for this organisation" graceful empty (META-01, META-02). Reusable template for Phase 3's `keeping_resume_timer` "no recent entry to resume" sentinel. |
 
 ### Open Questions (resolve during execution)
 
@@ -127,7 +134,9 @@ Phase 1 [█████] · Phase 2 [█████░] · Phase 3 [░░░�
 - [x] Phase 2 Plan 03: keeping_organisations + keeping_projects + keeping_tasks (completed 2026-06-10)
 - [x] Phase 2 Plan 04: keeping_list_entries + CI initialize-handshake smoke (completed 2026-06-10)
 - [x] Phase 2 Plan 05: scripts/probe-live.ts + anonymise() walker + npm run probe-live (completed 2026-06-10)
-- [ ] Phase 2 Plan 06: human-verify probe-live results + commit LIVE-API.md
+- [x] Phase 2 Plan 06: human-verify probe-live results + commit LIVE-API.md + Phase 2.5 carve-out (completed 2026-06-11)
+- [x] Phase 2.5 Plan 01: keeping_timer_status read tool — 10 tests + impl + server.ts wiring (completed 2026-06-11)
+- [ ] Phase 3: Write tools + conditional timer writes (not started)
 
 ### Blockers
 
@@ -142,13 +151,13 @@ None.
 1. Read `.planning/ROADMAP.md` — phase goals and success criteria
 2. Read `.planning/PROJECT.md` — core value and locked decisions
 3. Read `.planning/REQUIREMENTS.md` — requirement IDs and traceability
-4. Read `.planning/phases/02-read-tools-schema-discovery/02-05-SUMMARY.md` for the last completed plan
-5. Continue with `.planning/phases/02-read-tools-schema-discovery/02-06-PLAN.md` (human-verify gate — user runs the probe)
+4. Read `.planning/phases/02.5-timer-status-read-tool/02.5-01-SUMMARY.md` for the last completed plan
+5. Continue with Phase 3 (draft `.planning/phases/03-*/03-CONTEXT.md` first)
 
-**Last session:** 2026-06-11T16:50:26.545Z
-**Stopped at:** Phase 2.5 context gathered
-**Resume file:** .planning/phases/02.5-timer-status-read-tool/02.5-CONTEXT.md
-**Next action:** `/gsd:execute-phase 2` (or resume at Plan 02-06)
+**Last session:** 2026-06-11T17:22:20Z
+**Stopped at:** Phase 2.5 Plan 01 complete (keeping_timer_status shipped)
+**Resume file:** .planning/phases/02.5-timer-status-read-tool/02.5-01-SUMMARY.md
+**Next action:** `/gsd:plan-phase 3` to draft Phase 3 write tools + timer writes
 
 ---
 *State initialized: 2026-06-09 after roadmap creation*

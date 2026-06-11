@@ -18,7 +18,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 
 - [x] **Phase 1: Foundation & Scaffolding** — Project skeleton, KeepingClient, stderr-only logger, fail-fast token validation, CI pipeline green. No MCP tools yet; server does not start. Observable output: CI workflow exits green on every push. (completed 2026-06-09)
 - [x] **Phase 2: Read Tools & Schema Discovery** — Server runnable via `npx keeping-mcp`; all identity, metadata, and read tools operational; live-API session locked POST body schema (via the published OpenAPI spec at `developer.keeping.nl/openapi.json`, mirrored locally) and probed timer endpoint; rate-limit, retry, and identity caching in place. (completed 2026-06-11)
-- [ ] **Phase 2.5: Timer Status Read Tool** — Single read-only `keeping_timer_status` tool backed by `GET /{org_id}/time-entries/last` + the `ongoing` flag. Carved out per D-32-R / D-33-R: timer functionality is verified-in-scope but writes (start/stop/resume) stay in Phase 3 to keep the dry-run-by-default pattern consistent.
+- [x] **Phase 2.5: Timer Status Read Tool** — Single read-only `keeping_timer_status` tool backed by `GET /{org_id}/time-entries/last` + the `ongoing` flag. Carved out per D-32-R / D-33-R: timer functionality is verified-in-scope but writes (start/stop/resume) stay in Phase 3 to keep the dry-run-by-default pattern consistent. (completed 2026-06-11)
 - [ ] **Phase 3: Write Tools + Conditional Timers** — Full CRUD (`add`, `update`, `delete`) with dry-run gate, tool annotations, Amsterdam timezone default, and `purpose` field. Timer write tools (`start`, `stop`, `resume`) ship alongside per D-33-R.
 - [ ] **Phase 4: Distribution & Release Pipeline** — `files` whitelist, `npm pack --dry-run` audit, dual-platform README, GitHub Actions OIDC publish to npm + MCP Registry on `v*` tag, provenance attestation verified.
 
@@ -87,7 +87,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 5. The fixture from Plan 02-06 (`test/fixtures/time-entry-response.sample.json` shape) is reused as a structural reference for the test mock.
 
 **Plans**: 1 plan
-- [ ] 02.5-01-PLAN.md — Single-slice TDD: write 10 D-2.5-13 tests, implement src/tools/timer-status.ts (strict raw.time_entry read + 404 graceful-empty branch + is_running===true derivation), wire registerTimerStatus into src/server.ts.
+- [x] 02.5-01-PLAN.md — Single-slice TDD: wrote 10 D-2.5-13 tests, implemented src/tools/timer-status.ts (strict raw.time_entry read + 404 graceful-empty branch + is_running===true derivation), wired registerTimerStatus into src/server.ts. See `02.5-01-SUMMARY.md`. (completed 2026-06-11)
 
 **UI hint**: no
 
@@ -137,7 +137,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 |-------|----------------|--------|-----------|
 | 1. Foundation & Scaffolding | 3/3 | Complete    | 2026-06-09 |
 | 2. Read Tools & Schema Discovery | 6/6 | Complete    | 2026-06-11 |
-| 2.5. Timer Status Read Tool | 0/? | Not started | - |
+| 2.5. Timer Status Read Tool | 1/1 | Complete    | 2026-06-11 |
 | 3. Write Tools + Conditional Timers | 0/? | Not started | - |
 | 4. Distribution & Release Pipeline | 0/? | Not started | - |
 
