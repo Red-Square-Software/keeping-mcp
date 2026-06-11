@@ -50,6 +50,35 @@ describe("KeepingClient", () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
+  it("Test 2b: organisations() unwraps { organisations: [...] } wrapper shape", async () => {
+    vi.spyOn(global, "fetch").mockResolvedValue(
+      jsonResponse(200, { organisations: [{ id: "org-1", name: "Acme" }] }),
+    );
+    const client = new KeepingClient(FAKE_TOKEN, silentLogger());
+
+    const orgs = await client.organisations();
+
+    expect(orgs).toEqual([{ id: "org-1", name: "Acme" }]);
+  });
+
+  it("Test 2c: organisations() unwraps { data: [...] } wrapper shape", async () => {
+    vi.spyOn(global, "fetch").mockResolvedValue(
+      jsonResponse(200, { data: [{ id: "org-2", name: "Beta" }] }),
+    );
+    const client = new KeepingClient(FAKE_TOKEN, silentLogger());
+
+    const orgs = await client.organisations();
+
+    expect(orgs).toEqual([{ id: "org-2", name: "Beta" }]);
+  });
+
+  it("Test 2d: organisations() throws shape error when payload is neither array nor known wrapper", async () => {
+    vi.spyOn(global, "fetch").mockResolvedValue(jsonResponse(200, { foo: "bar" }));
+    const client = new KeepingClient(FAKE_TOKEN, silentLogger());
+
+    await expect(client.organisations()).rejects.toThrow(/unexpected shape/);
+  });
+
   it("Test 3: 401 from me() does NOT populate the cache; next call still fetches (D-25)", async () => {
     const fetchSpy = vi
       .spyOn(global, "fetch")

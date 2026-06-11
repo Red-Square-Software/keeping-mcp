@@ -27,6 +27,29 @@ type Logger = ReturnType<typeof import("../logger.js").createLogger>;
 const BASE = "https://api.keeping.nl/v1";
 const TIMEOUT_MS = 10_000;
 
+/**
+ * Defensive unwrap for the `/organisations` payload. The live API can return
+ * either a bare array or a wrapper object (`{ organisations: [...] }` or
+ * `{ data: [...] }`). Discovered post-Plan 02-02 during the Plan 02-06
+ * human-verify probe — the original implementation assumed a bare array and
+ * crashed with `orgs.map is not a function` on the wrapped shape.
+ */
+function unwrapOrgList(raw: unknown): KeepingOrg[] {
+  if (Array.isArray(raw)) return raw as KeepingOrg[];
+  if (raw !== null && typeof raw === "object") {
+    const obj = raw as Record<string, unknown>;
+    if (Array.isArray(obj.organisations)) return obj.organisations as KeepingOrg[];
+    if (Array.isArray(obj.data)) return obj.data as KeepingOrg[];
+  }
+  const keys =
+    raw !== null && typeof raw === "object"
+      ? Object.keys(raw as Record<string, unknown>).join(", ")
+      : typeof raw;
+  throw new Error(
+    `/organisations returned unexpected shape (top-level: ${keys}). Expected array, { organisations: [] }, or { data: [] }.`,
+  );
+}
+
 export class KeepingClient {
   // `token` is installed as a non-enumerable own property in the constructor
   // via Object.defineProperty (NOT a regular `private readonly` class field),
@@ -70,9 +93,10 @@ export class KeepingClient {
 
   async organisations(): Promise<KeepingOrg[]> {
     if (this.orgsCache !== null) return this.orgsCache;
-    const fetched = await this.get<KeepingOrg[]>("/organisations");
-    this.orgsCache = fetched;
-    return fetched;
+    const raw = await this.get<unknown>("/organisations");
+    const list = unwrapOrgList(raw);
+    this.orgsCache = list;
+    return list;
   }
 
   // ---- Org resolution (D-26, D-28, D-29) ----
