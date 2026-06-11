@@ -17,8 +17,9 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 ## Phases
 
 - [x] **Phase 1: Foundation & Scaffolding** — Project skeleton, KeepingClient, stderr-only logger, fail-fast token validation, CI pipeline green. No MCP tools yet; server does not start. Observable output: CI workflow exits green on every push. (completed 2026-06-09)
-- [ ] **Phase 2: Read Tools & Schema Discovery** — Server runnable via `npx keeping-mcp`; all identity, metadata, and read tools operational; live-API session locks POST body schema and probes timer endpoint; rate-limit, retry, and identity caching in place.
-- [ ] **Phase 3: Write Tools + Conditional Timers** — Full CRUD (`add`, `update`, `delete`) with dry-run gate, tool annotations, Amsterdam timezone default, and `purpose` field. Timer tools shipped if Phase 2 probe returned non-404.
+- [x] **Phase 2: Read Tools & Schema Discovery** — Server runnable via `npx keeping-mcp`; all identity, metadata, and read tools operational; live-API session locked POST body schema (via the published OpenAPI spec at `developer.keeping.nl/openapi.json`, mirrored locally) and probed timer endpoint; rate-limit, retry, and identity caching in place. (completed 2026-06-11)
+- [ ] **Phase 2.5: Timer Status Read Tool** — Single read-only `keeping_timer_status` tool backed by `GET /{org_id}/time-entries/last` + the `ongoing` flag. Carved out per D-32-R / D-33-R: timer functionality is verified-in-scope but writes (start/stop/resume) stay in Phase 3 to keep the dry-run-by-default pattern consistent.
+- [ ] **Phase 3: Write Tools + Conditional Timers** — Full CRUD (`add`, `update`, `delete`) with dry-run gate, tool annotations, Amsterdam timezone default, and `purpose` field. Timer write tools (`start`, `stop`, `resume`) ship alongside per D-33-R.
 - [ ] **Phase 4: Distribution & Release Pipeline** — `files` whitelist, `npm pack --dry-run` audit, dual-platform README, GitHub Actions OIDC publish to npm + MCP Registry on `v*` tag, provenance attestation verified.
 
 ---
@@ -67,7 +68,27 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 - [x] 02-03-PLAN.md — keeping_organisations (IDENT-02) + keeping_projects (META-01) + keeping_tasks (META-02) with graceful-empty for feature-disabled orgs
 - [x] 02-04-PLAN.md — keeping_list_entries raw pass-through (READ-01/02, D-34) + CI smoke upgrade (D-15 initialize handshake assertion)
 - [x] 02-05-PLAN.md — scripts/probe-live.ts (D-30..D-35) + tested anonymise() walker (D-35 step 3) + npm run probe-live entry (completed 2026-06-10)
-- [ ] 02-06-PLAN.md — autonomous:false human-verify gate: user runs probe-live, reviews LIVE-API.md + fixture for PII, updates REQUIREMENTS TIMER-01 row, commits three approved files
+- [x] 02-06-PLAN.md — autonomous:false human-verify gate: user ran probe-live; planned three-file commit escalated into the contract-fix detour (CONTEXT D-32-R..D-35-R + 17-file rewrite + `keeping_timer_status` carve-out as Phase 2.5). See `02-06-SUMMARY.md`. (completed 2026-06-11)
+
+---
+
+### Phase 2.5: Timer Status Read Tool
+
+**Goal**: A MCP client can call `keeping_timer_status` and receive the most-recent time entry plus a derived `is_running` boolean (from the API's `ongoing` field), without modifying any data.
+**Mode:** mvp
+**Depends on**: Phase 2 (KeepingClient + tool annotation pattern + read-tool error envelope)
+**Requirements**: TIMER-01 (status read portion only — start/stop/resume are Phase 3)
+
+**Success Criteria** (what must be TRUE):
+1. `keeping_timer_status` returns the raw `time_entry` object from `GET /{org_id}/time-entries/last`, including a top-level `is_running` boolean derived from `time_entry.ongoing`. No field renaming on the API payload (D-34-R pass-through).
+2. The tool carries `readOnlyHint: true`, `destructiveHint: false`, `idempotentHint: true` annotations consistent with Phase 2 read tools.
+3. The tool dispatches via the Phase 2 `KeepingClient.get<T>("/${orgId}/time-entries/last")` path — no new request-path strategy.
+4. A unit test asserts the `is_running` derivation: `ongoing: true` → `is_running: true`; `ongoing: false` → `is_running: false`; missing `ongoing` → `is_running: false` (defensive default).
+5. The fixture from Plan 02-06 (`test/fixtures/time-entry-response.sample.json` shape) is reused as a structural reference for the test mock.
+
+**Plans**: TBD
+
+**UI hint**: no
 
 ---
 
@@ -75,8 +96,8 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 
 **Goal**: Users can propose, preview, confirm, and if needed correct or delete a time entry — all through MCP tool calls — with explicit human confirmation required before any data reaches Keeping.
 **Mode:** mvp
-**Depends on**: Phase 2 (POST body schema confirmed via `keeping_list_entries` live session)
-**Requirements**: WRITE-01, WRITE-02, WRITE-03, WRITE-04, WRITE-05, WRITE-06, WRITE-07, WRITE-08, TIMER-01, TIMER-02
+**Depends on**: Phase 2 (POST body schema confirmed via `developer.keeping.nl/openapi.json` mirror at `.planning/research/keeping-openapi.json` and the anonymised fixture at `test/fixtures/time-entry-response.sample.json`)
+**Requirements**: WRITE-01, WRITE-02, WRITE-03, WRITE-04, WRITE-05, WRITE-06, WRITE-07, WRITE-08, TIMER-01 (start/stop/resume portion), TIMER-02
 
 **Success Criteria** (what must be TRUE):
 1. Calling `keeping_add_entry` without `confirm: true` (and with `KEEPING_REQUIRE_CONFIRM=true`, the default) returns a `{ would_post: { method, url, body } }` preview and makes zero API calls — verified by a unit test with a mocked `KeepingClient.post`.
@@ -114,7 +135,8 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Scaffolding | 3/3 | Complete    | 2026-06-09 |
-| 2. Read Tools & Schema Discovery | 5/6 | In Progress|  |
+| 2. Read Tools & Schema Discovery | 6/6 | Complete    | 2026-06-11 |
+| 2.5. Timer Status Read Tool | 0/? | Not started | - |
 | 3. Write Tools + Conditional Timers | 0/? | Not started | - |
 | 4. Distribution & Release Pipeline | 0/? | Not started | - |
 
@@ -132,7 +154,8 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 | Metadata Tools | META-01, META-02 | 2 |
 | Read Tools | READ-01, READ-02, READ-03 | 2 |
 | Write Tools | WRITE-01..08 | 3 |
-| Timer Tools (conditional) | TIMER-01, TIMER-02 | 3 |
+| Timer Tools (status read) | TIMER-01 (read portion) | 2.5 |
+| Timer Tools (writes) | TIMER-01 (start/stop/resume), TIMER-02 | 3 |
 | Safety & Reliability | SAFE-01 | 1 |
 | Safety & Reliability | SAFE-02, SAFE-03, SAFE-04, SAFE-05 | 2 |
 | Release Pipeline | REL-01 | 1 |
