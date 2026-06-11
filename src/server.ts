@@ -17,6 +17,7 @@ import { registerMe } from "./tools/me.js";
 import { registerOrganisations } from "./tools/organisations.js";
 import { registerProjects } from "./tools/projects.js";
 import { registerTasks } from "./tools/tasks.js";
+import { registerTimerStatus } from "./tools/timer-status.js";
 
 type Logger = ReturnType<typeof import("./logger.js").createLogger>;
 
@@ -37,9 +38,11 @@ export function createServer(
   registerProjects(server, client);
   registerTasks(server, client);
   registerEntriesList(server, client);
-  // All five Phase 2 read tools now registered. Phase 3 will append write
-  // tools (keeping_add_entry, keeping_update_entry, keeping_delete_entry,
-  // and conditional keeping_*_timer) here.
+  registerTimerStatus(server, client);
+  // All five Phase 2 read tools + the Phase 2.5 keeping_timer_status read
+  // tool now registered. Phase 3 will append write tools (keeping_add_entry,
+  // keeping_update_entry, keeping_delete_entry) and the timer writes
+  // (keeping_start_timer, keeping_stop_timer, keeping_resume_timer) here.
 
   return server;
 }
