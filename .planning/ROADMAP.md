@@ -88,7 +88,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 
 **Plans**: 2 plans
 - [x] 02.5-01-PLAN.md — Single-slice TDD: wrote 10 D-2.5-13 tests, implemented src/tools/timer-status.ts (strict raw.time_entry read + 404 graceful-empty branch + is_running===true derivation), wired registerTimerStatus into src/server.ts. See `02.5-01-SUMMARY.md`. (completed 2026-06-11)
-- [ ] 02.5-02-PLAN.md — Gap closure (Truth #3 / D-2.5-05a, REVIEW.md WR-01): RED two array-drift tests, then GREEN add Array.isArray(candidate) to extractTimeEntry guard so { time_entry: [] } and { time_entry: [{...}] } collapse to graceful empty.
+- [x] 02.5-02-PLAN.md — Gap closure (Truth #3 / D-2.5-05a, REVIEW.md WR-01): RED two array-drift tests, then GREEN add Array.isArray(candidate) to extractTimeEntry guard so { time_entry: [] } and { time_entry: [{...}] } collapse to graceful empty.
 
 **UI hint**: no
 
@@ -138,7 +138,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 |-------|----------------|--------|-----------|
 | 1. Foundation & Scaffolding | 3/3 | Complete    | 2026-06-09 |
 | 2. Read Tools & Schema Discovery | 6/6 | Complete    | 2026-06-11 |
-| 2.5. Timer Status Read Tool | 1/1 | Complete    | 2026-06-11 |
+| 2.5. Timer Status Read Tool | 2/2 | Complete   | 2026-06-11 |
 | 3. Write Tools + Conditional Timers | 0/? | Not started | - |
 | 4. Distribution & Release Pipeline | 0/? | Not started | - |
 

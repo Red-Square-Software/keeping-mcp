@@ -51,7 +51,7 @@
 
 ### Timer Tools (conditional)
 
-- [ ] **TIMER-01**: Timer functionality is verified-in-scope per the 2026-06-11 live probe (D-32-R). The v1 API exposes the full timer lifecycle via the existing `time-entries` resource: `GET /{org_id}/time-entries/last` + the `ongoing` flag for read; `POST /{org_id}/time-entries/{id}/stop` and `POST /{org_id}/time-entries/{id}/resume` for write. **Status-read portion COMPLETE 2026-06-11** (`keeping_timer_status` shipped in Phase 2.5 Plan 01 — see `.planning/phases/02.5-timer-status-read-tool/02.5-01-SUMMARY.md`). `keeping_start_timer` / `keeping_stop_timer` / `keeping_resume_timer` ship with the other writes in Phase 3 to keep the dry-run pattern consistent (D-33-R)
+- [x] **TIMER-01**: Timer functionality is verified-in-scope per the 2026-06-11 live probe (D-32-R). The v1 API exposes the full timer lifecycle via the existing `time-entries` resource: `GET /{org_id}/time-entries/last` + the `ongoing` flag for read; `POST /{org_id}/time-entries/{id}/stop` and `POST /{org_id}/time-entries/{id}/resume` for write. **Status-read portion COMPLETE 2026-06-11** (`keeping_timer_status` shipped in Phase 2.5 Plan 01 — see `.planning/phases/02.5-timer-status-read-tool/02.5-01-SUMMARY.md`). `keeping_start_timer` / `keeping_stop_timer` / `keeping_resume_timer` ship with the other writes in Phase 3 to keep the dry-run pattern consistent (D-33-R)
 - [ ] **TIMER-02**: When shipped, timer tools use `X-Server-Time-Ms` from response headers to compute elapsed time correctly
 
 ### Safety & Reliability

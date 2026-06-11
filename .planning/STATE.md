@@ -3,20 +3,20 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_plan
-stopped_at: Phase 2.5 Plan 01 complete (keeping_timer_status shipped)
-last_updated: "2026-06-11T17:56:18.874Z"
+stopped_at: Phase 2.5 Plan 02 complete (array-drift gap closed — D-2.5-05a re-enforced)
+last_updated: "2026-06-11T18:02:40.011Z"
 progress:
   total_phases: 6
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 11
-  completed_plans: 10
-  percent: 33
+  completed_plans: 11
+  percent: 50
 ---
 
 # Project State: keeping-mcp
 
 **Last updated:** 2026-06-11  
-**Session boundary:** Phase 2.5 Plan 01 complete (keeping_timer_status read tool shipped — RED → GREEN → WIRE vertical slice; 10 new tests; 77/77 total; src/keeping/ untouched; D-2.5-09 invariant preserved)
+**Session boundary:** Phase 2.5 Plan 02 complete (gap-closure — Array.isArray guard added to extractTimeEntry; bare-array time_entry now collapses to graceful empty; 2 new RED→GREEN tests; 79/79 total; src/keeping/ + src/server.ts untouched; D-2.5-05a re-enforced; REVIEW.md WR-01 closed; VERIFICATION.md Truth #3 transitions FAILED→VERIFIED on re-verify)
 
 ---
 
@@ -32,18 +32,18 @@ progress:
 
 ## Current Position
 
-Phase: 02.5 (timer-status-read-tool) — COMPLETE
-Plan: 1 of 1 complete
+Phase: 02.5 (timer-status-read-tool) — COMPLETE (gap closure shipped)
+Plan: 2 of 2 complete (initial + gap closure)
 
 | Field | Value |
 |-------|-------|
 | Current phase | Phase 3 — Write Tools + Conditional Timers (next) |
 | Current plan | TBD (Phase 3 plans not yet drafted) |
-| Phase status | Phase 2.5 Complete (1 of 1 plans complete) |
-| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 10 / 10 plans through Phase 2.5 |
+| Phase status | Phase 2.5 Complete — gap closure shipped (2 of 2 plans complete) |
+| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 11 / 11 plans through Phase 2.5 |
 
 ```
-Progress: [██████████] 100% through Phase 2.5
+Progress: [██████████] 100%
 Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [░░░░░] · Phase 4 [░░░░░]
 ```
 
@@ -67,8 +67,8 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 |--------|-------|
 | Phases completed | 3 / 4 (Phase 1, 2, 2.5) |
 | Requirements mapped | 38 / 38 |
-| Plans created | 10 (3 Phase 1 + 6 Phase 2 + 1 Phase 2.5) |
-| Plans completed | 10 (3 Phase 1 + 6 Phase 2 + 1 Phase 2.5) |
+| Plans created | 11 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5) |
+| Plans completed | 11 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5) |
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
@@ -78,6 +78,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Phase 02 P04 | 3min | 2 tasks | 4 files |
 | Phase 02 P05 | 4min | 2 tasks | 5 files |
 | Phase 02.5-timer-status-read-tool P01 | 3min | 3 tasks | 3 files |
+| Phase 02.5 P02 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Probe-live source-isolation (Plan 02-05) | `scripts/probe-live.ts` and the npm script entry are the only artefacts; `bin/` and `src/` are line-for-line untouched. Verified via `git diff HEAD~3 HEAD -- bin/ src/` returning empty. Q1 contingency code change (if needed) is Plan 02-06 Task 3's responsibility. `tsup.config.ts` is NOT changed — the probe never bundles into `dist/`. `tsconfig.json` adds `scripts/**/*` to `include` so `npx tsc --noEmit` typechecks the probe. |
 | Strict wrapper extractor locked (Plan 02.5-01, D-2.5-05a) | `src/tools/timer-status.ts:extractTimeEntry(raw)` accepts ONLY when `raw && typeof raw === 'object' && raw.time_entry && typeof raw.time_entry === 'object'`. No multi-key fallback (`entries[0]`, bare-array, aliases). Differs intentionally from `entries-list.ts:normaliseEntries` because the OpenAPI spec now authoritatively locks the singular `time_entry` wrapper post-Plan-02-06. Drift fails loudly via D-2.5-13 tests 5/6 (`toEqual({ time_entry: null, ... })`) rather than being masked. |
 | 404-as-graceful-empty pattern locked (Plan 02.5-01, D-2.5-03 + D-2.5-04a) | `keeping_timer_status` catches `err instanceof KeepingApiError && err.status === 404` and returns `{ time_entry: null, is_running: false }` with NO `isError` key. Same payload as the strict-extractor "no usable time_entry" branch — one empty-state surface regardless of cause. Sibling pattern to Phase 2's "feature not enabled for this organisation" graceful empty (META-01, META-02). Reusable template for Phase 3's `keeping_resume_timer` "no recent entry to resume" sentinel. |
+| Strict wrapper guard MUST pair typeof with Array.isArray (Plan 02.5-02, D-2.5-05a re-enforced) | `extractTimeEntry` guard now reads `candidate === null \|\| typeof candidate !== "object" \|\| Array.isArray(candidate)`. Closes the array-drift gap from `02.5-VERIFICATION.md` (REVIEW.md WR-01): `typeof [] === "object"` is `true` in JS, so the original two-clause guard silently accepted `{ time_entry: [] }` and `{ time_entry: [{...}] }` as valid wrappers — contradicting the source-comment contract (lines 17-22 / 53-56). Test 11 + Test 12 in `test/tools/timer-status.test.ts` are the regression gates (`toEqual({ time_entry: null, is_running: false })`). Phase 3 write tools that read entry shapes MUST reuse this three-clause guard pattern verbatim. |
 
 ### Open Questions (resolve during execution)
 
@@ -136,6 +138,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 - [x] Phase 2 Plan 05: scripts/probe-live.ts + anonymise() walker + npm run probe-live (completed 2026-06-10)
 - [x] Phase 2 Plan 06: human-verify probe-live results + commit LIVE-API.md + Phase 2.5 carve-out (completed 2026-06-11)
 - [x] Phase 2.5 Plan 01: keeping_timer_status read tool — 10 tests + impl + server.ts wiring (completed 2026-06-11)
+- [x] Phase 2.5 Plan 02: array-drift gap closure — Array.isArray guard in extractTimeEntry + Test 11/12 (completed 2026-06-11)
 - [ ] Phase 3: Write tools + conditional timer writes (not started)
 
 ### Blockers
@@ -151,14 +154,15 @@ None.
 1. Read `.planning/ROADMAP.md` — phase goals and success criteria
 2. Read `.planning/PROJECT.md` — core value and locked decisions
 3. Read `.planning/REQUIREMENTS.md` — requirement IDs and traceability
-4. Read `.planning/phases/02.5-timer-status-read-tool/02.5-01-SUMMARY.md` for the last completed plan
-5. Continue with Phase 3 (draft `.planning/phases/03-*/03-CONTEXT.md` first)
+4. Read `.planning/phases/02.5-timer-status-read-tool/02.5-02-SUMMARY.md` for the last completed plan (gap closure)
+5. Re-run `/gsd:verify-phase 02.5` to transition VERIFICATION.md from gaps_found 9/10 → complete 10/10 (Truth #3 FAILED → VERIFIED)
+6. Continue with Phase 3 (draft `.planning/phases/03-*/03-CONTEXT.md` first)
 
-**Last session:** 2026-06-11T17:22:20Z
-**Stopped at:** Phase 2.5 Plan 01 complete (keeping_timer_status shipped)
-**Resume file:** .planning/phases/02.5-timer-status-read-tool/02.5-01-SUMMARY.md
-**Next action:** `/gsd:plan-phase 3` to draft Phase 3 write tools + timer writes
+**Last session:** 2026-06-11T18:02:13.995Z
+**Stopped at:** Phase 2.5 Plan 02 complete (array-drift gap closed — D-2.5-05a re-enforced)
+**Resume file:** .planning/phases/02.5-timer-status-read-tool/02.5-02-SUMMARY.md
+**Next action:** `/gsd:verify-phase 02.5` for re-verification (gaps_found → complete), then `/gsd:plan-phase 3`
 
 ---
 *State initialized: 2026-06-09 after roadmap creation*
-*Last updated: 2026-06-10 after Phase 2 Plan 05 completion*
+*Last updated: 2026-06-11 after Phase 2.5 Plan 02 (gap closure) completion*
