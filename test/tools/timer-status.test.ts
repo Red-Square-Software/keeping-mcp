@@ -237,4 +237,51 @@ describe("keeping_timer_status tool", () => {
     expect(tool?.annotations?.idempotentHint).toBe(true);
     expect(tool?.annotations?.openWorldHint).toBe(true);
   });
+
+  it("Test 11: empty-array time_entry collapses to graceful empty (D-2.5-05a, REVIEW.md WR-01)", async () => {
+    const mockClient: Partial<KeepingClient> = {
+      resolveOrgId: async () => "47666",
+      // Drift shape: `time_entry` is a bare array. typeof [] === "object" lets
+      // this through the pre-fix guard, masking drift as a present-but-empty
+      // entry. D-2.5-05a contract requires it to collapse to null.
+      get: async <T>(): Promise<T> => ({ time_entry: [] }) as T,
+    };
+    const client = await buildClient(mockClient);
+
+    const res = await client.callTool({
+      name: "keeping_timer_status",
+      arguments: {},
+    });
+    // Graceful empty MUST NOT set isError (D-2.5-03 contract, Pitfall 8).
+    expect(res.isError).toBeFalsy();
+    const content = res.content as Array<{ type: "text"; text: string }>;
+    const parsed = JSON.parse(content[0]?.text ?? "");
+    // Pitfall 4 + D-2.5-05a: array `time_entry` MUST collapse to literal null,
+    // not pass through as [] (the bug REVIEW.md WR-01 documents).
+    expect(parsed).toEqual({ time_entry: null, is_running: false });
+  });
+
+  it("Test 12: non-empty-array time_entry collapses to graceful empty even when wrapped entry has ongoing:true (D-2.5-05a, REVIEW.md WR-01)", async () => {
+    const mockClient: Partial<KeepingClient> = {
+      resolveOrgId: async () => "47666",
+      // The more dangerous drift: a plausible-looking array of one running
+      // entry. Under D-2.5-05a the array MUST be discarded before
+      // `entry?.ongoing` is read — `is_running` MUST stay false.
+      get: async <T>(): Promise<T> => ({ time_entry: [{ ...fixtureEntry, ongoing: true }] }) as T,
+    };
+    const client = await buildClient(mockClient);
+
+    const res = await client.callTool({
+      name: "keeping_timer_status",
+      arguments: {},
+    });
+    expect(res.isError).toBeFalsy();
+    const content = res.content as Array<{ type: "text"; text: string }>;
+    const parsed = JSON.parse(content[0]?.text ?? "");
+    // BOTH dimensions pinned: time_entry === null AND is_running === false.
+    // Catches the obvious regression (array surfaces as payload.time_entry)
+    // AND the subtle regression (is_running set true because the wrapped
+    // entry has ongoing:true).
+    expect(parsed).toEqual({ time_entry: null, is_running: false });
+  });
 });
