@@ -1,0 +1,27 @@
+{
+  "time_entries": [
+    {
+      "id": 20135088,
+      "user_id": 55458,
+      "date": "2026-05-29",
+      "purpose": "[REDACTED]",
+      "approval_status": "unsubmitted",
+      "project_id": 573243,
+      "task_id": null,
+      "tag_ids": [],
+      "note": "[REDACTED]",
+      "external_references": "[REDACTED]",
+      "start": "2026-05-29T16:09:00+02:00",
+      "end": "2026-05-29T16:58:00+02:00",
+      "hours": 0.8167,
+      "ongoing": false,
+      "locked": false,
+      "is_direct_hours": true,
+      "included_in_total": true
+    }
+  ],
+  "meta": {
+    "user_id": 55458,
+    "date": "2026-05-29"
+  }
+}
