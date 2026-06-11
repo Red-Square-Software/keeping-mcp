@@ -9,6 +9,8 @@
 // "feature off" from "real failure" by HTTP status, not body.
 //
 // Sibling pattern of src/tools/projects.ts — same shape, "tasks" substitutions.
+//
+// Path: `/{orgId}/tasks` per D-34-R (NOT `/organisations/{orgId}/tasks`).
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
@@ -45,7 +47,7 @@ export function registerTasks(server: McpServer, client: KeepingClient): void {
     async (input) => {
       try {
         const orgId = await client.resolveOrgId(input.organisation_id);
-        const raw = await client.get<unknown>(`/organisations/${orgId}/tasks`);
+        const raw = await client.get<unknown>(`/${orgId}/tasks`);
         return {
           content: [{ type: "text", text: JSON.stringify(raw, null, 2) }],
         };

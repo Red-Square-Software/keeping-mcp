@@ -20,10 +20,20 @@ async function buildClient(mockClient: Partial<KeepingClient>) {
 }
 
 describe("keeping_me tool", () => {
-  it("Test 1: happy path — returns user payload merged with organisation_id", async () => {
+  it("Test 1: happy path — returns wrapped user payload merged with organisation_id (D-34-R)", async () => {
+    // D-34-R: client.me() returns the wrapper shape verbatim.
     const mockClient: Partial<KeepingClient> = {
-      resolveOrgId: async () => "org-1",
-      me: async () => ({ id: "u-1", name: "Test", email: "x@y.z" }),
+      resolveOrgId: async () => "47666",
+      me: async () => ({
+        user: {
+          id: 789,
+          first_name: "Ella",
+          surname: "van Doorn",
+          code: null,
+          role: "administrator",
+          state: "active",
+        },
+      }),
     };
     const client = await buildClient(mockClient);
 
@@ -31,16 +41,21 @@ describe("keeping_me tool", () => {
     expect(res.isError).toBeFalsy();
     const content = res.content as Array<{ type: "text"; text: string }>;
     expect(content[0]?.type).toBe("text");
-    expect(JSON.parse(content[0]?.text ?? "")).toMatchObject({
-      id: "u-1",
-      organisation_id: "org-1",
+    const parsed = JSON.parse(content[0]?.text ?? "") as {
+      user: { id: number; first_name: string; role: string };
+      organisation_id: string;
+    };
+    expect(parsed).toMatchObject({
+      user: { id: 789, first_name: "Ella", role: "administrator" },
+      organisation_id: "47666",
     });
   });
 
   it("Test 2: multi-org — MultiOrgError surfaces as isError with byte-identical D-27 wording", async () => {
+    // D-34-R: org id is numeric in the orgs payload.
     const orgs = [
-      { id: "org_abc", name: "Acme" },
-      { id: "org_xyz", name: "Beta" },
+      { id: 100, name: "Acme" },
+      { id: 200, name: "Beta" },
     ];
     const mockClient: Partial<KeepingClient> = {
       resolveOrgId: async () => {
@@ -56,13 +71,13 @@ describe("keeping_me tool", () => {
     expect(res.isError).toBe(true);
     const content = res.content as Array<{ type: "text"; text: string }>;
     expect(content[0]?.text).toBe(
-      "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: org_abc (Acme), org_xyz (Beta).",
+      "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: 100 (Acme), 200 (Beta).",
     );
   });
 
   it("Test 3: 401 — KeepingAuthError surfaces as isError with byte-identical D-25 wording", async () => {
     const mockClient: Partial<KeepingClient> = {
-      resolveOrgId: async () => "org-1",
+      resolveOrgId: async () => "47666",
       me: async () => {
         throw new KeepingAuthError();
       },
@@ -79,8 +94,17 @@ describe("keeping_me tool", () => {
 
   it("Test 4: tools/list reports readOnlyHint: true on keeping_me (READ-03)", async () => {
     const mockClient: Partial<KeepingClient> = {
-      resolveOrgId: async () => "org-1",
-      me: async () => ({ id: "u-1" }),
+      resolveOrgId: async () => "47666",
+      me: async () => ({
+        user: {
+          id: 789,
+          first_name: "Ella",
+          surname: null,
+          code: null,
+          role: "administrator",
+          state: "active",
+        },
+      }),
     };
     const client = await buildClient(mockClient);
 

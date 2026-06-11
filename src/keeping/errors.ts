@@ -33,7 +33,10 @@ export class KeepingApiError extends Error {
 }
 
 export class MultiOrgError extends Error {
-  constructor(orgs: ReadonlyArray<{ id: string; name: string }>) {
+  // 2026-06-11: real `KeepingOrg.id` is numeric. Accept either form so legacy
+  // string-id test data and real numeric-id production data both render via
+  // the same template literal.
+  constructor(orgs: ReadonlyArray<{ id: string | number; name: string }>) {
     // D-27 verbatim template (02-CONTEXT.md line 145).
     const options = orgs.map((o) => `${o.id} (${o.name})`).join(", ");
     super(

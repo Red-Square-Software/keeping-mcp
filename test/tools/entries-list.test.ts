@@ -21,22 +21,29 @@ async function buildClient(mockClient: Partial<KeepingClient>) {
 
 describe("keeping_list_entries tool", () => {
   it("Test 1: happy path — raw pass-through preserves every field (including custom_field_x) per D-34", async () => {
+    // Real time-entry shape per OpenAPI (subset).
     const entries = [
       {
-        id: "te-1",
-        day: "2026-06-09",
+        id: 456789,
+        user_id: 789,
+        date: "2026-06-09",
+        purpose: "work",
+        project_id: 100,
+        task_id: 200,
+        tag_ids: [],
+        note: "Wrote spec",
         hours: 1.5,
-        project_id: "p-1",
-        purpose: "billable",
+        ongoing: false,
         custom_field_x: 42,
       },
     ];
     const calls: string[] = [];
     const mockClient: Partial<KeepingClient> = {
-      resolveOrgId: async () => "org_abc",
+      resolveOrgId: async () => "47666",
       get: async <T>(path: string): Promise<T> => {
         calls.push(path);
-        return entries as T;
+        // Real wrapper key is `time_entries` (underscore).
+        return { time_entries: entries, meta: { date: "2026-06-09" } } as T;
       },
     };
     const client = await buildClient(mockClient);
@@ -57,12 +64,58 @@ describe("keeping_list_entries tool", () => {
     expect(parsed.entries[0]?.custom_field_x).toBe(42);
   });
 
-  it("Test 2: top-level wrapped shape — { entries, meta } unwraps to { entries, count }", async () => {
-    const inner = [{ id: "te-1" }];
-    const wrapped = { entries: inner, meta: { total: 1 } };
+  it("Test 2: single-day call uses /{orgId}/time-entries?date=... (D-34-R)", async () => {
+    const calls: string[] = [];
     const mockClient: Partial<KeepingClient> = {
-      resolveOrgId: async () => "org_abc",
-      get: async <T>(): Promise<T> => wrapped as T,
+      resolveOrgId: async () => "47666",
+      get: async <T>(path: string): Promise<T> => {
+        calls.push(path);
+        return { time_entries: [] } as T;
+      },
+    };
+    const client = await buildClient(mockClient);
+
+    await client.callTool({
+      name: "keeping_list_entries",
+      arguments: { from: "2026-06-09" },
+    });
+
+    expect(calls.length).toBe(1);
+    expect(calls[0]).toContain("/47666/time-entries");
+    expect(calls[0]).toContain("date=2026-06-09");
+    expect(calls[0]).not.toContain("/organisations/");
+    expect(calls[0]).not.toContain("time_entries"); // URL form uses hyphen
+    expect(calls[0]).not.toContain("/report/");
+  });
+
+  it("Test 3: multi-day range uses /{orgId}/report/time-entries?from=&to=... (D-34-R)", async () => {
+    const calls: string[] = [];
+    const mockClient: Partial<KeepingClient> = {
+      resolveOrgId: async () => "47666",
+      get: async <T>(path: string): Promise<T> => {
+        calls.push(path);
+        return { time_entries: [] } as T;
+      },
+    };
+    const client = await buildClient(mockClient);
+
+    await client.callTool({
+      name: "keeping_list_entries",
+      arguments: { from: "2026-06-01", to: "2026-06-09" },
+    });
+
+    expect(calls.length).toBe(1);
+    expect(calls[0]).toContain("/47666/report/time-entries");
+    expect(calls[0]).toContain("from=2026-06-01");
+    expect(calls[0]).toContain("to=2026-06-09");
+    expect(calls[0]).not.toContain("/organisations/");
+  });
+
+  it("Test 4: bare array response (no wrapper) flattens to { entries, count }", async () => {
+    const inner = [{ id: 1, note: "x" }];
+    const mockClient: Partial<KeepingClient> = {
+      resolveOrgId: async () => "47666",
+      get: async <T>(): Promise<T> => inner as T,
     };
     const client = await buildClient(mockClient);
 
@@ -76,18 +129,16 @@ describe("keeping_list_entries tool", () => {
       entries: Array<Record<string, unknown>>;
       count: number;
     };
-    // Only the top-level normalisation runs — `meta` is dropped, inner items
-    // pass through unchanged.
     expect(parsed).toEqual({ entries: inner, count: 1 });
   });
 
-  it("Test 3: date regex rejection — `from: '06/09/2026'` fails before mock is hit", async () => {
+  it("Test 5: date regex rejection — `from: '06/09/2026'` fails before mock is hit", async () => {
     let getCalled = false;
     let resolveCalled = false;
     const mockClient: Partial<KeepingClient> = {
       resolveOrgId: async () => {
         resolveCalled = true;
-        return "org_abc";
+        return "47666";
       },
       get: async <T>(): Promise<T> => {
         getCalled = true;
@@ -96,9 +147,6 @@ describe("keeping_list_entries tool", () => {
     };
     const client = await buildClient(mockClient);
 
-    // Any failure mode is acceptable as long as the underlying client is never
-    // touched. SDK input validation may produce a protocol-level error (thrown
-    // by client.callTool) or an isError result — accept either.
     let failedAsExpected = false;
     try {
       const res = await client.callTool({
@@ -114,10 +162,10 @@ describe("keeping_list_entries tool", () => {
     expect(resolveCalled).toBe(false);
   });
 
-  it("Test 4: multi-org — MultiOrgError surfaces as isError with byte-identical D-27 wording", async () => {
+  it("Test 6: multi-org — MultiOrgError surfaces as isError with byte-identical D-27 wording", async () => {
     const orgs = [
-      { id: "org_abc", name: "Acme" },
-      { id: "org_xyz", name: "Beta" },
+      { id: 100, name: "Acme" },
+      { id: 200, name: "Beta" },
     ];
     const mockClient: Partial<KeepingClient> = {
       resolveOrgId: async () => {
@@ -136,13 +184,13 @@ describe("keeping_list_entries tool", () => {
     expect(res.isError).toBe(true);
     const content = res.content as Array<{ type: "text"; text: string }>;
     expect(content[0]?.text).toBe(
-      "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: org_abc (Acme), org_xyz (Beta).",
+      "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: 100 (Acme), 200 (Beta).",
     );
   });
 
-  it("Test 5: 401 — KeepingAuthError surfaces as isError with byte-identical D-25 wording", async () => {
+  it("Test 7: 401 — KeepingAuthError surfaces as isError with byte-identical D-25 wording", async () => {
     const mockClient: Partial<KeepingClient> = {
-      resolveOrgId: async () => "org_abc",
+      resolveOrgId: async () => "47666",
       get: async <T>(): Promise<T> => {
         throw new KeepingAuthError();
       },
@@ -160,32 +208,10 @@ describe("keeping_list_entries tool", () => {
     );
   });
 
-  it("Test 6: limit default — call without limit produces URL with limit=200", async () => {
-    const calls: string[] = [];
-    const mockClient: Partial<KeepingClient> = {
-      resolveOrgId: async () => "org_abc",
-      get: async <T>(path: string): Promise<T> => {
-        calls.push(path);
-        return [] as T;
-      },
-    };
-    const client = await buildClient(mockClient);
-
-    await client.callTool({
-      name: "keeping_list_entries",
-      arguments: { from: "2026-06-09" },
-    });
-    expect(calls.length).toBe(1);
-    expect(calls[0]).toContain("limit=200");
-    // Sanity: from + to (defaulted to from) also present.
-    expect(calls[0]).toContain("from=2026-06-09");
-    expect(calls[0]).toContain("to=2026-06-09");
-  });
-
-  it("Test 7: limit cap — limit > 1000 rejected by Zod, mock untouched (Pitfall E)", async () => {
+  it("Test 8: limit cap — limit > 1000 rejected by Zod, mock untouched (Pitfall E)", async () => {
     let getCalled = false;
     const mockClient: Partial<KeepingClient> = {
-      resolveOrgId: async () => "org_abc",
+      resolveOrgId: async () => "47666",
       get: async <T>(): Promise<T> => {
         getCalled = true;
         return [] as T;
@@ -207,9 +233,57 @@ describe("keeping_list_entries tool", () => {
     expect(getCalled).toBe(false);
   });
 
-  it("Test 8: tools/list reports readOnlyHint: true on keeping_list_entries (READ-03)", async () => {
+  it("Test 9: limit truncates large result sets (Pitfall E client-side guard)", async () => {
+    // The Keeping API doesn't paginate, so `limit` is a post-fetch truncation
+    // guard against pathological days, NOT a query param.
+    const inner = Array.from({ length: 50 }, (_, i) => ({ id: i, hours: 0.1 }));
+    const calls: string[] = [];
     const mockClient: Partial<KeepingClient> = {
-      resolveOrgId: async () => "org_abc",
+      resolveOrgId: async () => "47666",
+      get: async <T>(path: string): Promise<T> => {
+        calls.push(path);
+        return { time_entries: inner } as T;
+      },
+    };
+    const client = await buildClient(mockClient);
+
+    const res = await client.callTool({
+      name: "keeping_list_entries",
+      arguments: { from: "2026-06-09", limit: 10 },
+    });
+    expect(res.isError).toBeFalsy();
+    const content = res.content as Array<{ type: "text"; text: string }>;
+    const parsed = JSON.parse(content[0]?.text ?? "") as {
+      entries: unknown[];
+      count: number;
+    };
+    expect(parsed.count).toBe(10);
+    expect(parsed.entries.length).toBe(10);
+    // limit must NOT appear as a query param (API ignores it; client-side only).
+    expect(calls[0]).not.toContain("limit=");
+  });
+
+  it("Test 10: user_id is propagated as a query param when provided", async () => {
+    const calls: string[] = [];
+    const mockClient: Partial<KeepingClient> = {
+      resolveOrgId: async () => "47666",
+      get: async <T>(path: string): Promise<T> => {
+        calls.push(path);
+        return { time_entries: [] } as T;
+      },
+    };
+    const client = await buildClient(mockClient);
+
+    await client.callTool({
+      name: "keeping_list_entries",
+      arguments: { from: "2026-06-09", user_id: "789" },
+    });
+    expect(calls[0]).toContain("user_id=789");
+  });
+
+  it("Test 11: tools/list reports readOnlyHint: true on keeping_list_entries (READ-03)", async () => {
+    const mockClient: Partial<KeepingClient> = {
+      resolveOrgId: async () => "47666",
       get: async <T>(): Promise<T> => [] as T,
     };
     const client = await buildClient(mockClient);

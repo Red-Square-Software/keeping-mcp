@@ -2,14 +2,19 @@
 //
 // Owns: bearer-token construction, 120-req/min throttle (p-throttle), retry-on-429
 //       for GETs only (p-retry, honouring Retry-After), identity cache for
-//       /users/me + /organisations (D-22..D-24), org resolution (D-26..D-29),
-//       and Pitfall G token scrub for API error bodies.
+//       /{orgId}/users/me + /organisations (D-22..D-24), org resolution
+//       (D-26..D-29), and Pitfall G token scrub for API error bodies.
 //
-// Path commitment for me() — Q1 RESOLVED in 02-RESEARCH §"Open Questions
-// (RESOLVED)": me() unconditionally calls the GLOBAL form `/users/me`.
-// Plan 02-06 Task 3 will switch this to `/organisations/${orgId}/users/me`
-// ONLY IF the live probe in Plan 02-05 returns 404 on the global path.
-// Do not preemptively branch here.
+// Path strategy (D-34-R, 2026-06-11):
+//   - BASE is `https://api.keeping.nl/v1`.
+//   - All authenticated endpoints live under `/{orgId}/...` — NOT
+//     `/organisations/{orgId}/...`. Tools build the `/{orgId}/<path>` segment
+//     themselves; this client's `request<T>()` only prepends BASE.
+//   - The single global endpoint at BASE is `GET /organisations`.
+//   - `me()` calls `/{orgId}/users/me` after resolving the org id; it
+//     deliberately bypasses the public `get()` helper to break the cycle
+//     against `resolveOrgId()` which itself depends on the orgs cache (not
+//     the user cache), so no recursion risk.
 
 import pRetry from "p-retry";
 import pThrottle from "p-throttle";
@@ -28,11 +33,11 @@ const BASE = "https://api.keeping.nl/v1";
 const TIMEOUT_MS = 10_000;
 
 /**
- * Defensive unwrap for the `/organisations` payload. The live API can return
- * either a bare array or a wrapper object (`{ organisations: [...] }` or
- * `{ data: [...] }`). Discovered post-Plan 02-02 during the Plan 02-06
- * human-verify probe — the original implementation assumed a bare array and
- * crashed with `orgs.map is not a function` on the wrapped shape.
+ * Defensive unwrap for the `/organisations` payload. The live API returns
+ * `{ organisations: [...] }`. We also accept `{ data: [...] }` and a bare
+ * array as defence-in-depth against future shape drift. Discovered during
+ * the Plan 02-06 human-verify probe — the original implementation assumed a
+ * bare array and crashed with `orgs.map is not a function`.
  */
 function unwrapOrgList(raw: unknown): KeepingOrg[] {
   if (Array.isArray(raw)) return raw as KeepingOrg[];
@@ -81,12 +86,20 @@ export class KeepingClient {
     this.log = log;
   }
 
-  // ---- Identity cache (D-22, D-23, D-24) ----
+  // ---- Identity cache (D-22, D-23, D-24, D-34-R) ----
 
+  /**
+   * `GET /{orgId}/users/me` — org-scoped per D-34-R.
+   *
+   * Returns the wrapped shape `{ user: { ... } }` verbatim. Wrapper preserved
+   * intentionally so the `keeping_me` tool decides whether to flatten or
+   * pass through — keeps schema-discovery transparency consistent with
+   * `keeping_list_entries` D-34 raw pass-through philosophy.
+   */
   async me(): Promise<KeepingUser> {
     if (this.meCache !== null) return this.meCache;
-    // GLOBAL path per Q1 RESOLVED. Plan 02-06 Task 3 owns the contingency switch.
-    const fetched = await this.get<KeepingUser>("/users/me");
+    const orgId = await this.resolveOrgId();
+    const fetched = await this.get<KeepingUser>(`/${orgId}/users/me`);
     this.meCache = fetched;
     return fetched;
   }
@@ -103,7 +116,10 @@ export class KeepingClient {
 
   async resolveOrgId(input?: string): Promise<string> {
     const orgs = await this.organisations();
-    const ids = orgs.map((o) => o.id);
+    // D-34-R: `KeepingOrg.id` is `number` (numeric primary key in the API).
+    // `KEEPING_ORG_ID` env and tool-input `organisation_id` arrive as strings.
+    // Compare by string-coercion at the boundary.
+    const ids = orgs.map((o) => String(o.id));
 
     // Precedence per D-28: (a) input → (b) env → (c) single-org auto-detect → (d) error.
     const candidate = input ?? process.env.KEEPING_ORG_ID;
@@ -115,7 +131,13 @@ export class KeepingClient {
       }
       return candidate;
     }
-    if (ids.length === 1) return ids[0];
+    if (ids.length === 1) {
+      const only = ids[0];
+      // Narrow `string | undefined` → `string` for the return type without
+      // a non-null assertion. `ids.length === 1` guarantees `only` is set.
+      if (only === undefined) throw new MultiOrgError(orgs);
+      return only;
+    }
     throw new MultiOrgError(orgs);
   }
 

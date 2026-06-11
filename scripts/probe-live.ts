@@ -1,17 +1,15 @@
-// scripts/probe-live.ts — one-shot live API probe (D-30..D-37 + D-35).
+// scripts/probe-live.ts — one-shot live API probe (D-30..D-37 + D-35-R).
 //
 // Owns:
-//   1. Three timer-endpoint best-guess probes in parallel (D-31).
-//   2. A single `/v1/users/me` GET to gather Q1 contingency evidence
-//      (RESEARCH §Open Questions RESOLVED — Plan 02-06 Task 3 reads the
-//      result before deciding whether to switch KeepingClient.me()).
-//   3. One time_entries capture for a user-supplied date range (default
-//      last 7 days, override via PROBE_FROM / PROBE_TO).
-//   4. Anonymisation pass (D-35 step 3) → committed fixture under
-//      test/fixtures/.
+//   1. Timer-endpoint reality probes against the OpenAPI ground-truth paths
+//      (`/{org_id}/time-entries/last`, `/{org_id}/time-entries?date=today`).
+//   2. A single `/{org_id}/users/me` GET to confirm the org-scoped path
+//      returns 200 (Q1 RESOLVED per D-34-R — the global `/users/me` path
+//      404s and is no longer probed as a target candidate).
+//   3. One time-entries capture for a user-supplied date (default today).
+//   4. Anonymisation pass (D-35-R) → committed fixture under test/fixtures/.
 //   5. Human-readable notes file at .planning/research/LIVE-API.md with
-//      the seven mandated sections (CONTEXT §Specific Ideas line 149 +
-//      the /v1/users/me path probe section).
+//      the seven mandated sections.
 //
 // Never runs from server code paths. Invoked manually by the developer
 // via `npm run probe-live`. The script + tested anonymiser ship in this
@@ -25,25 +23,42 @@ import { KeepingClient } from "../src/keeping/client.js";
 import { createLogger } from "../src/logger.js";
 
 /**
- * D-35 step 3 denylist. Exactly six keys — adding one without revisiting
- * 02-CONTEXT.md §"Specific Ideas" line 148 and the T-02-05-02 mitigation
- * trips Test 9 in test/scripts/anonymise.test.ts.
+ * D-35-R denylist (locked 2026-06-11). Drift guard test 9 in
+ * `test/scripts/anonymise.test.ts` asserts the exact membership + size.
+ * Adding or removing a key without updating `02-CONTEXT.md` §Revisions
+ * §D-35-R trips the test.
  *
- * KNOWN-WRONG (2026-06-11): the live probe revealed NONE of these keys
- * exist in real Keeping responses. The real sensitive fields are `note`,
- * `first_name`, `surname`. See `.planning/research/LIVE-API-FINDINGS.md` §7
- * — D-35 must be formally revised before the fixture is regenerated.
- * Until that revision lands, the `main()` flow below short-circuits the
- * fixture write (see PROBE_WRITE_FIXTURE guard) to keep accidental leaks
- * out of the committed tree.
+ * Composition:
+ *   - Observed-sensitive in real responses:
+ *       `note`, `first_name`, `surname`.
+ *   - Identity / linkage defence-in-depth (sensitive IF added to a future
+ *     payload):
+ *       `code`, `email`, `name`, `user_name`, `user_email`,
+ *       `client_name`, `project_name`, `task_name`, `description`.
+ *   - External references / behavioural-leakage guards:
+ *       `purpose`, `external_references`.
+ *
+ * Numeric IDs (`id`, `user_id`, `project_id`, `task_id`, `tag_ids`) are
+ * NOT redacted — they are opaque tokens, not PII.
  */
 export const ANONYMISE_KEYS: ReadonlySet<string> = new Set([
-  "description",
-  "project_name",
-  "task_name",
-  "client_name",
+  // Confirmed-sensitive in real responses (2026-06-11 probe).
+  "note",
+  "first_name",
+  "surname",
+  // Identity / linkage defence-in-depth.
+  "code",
+  "email",
+  "name",
   "user_name",
   "user_email",
+  "client_name",
+  "project_name",
+  "task_name",
+  "description",
+  // External references / behavioural-leakage guards.
+  "purpose",
+  "external_references",
 ]);
 
 /**
@@ -92,20 +107,6 @@ type MeProbe = {
 async function writeJson(path: string, value: unknown): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, `${JSON.stringify(value, null, 2)}\n`, "utf8");
-}
-
-/**
- * Last-week start date in YYYY-MM-DD. Used as the default PROBE_FROM /
- * PROBE_TO when the user hasn't set either. `toISOString().slice(0, 10)`
- * is acceptable here because this is a one-shot developer-run script, not
- * a server boundary — Pitfall 5 (Europe/Amsterdam timezone) applies to
- * tool handlers, not to a manual probe whose date range the developer
- * eyeballs before commit.
- */
-function defaultLastWeek(): string {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() - 7);
-  return d.toISOString().slice(0, 10);
 }
 
 /**
@@ -216,40 +217,41 @@ function buildLiveApiNotes(
   if (winner) {
     lines.push(`**WINNING PATH**: \`${winner.path}\``);
     lines.push("");
-    lines.push("Sample body (first 1000 chars):");
+    lines.push("Sample body keys (top-level only; values intentionally not embedded):");
     lines.push("");
-    lines.push("```json");
-    lines.push(JSON.stringify(winner.body, null, 2).slice(0, 1000));
+    lines.push("```");
+    if (winner.body !== null && typeof winner.body === "object") {
+      for (const k of Object.keys(winner.body as Record<string, unknown>)) {
+        lines.push(`- ${k}`);
+      }
+    } else {
+      lines.push(`(top-level shape: ${typeof winner.body})`);
+    }
     lines.push("```");
   } else if (probes.every((p) => p.status === 404)) {
-    lines.push("All three timer paths returned 404. TIMER-01 is deferred from v1 per D-32.");
+    lines.push(
+      "All timer probes returned 404. Per D-32-R, this should not happen against the real API — re-probe and inspect.",
+    );
   } else {
     lines.push("No 200 response on any timer path. Inspect per-path errors above.");
   }
   lines.push("");
 
-  // ---- 2. /v1/users/me path probe (Q1 contingency evidence) --------------
-  lines.push("## /v1/users/me path probe");
+  // ---- 2. /users/me path probe (Q1 RESOLVED — kept for transparency) ----
+  lines.push("## /users/me path probe");
   lines.push("");
   lines.push(`- \`${meProbe.path}\` → ${meProbe.status}`);
   lines.push(`- \`${meOrgProbe.path}\` → ${meOrgProbe.status}`);
   lines.push("");
-  if (meProbe.status === 200) {
-    lines.push("Decision: no code change required; KeepingClient.me() stays on /v1/users/me.");
-  } else if (meProbe.status === 404 && meOrgProbe.status === 200) {
+  if (meOrgProbe.status === 200) {
     lines.push(
-      `Decision: Plan 02-06 Task 3 must switch KeepingClient.me() to the org-scoped form ` +
-        `\`/organisations/{org_id}/users/me\` (verified 200 against this token).`,
-    );
-  } else if (meProbe.status === 404 && meOrgProbe.status === 404) {
-    lines.push(
-      "Decision: BOTH the global and org-scoped /users/me paths returned 404. " +
-        "Plan 02-06 Task 3 must investigate (no path verified) — likely the auth token " +
-        "is scoped to a different endpoint, or `me` is exposed under another path entirely.",
+      "Decision (D-34-R): KeepingClient.me() calls the org-scoped path " +
+        "`/{orgId}/users/me`. Confirmed 200 against this token.",
     );
   } else {
     lines.push(
-      "Decision: unexpected status combination; Plan 02-06 Task 3 must investigate before committing.",
+      "WARNING: the org-scoped /users/me path did not return 200. Investigate before " +
+        "trusting this probe run — D-34-R assumes org-scoped works.",
     );
   }
   lines.push("");
@@ -270,8 +272,8 @@ function buildLiveApiNotes(
     lines.push(`**WINNING ENTRIES PATH**: \`${winningEntryProbe.path}\``);
   } else {
     lines.push(
-      "**NO WINNING ENTRIES PATH**. Plan 02-06 Task 3 must extend the candidate list " +
-        "and re-probe before committing the fixture.",
+      "**NO WINNING ENTRIES PATH**. Per D-34-R the single-day endpoint " +
+        "`/{orgId}/time-entries?date=...` should return 200 against any real token.",
     );
   }
   lines.push("");
@@ -288,17 +290,20 @@ function buildLiveApiNotes(
     }
   } else if (entries !== null && typeof entries === "object") {
     const wrapper = entries as Record<string, unknown>;
-    if (Array.isArray(wrapper.entries)) {
-      topLevelDescription = `Top-level shape: object with key 'entries' containing ${wrapper.entries.length} items.`;
-      if (
-        wrapper.entries.length > 0 &&
-        wrapper.entries[0] !== null &&
-        typeof wrapper.entries[0] === "object"
-      ) {
-        firstItem = wrapper.entries[0] as Record<string, unknown>;
+    // D-34-R: the real wrapper key is `time_entries` (underscore).
+    const innerKey = Array.isArray(wrapper.time_entries)
+      ? "time_entries"
+      : Array.isArray(wrapper.entries)
+        ? "entries"
+        : null;
+    if (innerKey) {
+      const inner = wrapper[innerKey] as unknown[];
+      topLevelDescription = `Top-level shape: object with key '${innerKey}' containing ${inner.length} items.`;
+      if (inner.length > 0 && inner[0] !== null && typeof inner[0] === "object") {
+        firstItem = inner[0] as Record<string, unknown>;
       }
     } else {
-      topLevelDescription = `Top-level shape: object with keys [${Object.keys(wrapper).join(", ")}] — no 'entries' array.`;
+      topLevelDescription = `Top-level shape: object with keys [${Object.keys(wrapper).join(", ")}] — no entries array.`;
     }
   }
   lines.push(topLevelDescription);
@@ -321,10 +326,12 @@ function buildLiveApiNotes(
   const purposeValues = new Set<string>();
   const items = Array.isArray(entries)
     ? entries
-    : entries !== null &&
-        typeof entries === "object" &&
-        Array.isArray((entries as { entries?: unknown[] }).entries)
-      ? (entries as { entries: unknown[] }).entries
+    : entries !== null && typeof entries === "object"
+      ? Array.isArray((entries as { time_entries?: unknown[] }).time_entries)
+        ? ((entries as { time_entries: unknown[] }).time_entries as unknown[])
+        : Array.isArray((entries as { entries?: unknown[] }).entries)
+          ? ((entries as { entries: unknown[] }).entries as unknown[])
+          : []
       : [];
   for (const item of items) {
     if (item !== null && typeof item === "object") {
@@ -383,16 +390,14 @@ function buildLiveApiNotes(
   lines.push("## REQUIREMENTS update for Phase 3");
   lines.push("");
   lines.push(
-    "Copy ONE of the two lines below over the existing TIMER-01 row in `.planning/REQUIREMENTS.md`:",
+    "Copy the appropriate line below over the existing TIMER-01 row in `.planning/REQUIREMENTS.md`:",
   );
   lines.push("");
   lines.push("```");
   if (winner) {
-    lines.push(`TIMER-01 | Phase 3 | verified — endpoint ${winner.path}`);
-  } else if (probes.every((p) => p.status === 404)) {
-    lines.push("TIMER-01 | Phase 3 | deferred — 404 on all probes");
+    lines.push(`TIMER-01 | Phase 2.5 | verified — endpoint ${winner.path}`);
   } else {
-    lines.push("TIMER-01 | Phase 3 | TODO — inspect probes above, no clean 200 / 404 verdict");
+    lines.push("TIMER-01 | Phase 2.5 | TODO — inspect probes above, no 200 verdict");
   }
   lines.push("```");
   lines.push("");
@@ -452,9 +457,8 @@ async function main(): Promise<void> {
   console.error(`[probe-live] probing against organisation_id=${orgId}`);
 
   // GROUND TRUTH from OpenAPI: there is no /timers resource. The "current
-  // running timer" is the most recent time-entry whose `end` field is null
-  // (or via /time-entries/last). This rewrites D-31's probes to point at
-  // the real endpoint and a representative `date=today` listing.
+  // running timer" is the most recent time-entry whose `ongoing === true`
+  // (or via /time-entries/last).
   const today = new Date().toISOString().slice(0, 10);
   // probeTimerPath prepends KEEPING_BASE (= /v1) — paths must NOT begin with /v1.
   const timerPaths = [`/${orgId}/time-entries/last`, `/${orgId}/time-entries?date=${today}`];
@@ -482,8 +486,11 @@ async function main(): Promise<void> {
   }
 
   // Q1 contingency evidence — raw fetch (NOT client.me()) so a 401 doesn't
-  // poison the cache and a 404 doesn't blow up the probe. Also probe the
-  // org-scoped fallback so Plan 02-06 Task 3 has a verified target path.
+  // poison the cache and a 404 doesn't blow up the probe. Keep the global
+  // /users/me probe even though D-34-R resolves the path in favour of the
+  // org-scoped form — it confirms the 404 still occurs (a future
+  // re-introduction of /users/me at the global path would be a positive
+  // signal worth surfacing).
   const meRes = await fetch(`${KEEPING_BASE}/users/me`, {
     method: "GET",
     headers: {
@@ -495,7 +502,9 @@ async function main(): Promise<void> {
   const meProbe: MeProbe = { path: "/v1/users/me", ok: meRes.ok, status: meRes.status };
   console.error(`[probe-live] /v1/users/me path probe -> ${meRes.status}`);
 
-  const meOrgRes = await fetch(`${KEEPING_BASE}/organisations/${orgId}/users/me`, {
+  // D-34-R: the org-scoped path is `/v1/{orgId}/users/me`, NOT
+  // `/v1/organisations/{orgId}/users/me`.
+  const meOrgRes = await fetch(`${KEEPING_BASE}/${orgId}/users/me`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${config.KEEPING_TOKEN}`,
@@ -504,34 +513,11 @@ async function main(): Promise<void> {
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   const meOrgProbe: MeProbe = {
-    path: `/v1/organisations/${orgId}/users/me`,
+    path: `/v1/${orgId}/users/me`,
     ok: meOrgRes.ok,
     status: meOrgRes.status,
   };
-  console.error(
-    `[probe-live] /v1/organisations/${orgId}/users/me path probe -> ${meOrgRes.status}`,
-  );
-
-  // Tenant-subdomain /users/me probes — three prefixes since the API base
-  // path under tenant.keeping.nl is unknown.
-  const meTenantProbes: MeProbe[] = [];
-  // Extract tenantBase early so /users/me discovery can use it
-  let tenantBaseEarly: string | null = null;
-  if (orgsRaw !== null && typeof orgsRaw === "object") {
-    const arr = (orgsRaw as { organisations?: unknown[] }).organisations;
-    if (Array.isArray(arr) && arr.length > 0) {
-      const first = arr[0] as { url?: unknown };
-      if (typeof first.url === "string") tenantBaseEarly = first.url.replace(/\/$/, "");
-    }
-  }
-  // GROUND TRUTH from OpenAPI: /{organisation_id}/users/me is the real path.
-  const meCandidates: string[] = [`${KEEPING_BASE}/${orgId}/users/me`];
-  for (const url of meCandidates) {
-    const probe = await probeAbsolutePath(url, config.KEEPING_TOKEN);
-    meTenantProbes.push({ path: url, ok: probe.ok, status: probe.status ?? 0, body: probe.body });
-    console.error(`[probe-live] me probe ${url} -> ${probe.status ?? "ERR"}`);
-    if (probe.ok && probe.status === 200) break;
-  }
+  console.error(`[probe-live] /v1/${orgId}/users/me path probe -> ${meOrgRes.status}`);
 
   // Default to today since /time-entries is a single-day endpoint and the dev
   // is most likely actively logging time today (more useful sample).
@@ -539,32 +525,16 @@ async function main(): Promise<void> {
   const to = process.env.PROBE_TO ?? from;
   console.error(`[probe-live] capturing time_entries from=${from} to=${to}`);
 
-  // Subdomain-scoped API discovery — the org payload exposes a `url` field
-  // (e.g. https://red-square.keeping.nl) suggesting per-tenant subdomain
-  // routing rather than path scoping under api.keeping.nl. Pull the URL out
-  // of the raw orgs payload, then probe (subdomain, path) combinations.
-  let tenantBase: string | null = null;
-  if (orgsRaw !== null && typeof orgsRaw === "object") {
-    const orgsArr = (orgsRaw as { organisations?: unknown[] }).organisations;
-    if (Array.isArray(orgsArr) && orgsArr.length > 0) {
-      const first = orgsArr[0] as { url?: unknown };
-      if (typeof first.url === "string") {
-        tenantBase = first.url.replace(/\/$/, "");
-      }
-    }
-  }
-  console.error(`[probe-live] tenant base URL from orgs payload: ${tenantBase ?? "(none)"}`);
-
-  // Path-discovery loop — the actual entries endpoint name is unknown until
-  // the live probe reveals it. Try several plausible (base, path, query)
-  // combinations and capture every result. The first 200 wins.
+  // Path-discovery loop is now a sanity check rather than open exploration:
+  // we already know the ground-truth paths from OpenAPI. The probe still
+  // tries them to confirm 200 against the live token.
   type EntryCandidate = { base: string; path: string; q: string };
   const apiBase = KEEPING_BASE.replace(/\/v1$/, ""); // strip /v1 so candidates control their own prefix
   // GROUND TRUTH from OpenAPI spec at https://developer.keeping.nl/openapi.json:
   //   - Path pattern is `/{organisation_id}/...` (NOT `/organisations/{id}/...`)
   //   - Endpoint is `time-entries` with hyphen (NOT `time_entries`)
-  //   - Query param is `date=YYYY-MM-DD` (single day, NOT from/to range)
-  //   - For ranges/many entries, use `/{organisation_id}/report/time-entries`
+  //   - Single-day endpoint: `?date=YYYY-MM-DD`
+  //   - Multi-day range:     `/{organisation_id}/report/time-entries?from=&to=`
   const candidates: EntryCandidate[] = [
     { base: apiBase, path: `/v1/${orgId}/time-entries`, q: `date=${from}` },
     { base: apiBase, path: `/v1/${orgId}/report/time-entries`, q: `from=${from}&to=${to}` },
@@ -599,49 +569,40 @@ async function main(): Promise<void> {
     timers: probes,
     users_me_probe: meProbe,
     users_me_org_probe: meOrgProbe,
-    users_me_tenant_probes: meTenantProbes,
     entries_path_probes: entryProbes,
     time_entries: { from, to, body: entries },
   });
   console.error(`[probe-live] raw capture: ${rawPath}`);
 
-  // D-35 step 4 — DISABLED 2026-06-11. The live probe proved D-35's denylist
-  // names keys that do not exist in real responses (`description`,
-  // `project_name`, etc.) while real sensitive keys (`note`, `first_name`,
-  // `surname`) are NOT in the denylist. Writing the fixture under the
-  // current `anonymise()` would leak verbatim notes. Override with
-  // `PROBE_WRITE_FIXTURE=1` only after D-35 is formally revised and the
-  // denylist matches observed-sensitive fields.
+  // D-35-R denylist is now aligned with observed-sensitive fields. The
+  // PROBE_WRITE_FIXTURE gate is RETAINED as a deliberate two-step safety
+  // net: the developer reviews the raw capture in
+  // `.planning/research/.live-capture-raw.json` first, confirms anonymise()
+  // would scrub everything sensitive in their own payload, then re-runs
+  // with PROBE_WRITE_FIXTURE=1 to commit the anonymised fixture. The gate
+  // can be removed in a follow-up once one clean fixture is committed.
   if (process.env.PROBE_WRITE_FIXTURE === "1") {
     const fixturePath = "test/fixtures/time-entry-response.sample.json";
     await writeJson(fixturePath, anonymise(entries));
     console.error(`[probe-live] anonymised fixture: ${fixturePath}`);
   } else {
     console.error(
-      "[probe-live] fixture write SKIPPED (D-35 denylist out of date; see LIVE-API-FINDINGS.md §7).",
+      "[probe-live] fixture write SKIPPED (set PROBE_WRITE_FIXTURE=1 after reviewing .live-capture-raw.json).",
     );
   }
 
-  // LIVE-API.md historically embedded raw sample bodies. After the
-  // 2026-06-11 live probe we know those bodies can contain real `note`
-  // text. The file path is now gitignored, but to be safe we also gate
-  // its generation behind the same fixture-write env var. The structured
-  // findings live in `.planning/research/LIVE-API-FINDINGS.md` (hand-curated,
-  // never embedded raw bodies).
-  if (process.env.PROBE_WRITE_FIXTURE === "1") {
-    const notesPath = ".planning/research/LIVE-API.md";
-    await mkdir(dirname(notesPath), { recursive: true });
-    await writeFile(
-      notesPath,
-      buildLiveApiNotes(probes, meProbe, meOrgProbe, entryProbes, entries, from, to, orgId),
-      "utf8",
-    );
-    console.error(`[probe-live] human notes: ${notesPath}`);
-  } else {
-    console.error(
-      "[probe-live] LIVE-API.md write SKIPPED (embeds raw bodies; gate behind PROBE_WRITE_FIXTURE=1 after D-35 revision).",
-    );
-  }
+  // LIVE-API.md is rendered from probe results without embedding raw bodies
+  // (the section-3 sample-body section only lists top-level keys now). It
+  // is therefore SAFE to write unconditionally; the previous fixture gate
+  // existed because raw bodies were embedded.
+  const notesPath = ".planning/research/LIVE-API.md";
+  await mkdir(dirname(notesPath), { recursive: true });
+  await writeFile(
+    notesPath,
+    buildLiveApiNotes(probes, meProbe, meOrgProbe, entryProbes, entries, from, to, orgId),
+    "utf8",
+  );
+  console.error(`[probe-live] human notes: ${notesPath}`);
 
   console.error(
     "[probe-live] probe-live complete. Review LIVE-API.md and commit the fixture + notes after confirming the anonymised output contains no PII.",

@@ -20,14 +20,17 @@ async function buildClient(mockClient: Partial<KeepingClient>) {
 }
 
 describe("keeping_organisations tool", () => {
-  it("Test 1: happy path — returns raw org list with feature flags preserved (IDENT-02)", async () => {
+  it("Test 1: happy path — returns raw org list with feature flags preserved (IDENT-02, D-34-R numeric ids)", async () => {
+    // Real org shape per OpenAPI (subset): numeric id, nested `features`.
     const orgs = [
       {
-        id: "org_abc",
+        id: 47666,
         name: "Acme Studio",
-        projects: true,
-        tasks: false,
-        timesheet_mode: "approval",
+        url: "https://acme.keeping.nl",
+        current_plan: "plus_2019",
+        features: { timesheet: "times" as const, projects: true, tasks: false, breaks: false },
+        time_zone: "Europe/Amsterdam",
+        currency: "EUR",
       },
     ];
     const mockClient: Partial<KeepingClient> = {
@@ -48,8 +51,8 @@ describe("keeping_organisations tool", () => {
     // this test verifies the same envelope pattern reaches the client when
     // something goes wrong upstream — exercising the IDENT-03 surface.
     const orgs = [
-      { id: "org_abc", name: "Acme" },
-      { id: "org_xyz", name: "Beta" },
+      { id: 100, name: "Acme" },
+      { id: 200, name: "Beta" },
     ];
     const mockClient: Partial<KeepingClient> = {
       organisations: async () => {
@@ -62,7 +65,7 @@ describe("keeping_organisations tool", () => {
     expect(res.isError).toBe(true);
     const content = res.content as Array<{ type: "text"; text: string }>;
     expect(content[0]?.text).toBe(
-      "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: org_abc (Acme), org_xyz (Beta).",
+      "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: 100 (Acme), 200 (Beta).",
     );
   });
 

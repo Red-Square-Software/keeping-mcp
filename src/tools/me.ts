@@ -1,6 +1,13 @@
 // keeping_me tool — returns the authenticated user payload merged with the
 // resolved organisation_id. Identity is cached for the server's lifetime
 // (D-22); the optional `organisation_id` input overrides KEEPING_ORG_ID (D-26).
+//
+// Response shape (D-34-R, 2026-06-11):
+//   { user: { id, first_name, surname, code, role, state }, organisation_id }
+//
+// The `user` wrapper is preserved verbatim from the API response, consistent
+// with `keeping_list_entries`' raw-pass-through philosophy. Clients who want
+// a flat shape can read `parsed.user.id` etc.
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
@@ -20,10 +27,10 @@ export function registerMe(server: McpServer, client: KeepingClient): void {
     {
       title: "Who am I",
       description:
-        "Returns the authenticated user's id, name, email, and role for the selected " +
-        "organisation. Identity is cached for the server's lifetime. Pass the optional " +
-        "`organisation_id` input to override the KEEPING_ORG_ID default; required when " +
-        "the token has access to multiple organisations.",
+        "Returns the authenticated user (id, first_name, surname, code, role, state) wrapped " +
+        "under a `user` key, plus the resolved `organisation_id`. Identity is cached for the " +
+        "server's lifetime. Pass the optional `organisation_id` input to override the " +
+        "KEEPING_ORG_ID default; required when the token has access to multiple organisations.",
       inputSchema: MeInput,
       annotations: {
         // READ-03: every read tool advertises read-only intent.

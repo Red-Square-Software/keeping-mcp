@@ -7,6 +7,8 @@
 // projects endpoint, the org has the feature disabled. This is NOT a failure
 // — we return a human-readable note WITHOUT setting `isError: true`.
 // Distinguish "feature off" from "real failure" by HTTP status, not body.
+//
+// Path: `/{orgId}/projects` per D-34-R (NOT `/organisations/{orgId}/projects`).
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
@@ -43,7 +45,7 @@ export function registerProjects(server: McpServer, client: KeepingClient): void
     async (input) => {
       try {
         const orgId = await client.resolveOrgId(input.organisation_id);
-        const raw = await client.get<unknown>(`/organisations/${orgId}/projects`);
+        const raw = await client.get<unknown>(`/${orgId}/projects`);
         return {
           content: [{ type: "text", text: JSON.stringify(raw, null, 2) }],
         };

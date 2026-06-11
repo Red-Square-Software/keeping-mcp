@@ -17,11 +17,11 @@ async function buildClient(mockClient: Partial<KeepingClient>) {
 }
 
 describe("keeping_projects tool", () => {
-  it("Test 1: happy path — returns project list raw from API", async () => {
-    const projects = [{ id: "p-1", name: "Website" }];
+  it("Test 1: happy path — returns project list raw from API at /{orgId}/projects (D-34-R)", async () => {
+    const projects = [{ id: 1, name: "Website" }];
     const calls: string[] = [];
     const mockClient: Partial<KeepingClient> = {
-      resolveOrgId: async () => "org_abc",
+      resolveOrgId: async () => "47666",
       get: async <T>(path: string): Promise<T> => {
         calls.push(path);
         return projects as T;
@@ -31,7 +31,8 @@ describe("keeping_projects tool", () => {
 
     const res = await client.callTool({ name: "keeping_projects", arguments: {} });
     expect(res.isError).toBeFalsy();
-    expect(calls).toEqual(["/organisations/org_abc/projects"]);
+    // D-34-R: path is `/{orgId}/projects`, NOT `/organisations/{orgId}/projects`.
+    expect(calls).toEqual(["/47666/projects"]);
     const content = res.content as Array<{ type: "text"; text: string }>;
     expect(content[0]?.type).toBe("text");
     expect(JSON.parse(content[0]?.text ?? "")).toEqual(projects);
@@ -39,7 +40,7 @@ describe("keeping_projects tool", () => {
 
   it("Test 2: feature disabled — 404 returns graceful note, NOT isError (META-01)", async () => {
     const mockClient: Partial<KeepingClient> = {
-      resolveOrgId: async () => "org_abc",
+      resolveOrgId: async () => "47666",
       get: async () => {
         throw new KeepingApiError(404, "Not Found");
       },
@@ -55,7 +56,7 @@ describe("keeping_projects tool", () => {
 
   it("Test 3: real failure — 500 surfaces as isError", async () => {
     const mockClient: Partial<KeepingClient> = {
-      resolveOrgId: async () => "org_abc",
+      resolveOrgId: async () => "47666",
       get: async () => {
         throw new KeepingApiError(500, "boom");
       },
@@ -70,8 +71,8 @@ describe("keeping_projects tool", () => {
 
   it("Test 4: multi-org — MultiOrgError surfaces with byte-identical D-27 wording", async () => {
     const orgs = [
-      { id: "org_abc", name: "Acme" },
-      { id: "org_xyz", name: "Beta" },
+      { id: 100, name: "Acme" },
+      { id: 200, name: "Beta" },
     ];
     const mockClient: Partial<KeepingClient> = {
       resolveOrgId: async () => {
@@ -87,13 +88,13 @@ describe("keeping_projects tool", () => {
     expect(res.isError).toBe(true);
     const content = res.content as Array<{ type: "text"; text: string }>;
     expect(content[0]?.text).toBe(
-      "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: org_abc (Acme), org_xyz (Beta).",
+      "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: 100 (Acme), 200 (Beta).",
     );
   });
 
   it("Test 5: tools/list reports readOnlyHint: true on keeping_projects (READ-03)", async () => {
     const mockClient: Partial<KeepingClient> = {
-      resolveOrgId: async () => "org_abc",
+      resolveOrgId: async () => "47666",
       get: async <T>(): Promise<T> => [] as T,
     };
     const client = await buildClient(mockClient);

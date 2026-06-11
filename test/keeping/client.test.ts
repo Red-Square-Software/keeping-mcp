@@ -16,6 +16,59 @@ const jsonResponse = (status: number, body: unknown, headers?: Record<string, st
     headers: { "Content-Type": "application/json", ...(headers ?? {}) },
   });
 
+/**
+ * 2026-06-11 (D-34-R): `KeepingOrg.id` is numeric in real responses. Tests
+ * use the real numeric shape to exercise the `String(o.id)` boundary
+ * coercion in `resolveOrgId()`.
+ */
+const SAMPLE_ORG = {
+  id: 47666,
+  name: "Acme",
+  url: "https://acme.keeping.nl",
+  current_plan: "plus_2019",
+  features: { timesheet: "times", projects: true, tasks: true, breaks: false },
+  time_zone: "Europe/Amsterdam",
+  currency: "EUR",
+};
+
+/**
+ * D-34-R: `/{orgId}/users/me` returns a wrapper object `{ user: {...} }`.
+ * `KeepingClient.me()` preserves the wrapper verbatim.
+ */
+const SAMPLE_ME = {
+  user: {
+    id: 789,
+    first_name: "Ella",
+    surname: "van Doorn",
+    code: null,
+    role: "administrator",
+    state: "active",
+  },
+};
+
+/**
+ * Build a fetch mock that routes by URL substring. The KeepingClient.me()
+ * path now needs `organisations()` to succeed first (it calls resolveOrgId
+ * internally), so most identity-cache tests must mock BOTH endpoints.
+ */
+function routedFetchMock(handlers: {
+  organisations?: () => Response;
+  me?: () => Response;
+  fallback?: (url: string) => Response;
+}) {
+  return vi.spyOn(global, "fetch").mockImplementation(async (input) => {
+    const url = typeof input === "string" ? input : (input as Request).url;
+    if (url.endsWith("/organisations") && handlers.organisations) {
+      return handlers.organisations();
+    }
+    if (url.includes("/users/me") && handlers.me) {
+      return handlers.me();
+    }
+    if (handlers.fallback) return handlers.fallback(url);
+    throw new Error(`Unexpected fetch in test: ${url}`);
+  });
+}
+
 describe("KeepingClient", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -25,23 +78,36 @@ describe("KeepingClient", () => {
   // ---------- Cache (D-22, D-23, D-24, SAFE-05) ----------
 
   it("Test 1: me() is cached across calls (D-22)", async () => {
-    const fetchSpy = vi
-      .spyOn(global, "fetch")
-      .mockResolvedValue(jsonResponse(200, { id: "u-1", name: "X" }));
+    let meCalls = 0;
+    let orgCalls = 0;
+    routedFetchMock({
+      organisations: () => {
+        orgCalls += 1;
+        return jsonResponse(200, { organisations: [SAMPLE_ORG] });
+      },
+      me: () => {
+        meCalls += 1;
+        return jsonResponse(200, SAMPLE_ME);
+      },
+    });
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
     const first = await client.me();
     const second = await client.me();
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(meCalls).toBe(1);
+    // organisations() is also cached, but resolveOrgId is called once per
+    // me() invocation that hits the cache MISS — first call only, since
+    // the second me() returns the cached me directly.
+    expect(orgCalls).toBe(1);
     expect(first).toEqual(second);
-    expect(first.id).toBe("u-1");
+    expect(first.user.id).toBe(789);
   });
 
   it("Test 2: organisations() is cached across calls (D-22)", async () => {
     const fetchSpy = vi
       .spyOn(global, "fetch")
-      .mockResolvedValue(jsonResponse(200, [{ id: "org-1", name: "Acme" }]));
+      .mockResolvedValue(jsonResponse(200, { organisations: [SAMPLE_ORG] }));
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
     await client.organisations();
@@ -51,25 +117,22 @@ describe("KeepingClient", () => {
   });
 
   it("Test 2b: organisations() unwraps { organisations: [...] } wrapper shape", async () => {
-    vi.spyOn(global, "fetch").mockResolvedValue(
-      jsonResponse(200, { organisations: [{ id: "org-1", name: "Acme" }] }),
-    );
+    vi.spyOn(global, "fetch").mockResolvedValue(jsonResponse(200, { organisations: [SAMPLE_ORG] }));
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
     const orgs = await client.organisations();
 
-    expect(orgs).toEqual([{ id: "org-1", name: "Acme" }]);
+    expect(orgs).toEqual([SAMPLE_ORG]);
   });
 
-  it("Test 2c: organisations() unwraps { data: [...] } wrapper shape", async () => {
-    vi.spyOn(global, "fetch").mockResolvedValue(
-      jsonResponse(200, { data: [{ id: "org-2", name: "Beta" }] }),
-    );
+  it("Test 2c: organisations() unwraps { data: [...] } wrapper shape (defence-in-depth)", async () => {
+    const alt = { ...SAMPLE_ORG, id: 47667, name: "Beta" };
+    vi.spyOn(global, "fetch").mockResolvedValue(jsonResponse(200, { data: [alt] }));
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
     const orgs = await client.organisations();
 
-    expect(orgs).toEqual([{ id: "org-2", name: "Beta" }]);
+    expect(orgs).toEqual([alt]);
   });
 
   it("Test 2d: organisations() throws shape error when payload is neither array nor known wrapper", async () => {
@@ -80,16 +143,20 @@ describe("KeepingClient", () => {
   });
 
   it("Test 3: 401 from me() does NOT populate the cache; next call still fetches (D-25)", async () => {
-    const fetchSpy = vi
-      .spyOn(global, "fetch")
-      .mockResolvedValueOnce(jsonResponse(401, { error: "unauthorized" }))
-      .mockResolvedValueOnce(jsonResponse(401, { error: "unauthorized" }));
+    let meCalls = 0;
+    routedFetchMock({
+      organisations: () => jsonResponse(200, { organisations: [SAMPLE_ORG] }),
+      me: () => {
+        meCalls += 1;
+        return jsonResponse(401, { error: { message: "unauthorized" } });
+      },
+    });
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
     await expect(client.me()).rejects.toBeInstanceOf(KeepingAuthError);
     await expect(client.me()).rejects.toBeInstanceOf(KeepingAuthError);
 
-    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(meCalls).toBe(2);
   });
 
   // ---------- Throttle wiring (SAFE-02, D-22) ----------
@@ -151,7 +218,10 @@ describe("KeepingClient", () => {
   // ---------- 401 path (D-25) ----------
 
   it("Test 8: 401 on me() rejects with KeepingAuthError byte-identical D-25 message", async () => {
-    vi.spyOn(global, "fetch").mockResolvedValue(jsonResponse(401, { error: "nope" }));
+    routedFetchMock({
+      organisations: () => jsonResponse(200, { organisations: [SAMPLE_ORG] }),
+      me: () => jsonResponse(401, { error: { message: "nope" } }),
+    });
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
     await expect(client.me()).rejects.toMatchObject({
@@ -184,70 +254,67 @@ describe("KeepingClient", () => {
   // ---------- resolveOrgId precedence (D-26, D-28, D-29, AUTH-05) ----------
 
   it("Test 10: resolveOrgId — input arg wins over env when both present", async () => {
-    vi.spyOn(global, "fetch").mockResolvedValue(
-      jsonResponse(200, [
-        { id: "org_abc", name: "Acme" },
-        { id: "org_xyz", name: "Beta" },
-      ]),
-    );
-    process.env.KEEPING_ORG_ID = "org_abc";
+    const orgs = [
+      { ...SAMPLE_ORG, id: 100, name: "Acme" },
+      { ...SAMPLE_ORG, id: 200, name: "Beta" },
+    ];
+    vi.spyOn(global, "fetch").mockResolvedValue(jsonResponse(200, { organisations: orgs }));
+    process.env.KEEPING_ORG_ID = "100";
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
-    const resolved = await client.resolveOrgId("org_xyz");
-    expect(resolved).toBe("org_xyz");
+    // Numeric id 200 supplied as string — D-29 boundary coercion.
+    const resolved = await client.resolveOrgId("200");
+    expect(resolved).toBe("200");
   });
 
   it("Test 11: resolveOrgId — input arg not in org list throws MultiOrgError (D-29 typo guard)", async () => {
-    vi.spyOn(global, "fetch").mockResolvedValue(
-      jsonResponse(200, [
-        { id: "org_abc", name: "Acme Studio" },
-        { id: "org_xyz", name: "Beta BV" },
-      ]),
-    );
+    const orgs = [
+      { ...SAMPLE_ORG, id: 100, name: "Acme Studio" },
+      { ...SAMPLE_ORG, id: 200, name: "Beta BV" },
+    ];
+    vi.spyOn(global, "fetch").mockResolvedValue(jsonResponse(200, { organisations: orgs }));
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
     let err: unknown;
     try {
-      await client.resolveOrgId("org_typo");
+      await client.resolveOrgId("999");
     } catch (e) {
       err = e;
     }
 
     expect(err).toBeInstanceOf(MultiOrgError);
     expect((err as Error).message).toBe(
-      "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: org_abc (Acme Studio), org_xyz (Beta BV).",
+      "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: 100 (Acme Studio), 200 (Beta BV).",
     );
   });
 
   it("Test 12: resolveOrgId — env var used when no input arg and orgs include it", async () => {
-    vi.spyOn(global, "fetch").mockResolvedValue(
-      jsonResponse(200, [
-        { id: "org_abc", name: "Acme" },
-        { id: "org_xyz", name: "Beta" },
-      ]),
-    );
-    process.env.KEEPING_ORG_ID = "org_abc";
+    const orgs = [
+      { ...SAMPLE_ORG, id: 100, name: "Acme" },
+      { ...SAMPLE_ORG, id: 200, name: "Beta" },
+    ];
+    vi.spyOn(global, "fetch").mockResolvedValue(jsonResponse(200, { organisations: orgs }));
+    process.env.KEEPING_ORG_ID = "100";
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
-    expect(await client.resolveOrgId()).toBe("org_abc");
+    expect(await client.resolveOrgId()).toBe("100");
   });
 
   it("Test 13: resolveOrgId — single-org auto-detect when no input, no env", async () => {
     vi.spyOn(global, "fetch").mockResolvedValue(
-      jsonResponse(200, [{ id: "org_solo", name: "Solo" }]),
+      jsonResponse(200, { organisations: [{ ...SAMPLE_ORG, id: 555, name: "Solo" }] }),
     );
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
-    expect(await client.resolveOrgId()).toBe("org_solo");
+    expect(await client.resolveOrgId()).toBe("555");
   });
 
   it("Test 14: resolveOrgId — multi-org with no input + no env throws MultiOrgError with D-27 wording", async () => {
-    vi.spyOn(global, "fetch").mockResolvedValue(
-      jsonResponse(200, [
-        { id: "org_abc", name: "Acme Studio" },
-        { id: "org_xyz", name: "Beta BV" },
-      ]),
-    );
+    const orgs = [
+      { ...SAMPLE_ORG, id: 100, name: "Acme Studio" },
+      { ...SAMPLE_ORG, id: 200, name: "Beta BV" },
+    ];
+    vi.spyOn(global, "fetch").mockResolvedValue(jsonResponse(200, { organisations: orgs }));
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
     let err: unknown;
@@ -259,7 +326,7 @@ describe("KeepingClient", () => {
 
     expect(err).toBeInstanceOf(MultiOrgError);
     expect((err as Error).message).toBe(
-      "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: org_abc (Acme Studio), org_xyz (Beta BV).",
+      "Multiple organisations available. Pass organisation_id, or set KEEPING_ORG_ID. Options: 100 (Acme Studio), 200 (Beta BV).",
     );
   });
 
@@ -269,5 +336,37 @@ describe("KeepingClient", () => {
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
     const serialised = JSON.stringify(client);
     expect(serialised).not.toContain(FAKE_TOKEN);
+  });
+
+  // ---------- Path strategy (D-34-R) ----------
+
+  it("Test 16: me() calls /{orgId}/users/me (D-34-R, not /organisations/{orgId}/users/me)", async () => {
+    const urls: string[] = [];
+    routedFetchMock({
+      organisations: () => jsonResponse(200, { organisations: [SAMPLE_ORG] }),
+      me: () => jsonResponse(200, SAMPLE_ME),
+      fallback: () => jsonResponse(200, {}),
+    });
+    // Re-spy with a capturing implementation: vi.spyOn last write wins.
+    vi.spyOn(global, "fetch").mockImplementation(async (input) => {
+      const url = typeof input === "string" ? input : (input as Request).url;
+      urls.push(url);
+      if (url.endsWith("/organisations")) {
+        return jsonResponse(200, { organisations: [SAMPLE_ORG] });
+      }
+      if (url.includes("/users/me")) {
+        return jsonResponse(200, SAMPLE_ME);
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+    const client = new KeepingClient(FAKE_TOKEN, silentLogger());
+
+    await client.me();
+
+    const meUrl = urls.find((u) => u.includes("/users/me"));
+    expect(meUrl).toBeDefined();
+    // Must match `/v1/{orgId}/users/me`, NOT `/v1/organisations/{orgId}/users/me`.
+    expect(meUrl).toBe(`https://api.keeping.nl/v1/${SAMPLE_ORG.id}/users/me`);
+    expect(meUrl).not.toContain("/organisations/");
   });
 });
