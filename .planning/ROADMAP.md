@@ -86,7 +86,8 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 4. A unit test asserts the `is_running` derivation: `ongoing: true` → `is_running: true`; `ongoing: false` → `is_running: false`; missing `ongoing` → `is_running: false` (defensive default).
 5. The fixture from Plan 02-06 (`test/fixtures/time-entry-response.sample.json` shape) is reused as a structural reference for the test mock.
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 02.5-01-PLAN.md — Single-slice TDD: write 10 D-2.5-13 tests, implement src/tools/timer-status.ts (strict raw.time_entry read + 404 graceful-empty branch + is_running===true derivation), wire registerTimerStatus into src/server.ts.
 
 **UI hint**: no
 
