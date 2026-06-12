@@ -28,7 +28,7 @@ Add to `%APPDATA%\Claude\claude_desktop_config.json` or to your project's `.mcp.
   "mcpServers": {
     "keeping-mcp": {
       "command": "cmd",
-      "args": ["/c", "npx", "-y", "@red-square/keeping-mcp"],
+      "args": ["/c", "npx", "-y", "keeping-mcp"],
       "env": {
         "KEEPING_TOKEN": "kp_live_your_token_here"
       }
@@ -48,7 +48,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
   "mcpServers": {
     "keeping-mcp": {
       "command": "npx",
-      "args": ["-y", "@red-square/keeping-mcp"],
+      "args": ["-y", "keeping-mcp"],
       "env": {
         "KEEPING_TOKEN": "kp_live_your_token_here"
       }
@@ -59,7 +59,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 
 ### Other MCP clients
 
-Any MCP-capable client that supports the stdio transport works. The server is started by `npx -y @red-square/keeping-mcp` and reads `KEEPING_TOKEN` from its environment. Discoverable in the [MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.red-square-software/keeping-mcp`.
+Any MCP-capable client that supports the stdio transport works. The server is started by `npx -y keeping-mcp` and reads `KEEPING_TOKEN` from its environment. Discoverable in the [MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.red-square-software/keeping-mcp`.
 
 ## Get a Keeping access token
 
@@ -157,7 +157,7 @@ Releases are published via GitHub Actions OIDC trusted publishing (no long-lived
 ```bash
 npm audit signatures
 # or, for a single package:
-npm view @red-square/keeping-mcp --json | jq '.dist.attestations'
+npm view keeping-mcp --json | jq '.dist.attestations'
 ```
 
 ## Local development

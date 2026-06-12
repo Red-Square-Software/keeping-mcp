@@ -1,5 +1,5 @@
 {
-  "name": "@red-square/keeping-mcp",
+  "name": "keeping-mcp",
   "version": "1.0.0",
   "description": "MCP server for the Keeping time-tracking API",
   "type": "module",
@@ -53,8 +53,5 @@
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
