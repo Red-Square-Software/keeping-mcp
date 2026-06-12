@@ -59,7 +59,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 
 ### Other MCP clients
 
-Any MCP-capable client that supports the stdio transport works. The server is started by `npx -y keeping-mcp` and reads `KEEPING_TOKEN` from its environment. Discoverable in the [MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.red-square-software/keeping-mcp`.
+Any MCP-capable client that supports the stdio transport works. The server is started by `npx -y keeping-mcp` and reads `KEEPING_TOKEN` from its environment. Discoverable in the [MCP Registry](https://registry.modelcontextprotocol.io/) as `io.github.Red-Square-Software/keeping-mcp`.
 
 ## Get a Keeping access token
 

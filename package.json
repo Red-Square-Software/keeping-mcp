@@ -1,6 +1,6 @@
 {
   "name": "keeping-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for the Keeping time-tracking API",
   "type": "module",
   "engines": {
@@ -39,7 +39,7 @@
     "url": "git+https://github.com/Red-Square-Software/keeping-mcp.git"
   },
   "homepage": "https://github.com/red-square-software/keeping-mcp",
-  "mcpName": "io.github.red-square-software/keeping-mcp",
+  "mcpName": "io.github.Red-Square-Software/keeping-mcp",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "p-retry": "^8.0.0",
