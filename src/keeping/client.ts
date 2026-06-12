@@ -159,6 +159,50 @@ export class KeepingClient {
     return this.request<T>("DELETE", path);
   }
 
+  /**
+   * D-3-18 / TIMER-02 — public method that exposes the underlying `Response`
+   * headers alongside the parsed body. Used by `keeping_stop_timer` and
+   * `keeping_resume_timer` to read `X-Server-Time-Ms` as the canonical
+   * elapsed-time anchor.
+   *
+   * Shares the same `this.throttle` slot allocator and `pRetry` machinery as
+   * `request<T>` (Pitfall 3). Limited to write verbs that have a header-read
+   * use case in Phase 3; reads still flow through `get<T>()`.
+   *
+   * Writes still don't retry — `shouldRetry` rejects non-GET methods at the
+   * `pRetry` layer, so the surface is purely for consistency with `request<T>`.
+   */
+  async requestWithHeaders<T>(
+    method: "POST" | "PATCH",
+    path: string,
+    body?: unknown,
+  ): Promise<{ body: T; headers: Headers }> {
+    const throttled = this.throttle(() => this.rawFetchWithHeaders(method, path, body));
+
+    const result = await pRetry(throttled, {
+      retries: 3,
+      minTimeout: 0,
+      factor: 1,
+      onFailedAttempt: async ({ error }) => {
+        if (!(error instanceof KeepingRateLimitError)) return;
+        // Writes never retry on rate limits (shouldRetry returns false below),
+        // so this never sleeps — kept for surface symmetry with request<T>.
+        if (method !== ("GET" as string)) return;
+        this.log.warn(`429 received, sleeping ${error.retryAfter}s before retry`);
+        await new Promise((r) => setTimeout(r, error.retryAfter * 1000));
+      },
+      shouldRetry: ({ error }) => {
+        // SAFE-03 + Pitfall 3: writes never retry on rate limits or network blips.
+        // requestWithHeaders is restricted to POST | PATCH, so this is always false —
+        // kept explicit for code-reading clarity.
+        if (method !== ("GET" as string)) return false;
+        if (error instanceof KeepingRateLimitError) return true;
+        return false;
+      },
+    });
+    return { body: result.body as T, headers: result.headers };
+  }
+
   // ---- Internals ----
 
   private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
@@ -218,6 +262,49 @@ export class KeepingClient {
       // Pitfall G defence-in-depth: scrub before the body reaches the error message.
       throw new KeepingApiError(res.status, sanitiseBody(text, this.token));
     }
+    // D-3-27: DELETE returns 204 No Content (empty body); res.json() would
+    // throw SyntaxError. The 204 branch must sit AFTER the !res.ok guard so
+    // it never executes on error responses (Test C2 regression gate).
+    if (res.status === 204) return null;
     return res.json();
+  }
+
+  /**
+   * D-3-18 sibling of `rawFetch`. Identical request shape but returns the
+   * `Response.headers` alongside the parsed body so `requestWithHeaders<T>`
+   * can surface them. Token-sanitisation + 401 / 429 / 204 / !ok branches
+   * mirror `rawFetch` verbatim.
+   */
+  private async rawFetchWithHeaders(
+    method: string,
+    path: string,
+    body?: unknown,
+  ): Promise<{ body: unknown; headers: Headers }> {
+    const res = await fetch(`${BASE}${path}`, {
+      method,
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+
+    if (res.status === 401) {
+      throw new KeepingAuthError();
+    }
+    if (res.status === 429) {
+      const retryAfter = Number(res.headers.get("Retry-After") ?? "30");
+      throw new KeepingRateLimitError(Number.isFinite(retryAfter) ? retryAfter : 30);
+    }
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new KeepingApiError(res.status, sanitiseBody(text, this.token));
+    }
+    if (res.status === 204) {
+      return { body: null, headers: res.headers };
+    }
+    return { body: await res.json(), headers: res.headers };
   }
 }

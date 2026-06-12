@@ -15,16 +15,8 @@
 
 import { describe, expect, it } from "vitest";
 import type { KeepingClient } from "../../src/keeping/client.js";
-import {
-  KeepingApiError,
-  KeepingAuthError,
-  MultiOrgError,
-} from "../../src/keeping/errors.js";
-import {
-  AMBIGUOUS_TEXT,
-  classifyAmbiguous,
-  previewOrCall,
-} from "../../src/keeping/write-gate.js";
+import { KeepingApiError, KeepingAuthError, MultiOrgError } from "../../src/keeping/errors.js";
+import { AMBIGUOUS_TEXT, classifyAmbiguous, previewOrCall } from "../../src/keeping/write-gate.js";
 
 type Call = { method: "POST" | "PATCH" | "DELETE"; path: string; body?: unknown };
 
@@ -123,9 +115,7 @@ describe("src/keeping/write-gate.ts", () => {
       { requireConfirm: true, confirm: true },
       { method: "POST", path: "/47666/time-entries", body },
     );
-    expect(calls).toEqual([
-      { method: "POST", path: "/47666/time-entries", body },
-    ]);
+    expect(calls).toEqual([{ method: "POST", path: "/47666/time-entries", body }]);
     expect(result).toEqual({ time_entry: { id: 42 } });
   });
 
@@ -137,9 +127,7 @@ describe("src/keeping/write-gate.ts", () => {
       { requireConfirm: true, confirm: true },
       { method: "PATCH", path: "/47666/time-entries/42", body },
     );
-    expect(calls).toEqual([
-      { method: "PATCH", path: "/47666/time-entries/42", body },
-    ]);
+    expect(calls).toEqual([{ method: "PATCH", path: "/47666/time-entries/42", body }]);
   });
 
   it("Test W6: confirm=true on DELETE calls client.delete with no body arg", async () => {
@@ -149,9 +137,7 @@ describe("src/keeping/write-gate.ts", () => {
       { requireConfirm: true, confirm: true },
       { method: "DELETE", path: "/47666/time-entries/42" },
     );
-    expect(calls).toEqual([
-      { method: "DELETE", path: "/47666/time-entries/42" },
-    ]);
+    expect(calls).toEqual([{ method: "DELETE", path: "/47666/time-entries/42" }]);
   });
 
   it("Test W7: env-false escape hatch (requireConfirm=false, confirm=false) still calls API", async () => {
@@ -162,9 +148,7 @@ describe("src/keeping/write-gate.ts", () => {
       { requireConfirm: false, confirm: false },
       { method: "POST", path: "/47666/time-entries", body },
     );
-    expect(calls).toEqual([
-      { method: "POST", path: "/47666/time-entries", body },
-    ]);
+    expect(calls).toEqual([{ method: "POST", path: "/47666/time-entries", body }]);
   });
 
   // ---------------------------------------------------------------------------
@@ -192,9 +176,7 @@ describe("src/keeping/write-gate.ts", () => {
   it("Test W10: classifyAmbiguous — TypeError true; KeepingAuthError/MultiOrgError/duck-typed/null false", () => {
     expect(classifyAmbiguous(new TypeError("fetch failed"))).toBe(true);
     expect(classifyAmbiguous(new KeepingAuthError())).toBe(false);
-    expect(
-      classifyAmbiguous(new MultiOrgError([{ id: 1, name: "A" }])),
-    ).toBe(false);
+    expect(classifyAmbiguous(new MultiOrgError([{ id: 1, name: "A" }]))).toBe(false);
     // Duck-typing trap: string-typed status must NOT be ambiguous.
     expect(classifyAmbiguous({ status: "500" })).toBe(false);
     expect(classifyAmbiguous(null)).toBe(false);

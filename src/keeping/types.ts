@@ -49,3 +49,75 @@ export interface KeepingOrg {
   time_zone: string;
   currency: string;
 }
+
+// ---------------------------------------------------------------------------
+// Phase 3 write-tool body + response typings.
+//
+// Source: `.planning/research/keeping-openapi.json` §components.schemas —
+//   - `entry_create_request` → EntryCreateBody
+//   - `entry_edit_request`   → EntryEditBody (immutable date/purpose per
+//                              OpenAPI; modelled as Omit)
+//   - response wrapper       → TimeEntryResponse (`{ time_entry, meta? }`)
+//
+// Per D-3-28: request-body `start` / `end` are `HH:mm` time-only strings
+// (NOT full ISO 8601). The response shape on `time_entry` is the asymmetric
+// full ISO 8601 with offset — the read shape vs write shape is intentionally
+// different.
+//
+// Per D-3-29: organisation field is `time_zone` (underscore).
+// ---------------------------------------------------------------------------
+
+/**
+ * Body shape for `POST /{orgId}/time-entries` per OpenAPI `entry_create_request`.
+ * `start` / `end` are HH:mm time-only strings (D-3-28); `hours` is the
+ * decimal-hours alternative used by `features.timesheet === "hours"` orgs.
+ */
+export interface EntryCreateBody {
+  date: string; // YYYY-MM-DD in org timezone
+  purpose:
+    | "work"
+    | "break"
+    | "special_leave"
+    | "unpaid_leave"
+    | "statutory_leave"
+    | "sick_leave"
+    | "work_reduction"
+    | "trip";
+  project_id?: number;
+  task_id?: number;
+  note?: string;
+  tag_ids?: number[];
+  external_references?: Array<{
+    id: string;
+    type: "generic_work_reference";
+    name: string;
+    url?: string;
+  }>;
+  start?: string; // HH:mm — D-3-28 (NOT ISO 8601)
+  end?: string; // HH:mm — D-3-28
+  hours?: number; // decimal hours; used by features.timesheet === "hours"
+}
+
+/**
+ * Body shape for `PATCH /{orgId}/time-entries/{entry_id}` per OpenAPI
+ * `entry_edit_request`. `date` and `purpose` are immutable post-creation —
+ * Omit them from the edit shape so the write tool's Zod schema rejects them.
+ */
+export type EntryEditBody = Omit<EntryCreateBody, "date" | "purpose">;
+
+/**
+ * Response wrapper returned by `POST /time-entries`, `PATCH /time-entries/{id}`,
+ * `PATCH /time-entries/{id}/stop`, and `POST /time-entries/{id}/resume`.
+ *
+ * `time_entry` is left as a drift-tolerant `Record<string, unknown>` per
+ * D-34 — write tools surface it verbatim and never assert specific fields
+ * beyond the strict-wrapper guard.
+ */
+export interface TimeEntryResponse {
+  time_entry: Record<string, unknown>;
+  meta?: {
+    created_additional_time_entry_ids?: number[];
+    modified_existing_time_entry_ids?: number[];
+    deleted_existing_time_entry_ids?: number[];
+  };
+}

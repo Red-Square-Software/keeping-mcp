@@ -399,9 +399,7 @@ describe("KeepingClient — Phase 3 surface (D-3-18, D-3-27)", () => {
   });
 
   it("Test C2: DELETE 500 still throws KeepingApiError — 204 branch only applies to 204 (D-3-27)", async () => {
-    vi.spyOn(global, "fetch").mockResolvedValue(
-      new Response("boom", { status: 500 }),
-    );
+    vi.spyOn(global, "fetch").mockResolvedValue(new Response("boom", { status: 500 }));
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
     let captured: unknown;
@@ -442,7 +440,11 @@ describe("KeepingClient — Phase 3 surface (D-3-18, D-3-27)", () => {
   it("Test C4: requestWithHeaders<T> shares the same throttle slot allocator as request<T> (Pitfall 3)", async () => {
     let throttleCalls = 0;
     vi.spyOn(global, "fetch").mockImplementation(
-      async () => new Response('{"ok":true}', { status: 200, headers: { "Content-Type": "application/json" } }),
+      async () =>
+        new Response('{"ok":true}', {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
     );
     const client = new KeepingClient(FAKE_TOKEN, silentLogger());
 
@@ -454,7 +456,9 @@ describe("KeepingClient — Phase 3 surface (D-3-18, D-3-27)", () => {
     ).throttle;
     (client as unknown as { throttle: <T>(fn: () => Promise<T>) => () => Promise<T> }).throttle = <
       T,
-    >(fn: () => Promise<T>) => {
+    >(
+      fn: () => Promise<T>,
+    ) => {
       throttleCalls += 1;
       return realThrottle(fn);
     };
