@@ -843,27 +843,29 @@ If the Assumptions Log is non-empty (it is), the planner / discuss-phase reviewe
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All four open questions resolved post-research; resolutions are reflected in plans 03-01..03-08.
 
 1. **Should `keeping_get_entry` ship as a public tool, or stay internal to `keeping_delete_entry`'s dry-run path?**
    - What we know: D-3-03 mandates `GET /{orgId}/time-entries/{entry_id}` before delete preview. The internal call is required; the question is whether to expose it via a public tool too.
-   - What's unclear: User intent. The CONTEXT §"Claude's Discretion" item explicitly defers to the planner.
-   - Recommendation: Ship it. The cost is one tool file (~30 lines mirroring `timer-status.ts`) and one test file. The benefit is that `keeping_update_entry`'s caller can read the current state before constructing the partial update — which matches the "review-before-write" philosophy.
+   - Recommendation: Ship it.
+   - **RESOLVED:** **Do NOT ship as a public tool.** Plan 08's tool list is locked at 12 (6 read + 6 write). The internal GET inside `keeping_delete_entry`'s dry-run path (Plan 04) is the sole consumer of `GET /{orgId}/time-entries/{entry_id}`. Rationale: smaller surface for v1; can ship as a small Phase 4+ follow-up if user demand emerges. CONTEXT §"Claude's Discretion" item resolved no-ship.
 
 2. **Should `nowAmsterdamISO()` (full ISO `YYYY-MM-DDTHH:mm:ss±HH:MM`) be kept at all, given the request body wants `HH:mm`?**
    - What we know: D-3-13 specifies it for `start_timer`'s `start` default. But D-3-13 was written before the OpenAPI ground-truth check.
-   - What's unclear: Whether the planner wants a single canonical "now in Amsterdam" function or two functions (date-only + time-only).
-   - Recommendation: Two functions — `todayInAmsterdam()` and `nowInAmsterdamHHMM()`. Drop full-ISO entirely from Phase 3 scope; the response side returns full ISO but the tool layer can pass through verbatim without parsing.
+   - Recommendation: Two functions — `todayInAmsterdam()` and `nowInAmsterdamHHMM()`.
+   - **RESOLVED:** **Drop `nowAmsterdamISO()` from Phase 3 scope entirely.** `src/keeping/date.ts` (Plan 01) ships exactly two exports: `todayInAmsterdam(now?: Date): string` (`YYYY-MM-DD`) and `nowInAmsterdamHHMM(now?: Date): string` (`HH:mm`). The response side returns full ISO datetimes; the tool layer passes those through verbatim without parsing.
 
 3. **What does `keeping_resume_timer` do when the user resumes an entry whose `purpose` is `break` and breaks are now disabled on the org?**
-   - What we know: OpenAPI says 403 in this case (resume description: "you cannot resume locked time entries, and trying to do so will result in a `403`").
-   - What's unclear: Whether 403 should surface as ambiguous-failure or definite-fail.
-   - Recommendation: 403 is a definite-fail per D-3-16's "4xx flows through `toIsErrorContent`" branch. Tool returns the localised error message verbatim. No special-casing.
+   - What we know: OpenAPI says 403 in this case.
+   - Recommendation: 403 is a definite-fail per D-3-16's "4xx flows through `toIsErrorContent`" branch.
+   - **RESOLVED:** **403 is a definite-fail.** Plan 07 Test 7 asserts 403 KeepingApiError flows through `toIsErrorContent(err)` verbatim — no ambiguous-failure envelope, no special-casing. Matches the D-3-16 rule that ambiguous-failure is reserved for 5xx + AbortError + TypeError; all 4xx (including 403) is definite-fail.
 
 4. **Should `keeping_stop_timer` reject a non-ongoing entry with a friendly message before hitting the API?**
-   - What we know: OpenAPI says "you can only stop an ongoing time entry"; mismatched calls return error.
-   - What's unclear: Whether the tool should do a pre-flight `GET` to check `ongoing` (extra cost, extra latency) or just surface the API's 422.
-   - Recommendation: NO pre-flight. Let the API decide. Reduces complexity and matches the read-tool-then-write workflow the user is expected to follow (`keeping_timer_status` first, then `keeping_stop_timer`).
+   - What we know: OpenAPI says "you can only stop an ongoing time entry".
+   - Recommendation: NO pre-flight.
+   - **RESOLVED:** **No pre-flight GET.** Plan 06 dispatches `PATCH /{orgId}/time-entries/{id}/stop` directly via `requestWithHeaders<T>`. If the entry is not ongoing, the API's 4xx response flows through `toIsErrorContent`. Reduces complexity and matches the read-tool-then-write workflow (`keeping_timer_status` first, then `keeping_stop_timer`).
 
 ---
 
