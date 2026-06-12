@@ -97,9 +97,7 @@ describe("keeping_stop_timer tool", () => {
     const content = res.content as Array<{ type: "text"; text: string }>;
     const parsed = JSON.parse(content[0]?.text ?? "");
     expect(parsed.would_post.method).toBe("PATCH");
-    expect(parsed.would_post.url).toBe(
-      "https://api.keeping.nl/v1/47666/time-entries/12345/stop",
-    );
+    expect(parsed.would_post.url).toBe("https://api.keeping.nl/v1/47666/time-entries/12345/stop");
     expect(parsed.would_post.body).toBe(null);
     expect(calls.length).toBe(0);
   });
