@@ -14,7 +14,11 @@ A Claude Code (or any MCP client) user can log a reviewed time entry into their 
 
 <!-- Shipped and confirmed valuable. -->
 
-(None yet — ship to validate)
+- [x] `keeping_add_entry` tool — create a time entry (Validated in Phase 3: write-tools-conditional-timers)
+- [x] `keeping_update_entry` tool — edit an existing entry (Validated in Phase 3)
+- [x] `keeping_delete_entry` tool — remove an entry (Validated in Phase 3)
+- [x] `keeping_start_timer` / `keeping_stop_timer` tools (Validated in Phase 3 — includes `keeping_resume_timer`, `keeping_timer_status`)
+- [x] Dry-run-by-default writes: write tools return a preview unless `confirm: true` is passed. Controlled by `KEEPING_REQUIRE_CONFIRM` env var (default `true`) (Validated in Phase 3)
 
 ### Active
 
@@ -27,11 +31,6 @@ A Claude Code (or any MCP client) user can log a reviewed time entry into their 
 - [ ] `keeping_projects` tool — list projects when feature enabled
 - [ ] `keeping_tasks` tool — list tasks when feature enabled
 - [ ] `keeping_list_entries` tool — read existing time entries for a date range (also used to learn the real entry schema)
-- [ ] `keeping_add_entry` tool — create a time entry
-- [ ] `keeping_update_entry` tool — edit an existing entry
-- [ ] `keeping_delete_entry` tool — remove an entry
-- [ ] `keeping_start_timer` / `keeping_stop_timer` tools — if Keeping API exposes running timers (verify in research phase)
-- [ ] Dry-run-by-default writes: `keeping_add_entry` (and the other write tools) return a preview unless `confirm: true` is passed. Controlled by `KEEPING_REQUIRE_CONFIRM` env var (default `true`)
 - [ ] Multi-organisation handling: auto-detect single org; require explicit `organisation_id` when user has multiple
 - [ ] Rate-limit aware (Keeping API caps at 120 req/min) — back off cleanly instead of failing the whole tool call
 - [ ] Published to npm under a name compatible with the MCP registry namespace `io.github.red-square-software/keeping-mcp`
@@ -103,4 +102,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-08 after initialization*
+*Last updated: 2026-06-12 after Phase 3 (write-tools-conditional-timers) completion — Phase 4 (distribution & release pipeline) next*
