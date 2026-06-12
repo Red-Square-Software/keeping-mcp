@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.red-square-software/keeping-mcp",
+  "description": "MCP server for the Keeping time-tracking API",
+  "version": "0.0.0",
+  "repository": {
+    "url": "https://github.com/red-square-software/keeping-mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://github.com/red-square-software/keeping-mcp",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "keeping-mcp",
+      "version": "0.0.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
