@@ -186,7 +186,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 
 ### Blockers
 
-None.
+- **04-04-BLOCKER-01 (active 2026-06-12T09:34Z):** npm publish step in release workflow run [27407390166](https://github.com/Red-Square-Software/keeping-mcp/actions/runs/27407390166) failed with `npm error 404 'keeping-mcp@1.0.0' is not in this registry` on PUT https://registry.npmjs.org/keeping-mcp. Tag `v1.0.0` on commit `0a8703a` is pushed and immutable. ci-gate matrix all four combos PASSED. Publish job ran: checkout/build/check-publish-shape/tag-match guard all OK; provenance statement signed (sigstore log index 1801238127) but the npm PUT itself 404'd. Diagnostic: this is the trusted-publisher-not-configured signature (npm falls back to NODE_AUTH_TOKEN placeholder, auths as anonymous, gets 404 on PUT for a new package name). User action required: visit https://www.npmjs.com/settings/<user>/trusted-publishers and confirm a pending trusted publisher row exists for `keeping-mcp` bound to repo `red-square-software/keeping-mcp` + workflow `release.yml`. After configuration, recovery is `gh run rerun --failed 27407390166` (no new tag needed — tag still points at the right commit). External state: npm `keeping-mcp` does NOT exist (verified 404), MCP Registry returns 0 results (verified). No name claimed yet.
 
 ---
 
