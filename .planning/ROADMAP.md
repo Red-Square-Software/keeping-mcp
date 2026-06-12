@@ -110,7 +110,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 6. *(Conditional — only if Phase 2 probe returned non-404)* `keeping_start_timer` starts a running timer and returns a `timer_id`; `keeping_stop_timer` stops it and creates the corresponding time entry; elapsed time uses `X-Server-Time-Ms` from the response header; if the probe returned 404, this criterion is marked "not applicable" and the omission is documented.
 
 **Plans**: 8 plans
-- [ ] 03-01-PLAN.md — Foundation: rawFetch 204 fix (D-3-27), `requestWithHeaders<T>` (D-3-18), `src/keeping/date.ts` (`todayInAmsterdam` + `nowInAmsterdamHHMM`), `src/keeping/write-gate.ts` (`previewOrCall` + `classifyAmbiguous` + byte-locked `AMBIGUOUS_TEXT`), types append. TDD with 20+ tests across three test files.
+- [x] 03-01-PLAN.md — Foundation: rawFetch 204 fix (D-3-27), `requestWithHeaders<T>` (D-3-18), `src/keeping/date.ts` (`todayInAmsterdam` + `nowInAmsterdamHHMM`), `src/keeping/write-gate.ts` (`previewOrCall` + `classifyAmbiguous` + byte-locked `AMBIGUOUS_TEXT`), types append. TDD with 20+ tests across three test files.
 - [ ] 03-02-PLAN.md — `keeping_add_entry` vertical slice (Zod schema + handler + 11+ tests): dry-run gate, org-mode-aware body (times vs hours per D-3-08), DST-correct date default per D-3-15/D-3-26, real OpenAPI 8-value purpose enum per D-3-07. server.ts wiring deferred to 03-08 for parallelism.
 - [ ] 03-03-PLAN.md — `keeping_update_entry` vertical slice (9 tests): PATCH partial; `date`/`purpose`/`user_id` immutable per OpenAPI `entry_edit_request`; only supplied fields in body.
 - [ ] 03-04-PLAN.md — `keeping_delete_entry` vertical slice (10 tests): inline dry-run gate + extra GET for `would_delete` (D-3-03); confirm path proves D-3-27 204-tolerant rawFetch end-to-end; description carries the `**DESTRUCTIVE: permanently deletes the entry**` marker per D-3-11.
@@ -147,7 +147,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 | 1. Foundation & Scaffolding | 3/3 | Complete    | 2026-06-09 |
 | 2. Read Tools & Schema Discovery | 6/6 | Complete    | 2026-06-11 |
 | 2.5. Timer Status Read Tool | 2/2 | Complete   | 2026-06-11 |
-| 3. Write Tools + Conditional Timers | 0/8 | Planned (8 plans, 3 waves) | - |
+| 3. Write Tools + Conditional Timers | 1/8 | In Progress|  |
 | 4. Distribution & Release Pipeline | 0/? | Not started | - |
 
 ---
