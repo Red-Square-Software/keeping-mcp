@@ -23,6 +23,7 @@
     "lint": "biome check .",
     "test": "vitest run",
     "dev": "node dist/bin/keeping-mcp.js",
+    "check-publish-shape": "tsx scripts/check-publish-shape.ts",
     "probe-live": "tsx --env-file-if-exists=.env scripts/probe-live.ts"
   },
   "keywords": [
