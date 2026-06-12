@@ -19,18 +19,21 @@ A Claude Code (or any MCP client) user can log a reviewed time entry into their 
 - [x] `keeping_delete_entry` tool — remove an entry (Validated in Phase 3)
 - [x] `keeping_start_timer` / `keeping_stop_timer` tools (Validated in Phase 3 — includes `keeping_resume_timer`, `keeping_timer_status`)
 - [x] Dry-run-by-default writes: write tools return a preview unless `confirm: true` is passed. Controlled by `KEEPING_REQUIRE_CONFIRM` env var (default `true`) (Validated in Phase 3)
+- [x] MCP server installable via `npx keeping-mcp` (Validated in Phase 4 — shipped as `keeping-mcp@1.0.1` on npm with sigstore provenance)
+- [x] Personal access token auth via `KEEPING_TOKEN` env var (Validated Phase 1 + 4)
+- [x] `keeping_me` tool (Validated Phase 2)
+- [x] `keeping_organisations` tool (Validated Phase 2)
+- [x] `keeping_projects` tool (Validated Phase 2)
+- [x] `keeping_tasks` tool (Validated Phase 2)
+- [x] `keeping_list_entries` tool (Validated Phase 2)
+- [x] MCP Registry listing under `io.github.Red-Square-Software/keeping-mcp` (Validated Phase 4)
+- [x] GitHub Actions release pipeline (tag → npm + Registry publish) (Validated Phase 4 — NPM_TOKEN classic auth fallback; sigstore provenance via OIDC)
 
 ### Active
 
 <!-- v1 scope. Building toward these. -->
 
-- [ ] MCP server installable via `npx keeping-mcp` (no global install required)
-- [ ] Personal access token auth via `KEEPING_TOKEN` env var (no OAuth in v1)
-- [ ] `keeping_me` tool — resolve `user_id` per organisation
-- [ ] `keeping_organisations` tool — list orgs and enabled features (projects/tasks)
-- [ ] `keeping_projects` tool — list projects when feature enabled
-- [ ] `keeping_tasks` tool — list tasks when feature enabled
-- [ ] `keeping_list_entries` tool — read existing time entries for a date range (also used to learn the real entry schema)
+(v1 milestone complete — all v1 requirements validated. Next: v2 planning.)
 - [ ] Multi-organisation handling: auto-detect single org; require explicit `organisation_id` when user has multiple
 - [ ] Rate-limit aware (Keeping API caps at 120 req/min) — back off cleanly instead of failing the whole tool call
 - [ ] Published to npm under a name compatible with the MCP registry namespace `io.github.red-square-software/keeping-mcp`
@@ -102,4 +105,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-12 after Phase 3 (write-tools-conditional-timers) completion — Phase 4 (distribution & release pipeline) next*
+*Last updated: 2026-06-12 after Phase 4 complete — v1.0 milestone shipped (keeping-mcp@1.0.1 on npm + MCP Registry with sigstore provenance)*
