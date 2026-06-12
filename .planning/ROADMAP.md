@@ -110,7 +110,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
    > ⚠ **Footnote (2026-06-12, D-3-07):** The `billable`/`non_billable` wording above is preserved for historical traceability but does NOT match the real Keeping API. Per D-3-07 (CONTEXT.md), the live OpenAPI enum is `work`, `break`, `special_leave`, `unpaid_leave`, `statutory_leave`, `sick_leave`, `work_reduction`, `trip`. Phase 3 implements that 8-value enum (default `work`). The SC #5 spirit is honored — `confirm` parameter description still mandates human-set-only (D-3-12) — but the enum values differ. REQUIREMENTS.md WRITE-06 carries the full amendment text.
 6. *(Conditional — only if Phase 2 probe returned non-404)* `keeping_start_timer` starts a running timer and returns a `timer_id`; `keeping_stop_timer` stops it and creates the corresponding time entry; elapsed time uses `X-Server-Time-Ms` from the response header; if the probe returned 404, this criterion is marked "not applicable" and the omission is documented.
 
-**Plans**: 8 plans
+**Plans**: 10 plans (8 original + 2 gap-closure 2026-06-12)
 - [x] 03-01-PLAN.md — Foundation: rawFetch 204 fix (D-3-27), `requestWithHeaders<T>` (D-3-18), `src/keeping/date.ts` (`todayInAmsterdam` + `nowInAmsterdamHHMM`), `src/keeping/write-gate.ts` (`previewOrCall` + `classifyAmbiguous` + byte-locked `AMBIGUOUS_TEXT`), types append. TDD with 20+ tests across three test files.
 - [x] 03-02-PLAN.md — `keeping_add_entry` vertical slice (13 tests, 2 commits): dry-run gate via previewOrCall, org-mode-aware body (times vs hours per D-3-08), DST-correct date default per D-3-15/D-3-26, real OpenAPI 8-value purpose enum per D-3-07. server.ts wiring deferred to 03-08. See `03-02-SUMMARY.md`. (completed 2026-06-12)
 - [x] 03-03-PLAN.md — `keeping_update_entry` vertical slice (10 tests, 2 commits): PATCH partial; Zod schema OMITS `date`/`purpose`/`user_id` per OpenAPI `entry_edit_request` (Zod's default `.strip()` enforcement); undefined-skip body builder ensures only supplied fields hit the wire; same dry-run gate + ambiguous-failure envelope as add-entry. server.ts wiring deferred to 03-08. See `03-03-SUMMARY.md`. (completed 2026-06-12)
@@ -119,6 +119,8 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 - [x] 03-06-PLAN.md — `keeping_stop_timer` vertical slice (9 tests): PATCH `/{orgId}/time-entries/{entry_id}/stop` per D-3-05 (supersedes D-32-R's POST claim); uses new `client.requestWithHeaders<T>` to read `X-Server-Time-Ms` (TIMER-02, D-3-19); missing/invalid header falls back to `Date.now()` + `log.warn`, NOT an isError.
 - [x] 03-07-PLAN.md — `keeping_resume_timer` vertical slice (10 tests): POST `/{orgId}/time-entries/{entry_id}/resume` per D-3-05 (resume = POST is unchanged from D-32-R); same `X-Server-Time-Ms` surface as stop-timer; tool does NOT assert `response.time_entry.id === input.entry_id` (Pitfall 6 — resume on new day creates a new entry with different id); 403 on locked entries = DEFINITE-FAIL via toIsErrorContent per RESEARCH Q3.
 - [x] 03-08-PLAN.md — Wrap-up: wire all six write tools into `src/server.ts` + `test/server.test.ts` listTools smoke (asserts the 12-tool sorted name list); amend REQUIREMENTS.md WRITE-06 per D-3-07 (preserve original wording in footnote); add ROADMAP SC #5 footnote citing D-3-07.
+- [ ] 03-09-PLAN.md — Gap closure CR-01 (D-3-16 violation): add TimeoutError arm to classifyAmbiguous (`src/keeping/write-gate.ts:104`) — Node 22 `AbortSignal.timeout()` throws `DOMException(name=TimeoutError)`, not `AbortError`. New W12 test constructs real DOMException. Closes VERIFICATION.md Truth #2 / SC #2.
+- [ ] 03-10-PLAN.md — Gap closure CR-02 (D-3-28 spirit violation): replace loose HH:mm regex with strict 24-hour zero-padded form across add-entry.ts (start+end), update-entry.ts (start+end), start-timer.ts (start). Export schemas + add negative tests rejecting 1:30pm/25:00/9:5/00:00:00. Closes VERIFICATION.md Truth #6 / SC #6.
 
 ---
 
@@ -148,7 +150,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 | 1. Foundation & Scaffolding | 3/3 | Complete    | 2026-06-09 |
 | 2. Read Tools & Schema Discovery | 6/6 | Complete    | 2026-06-11 |
 | 2.5. Timer Status Read Tool | 2/2 | Complete   | 2026-06-11 |
-| 3. Write Tools + Conditional Timers | 8/8 | Complete   | 2026-06-12 |
+| 3. Write Tools + Conditional Timers | 8/10 | Gap closure in progress (BLOCKERS CR-01 + CR-02) | 2026-06-12 |
 | 4. Distribution & Release Pipeline | 0/? | Not started | - |
 
 ---
