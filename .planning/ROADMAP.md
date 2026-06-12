@@ -138,7 +138,11 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 4. README contains a Windows-specific Claude Code config block (`{ "command": "cmd", "args": ["/c", "npx", "-y", "keeping-mcp"] }`) alongside the macOS/Linux block, a step-by-step token setup section (enable developer features in Keeping prefs → generate access token), env var reference, and an example dry-run transcript.
 5. README contains a prominent warning that `KEEPING_REQUIRE_CONFIRM=false` disables the dry-run gate and writes are immediate; a cold-start `npx keeping-mcp` smoke test on Windows 11 passes (no `ENOENT` or silent failure).
 
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 04-01-PLAN.md — server.json + scripts/check-publish-shape.ts (DIST-04 allowlist guard, DIST-05 namespace binding, REL-03 placeholder shape)
+- [ ] 04-02-PLAN.md — README rewrite: Windows-first install UX, token setup, dry-run warning callouts (REL-04, REL-05)
+- [ ] 04-03-PLAN.md — .github/workflows/release.yml: tag-triggered OIDC publish to npm + MCP Registry with jq version injection (DIST-04 enforcement, REL-02, REL-03)
+- [ ] 04-04-PLAN.md — autonomous:false — pending-publisher checkpoint + v1.0.0 release + post-publish provenance/registry/Windows-cold-start verification (DIST-05 end-to-end, REL-02 end-to-end, REL-05 cold-start)
 **UI hint**: no
 
 ---
@@ -151,7 +155,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 | 2. Read Tools & Schema Discovery | 6/6 | Complete    | 2026-06-11 |
 | 2.5. Timer Status Read Tool | 2/2 | Complete   | 2026-06-11 |
 | 3. Write Tools + Conditional Timers | 10/10 | Implementation + both gap closures complete (CR-01 via 03-09, CR-02 via 03-10); awaiting verifier re-pass | 2026-06-12 |
-| 4. Distribution & Release Pipeline | 0/? | Not started | - |
+| 4. Distribution & Release Pipeline | 0/4 | Planned   | -          |
 
 ---
 
@@ -178,4 +182,4 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 
 ---
 *Roadmap created: 2026-06-09*
-*Last updated: 2026-06-12 — Phase 3 Plan 10 (CR-02 gap closure — strict HH:mm regex + 43 new tests) complete; 10/10 Phase 3 plans done; awaiting verifier re-pass before Phase 4*
+*Last updated: 2026-06-12 — Phase 4 (distribution & release pipeline) planned: 4 plans, 3 waves
