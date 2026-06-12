@@ -112,7 +112,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 **Plans**: 8 plans
 - [x] 03-01-PLAN.md — Foundation: rawFetch 204 fix (D-3-27), `requestWithHeaders<T>` (D-3-18), `src/keeping/date.ts` (`todayInAmsterdam` + `nowInAmsterdamHHMM`), `src/keeping/write-gate.ts` (`previewOrCall` + `classifyAmbiguous` + byte-locked `AMBIGUOUS_TEXT`), types append. TDD with 20+ tests across three test files.
 - [x] 03-02-PLAN.md — `keeping_add_entry` vertical slice (13 tests, 2 commits): dry-run gate via previewOrCall, org-mode-aware body (times vs hours per D-3-08), DST-correct date default per D-3-15/D-3-26, real OpenAPI 8-value purpose enum per D-3-07. server.ts wiring deferred to 03-08. See `03-02-SUMMARY.md`. (completed 2026-06-12)
-- [ ] 03-03-PLAN.md — `keeping_update_entry` vertical slice (9 tests): PATCH partial; `date`/`purpose`/`user_id` immutable per OpenAPI `entry_edit_request`; only supplied fields in body.
+- [x] 03-03-PLAN.md — `keeping_update_entry` vertical slice (10 tests, 2 commits): PATCH partial; Zod schema OMITS `date`/`purpose`/`user_id` per OpenAPI `entry_edit_request` (Zod's default `.strip()` enforcement); undefined-skip body builder ensures only supplied fields hit the wire; same dry-run gate + ambiguous-failure envelope as add-entry. server.ts wiring deferred to 03-08. See `03-03-SUMMARY.md`. (completed 2026-06-12)
 - [ ] 03-04-PLAN.md — `keeping_delete_entry` vertical slice (10 tests): inline dry-run gate + extra GET for `would_delete` (D-3-03); confirm path proves D-3-27 204-tolerant rawFetch end-to-end; description carries the `**DESTRUCTIVE: permanently deletes the entry**` marker per D-3-11.
 - [ ] 03-05-PLAN.md — `keeping_start_timer` vertical slice (9 tests): POST `/{orgId}/time-entries` per D-3-06 with strict `Object.keys` assertion that body OMITS `end` AND `hours`; `timer_id` extracted via verbatim three-clause `Array.isArray` guard (D-2.5-05a); DST default for `date` + `nowInAmsterdamHHMM()` for `start`.
 - [ ] 03-06-PLAN.md — `keeping_stop_timer` vertical slice (9 tests): PATCH `/{orgId}/time-entries/{entry_id}/stop` per D-3-05 (supersedes D-32-R's POST claim); uses new `client.requestWithHeaders<T>` to read `X-Server-Time-Ms` (TIMER-02, D-3-19); missing/invalid header falls back to `Date.now()` + `log.warn`, NOT an isError.
@@ -147,7 +147,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 | 1. Foundation & Scaffolding | 3/3 | Complete    | 2026-06-09 |
 | 2. Read Tools & Schema Discovery | 6/6 | Complete    | 2026-06-11 |
 | 2.5. Timer Status Read Tool | 2/2 | Complete   | 2026-06-11 |
-| 3. Write Tools + Conditional Timers | 1/8 | In Progress|  |
+| 3. Write Tools + Conditional Timers | 3/8 | In Progress|  |
 | 4. Distribution & Release Pipeline | 0/? | Not started | - |
 
 ---
@@ -175,4 +175,4 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 
 ---
 *Roadmap created: 2026-06-09*
-*Last updated: 2026-06-12 — Phase 3 plans drafted (8 plans, 3 waves)*
+*Last updated: 2026-06-12 — Phase 3 Plan 03 (keeping_update_entry) complete; 3/8 plans done*
