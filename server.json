@@ -11,7 +11,7 @@
   "packages": [
     {
       "registryType": "npm",
-      "identifier": "keeping-mcp",
+      "identifier": "@red-square/keeping-mcp",
       "version": "0.0.0",
       "transport": {
         "type": "stdio"
