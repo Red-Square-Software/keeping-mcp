@@ -61,7 +61,7 @@ function extractTimeEntry(raw: unknown): Record<string, unknown> | null {
 // running timer (D-3-06). `date` defaults to today in Amsterdam server-side
 // per D-3-26 + D-3-28; the input surface does NOT accept `date` because the
 // "timer started today" semantics make a user-supplied date a footgun.
-const StartTimerInput = z.object({
+export const StartTimerInput = z.object({
   organisation_id: z
     .string()
     .optional()
@@ -86,7 +86,7 @@ const StartTimerInput = z.object({
   note: z.string().max(10000).optional(),
   start: z
     .string()
-    .regex(/^\d{1,2}:\d{2}(:\d{2})?(am|pm)?$/i)
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "must be HH:mm (24-hour, zero-padded)")
     .optional()
     .describe(
       "HH:mm in org timezone; defaults to the current time in Europe/Amsterdam when omitted.",

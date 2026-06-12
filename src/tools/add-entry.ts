@@ -45,7 +45,7 @@ import { AMBIGUOUS_TEXT, classifyAmbiguous, previewOrCall } from "../keeping/wri
 // NOT `.default(true)`. The AND-gate in `previewOrCall` coerces
 // `input.confirm === true`, so `undefined`, `false`, and any non-strict-true
 // value all collapse to dry-run (T-03-02-01 / T-03-02-02 mitigation).
-const AddEntryInput = z.object({
+export const AddEntryInput = z.object({
   organisation_id: z
     .string()
     .optional()
@@ -87,12 +87,12 @@ const AddEntryInput = z.object({
     .optional(),
   start: z
     .string()
-    .regex(/^\d{1,2}:\d{2}(:\d{2})?(am|pm)?$/i)
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "must be HH:mm (24-hour, zero-padded)")
     .optional()
     .describe("HH:mm in org timezone; only used when org timesheet is 'times' mode."),
   end: z
     .string()
-    .regex(/^\d{1,2}:\d{2}(:\d{2})?(am|pm)?$/i)
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "must be HH:mm (24-hour, zero-padded)")
     .optional()
     .describe("HH:mm in org timezone; only used when org timesheet is 'times' mode."),
   hours: z

@@ -22,7 +22,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { KeepingConfig } from "../../src/config.js";
 import type { KeepingClient } from "../../src/keeping/client.js";
 import { KeepingApiError, KeepingAuthError, MultiOrgError } from "../../src/keeping/errors.js";
-import { registerAddEntry } from "../../src/tools/add-entry.js";
+import { AddEntryInput, registerAddEntry } from "../../src/tools/add-entry.js";
 
 const defaultConfig: KeepingConfig = {
   KEEPING_TOKEN: "kp_test_FAKE",
@@ -403,5 +403,48 @@ describe("keeping_add_entry tool", () => {
     // date defaults to today in Amsterdam — assert it's a YYYY-MM-DD string.
     expect(typeof body.date).toBe("string");
     expect(body.date as string).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+});
+
+describe("HH:mm regex (CR-02 / D-3-28 gap closure)", () => {
+  // D-3-28 locks strict 24-hour zero-padded HH:mm on the wire. The Zod
+  // schema must reject 12-hour suffixes, hour-overflow, unpadded values,
+  // and seconds segments BEFORE the request reaches Keeping — closes the
+  // CR-02 BLOCKER in 03-VERIFICATION.md / 03-REVIEW.md.
+  const REJECT_CASES = ["1:30pm", "25:00", "9:5", "00:00:00"];
+  const ACCEPT_CASES = ["00:00", "09:05", "13:45", "23:59"];
+
+  for (const bad of REJECT_CASES) {
+    it(`rejects start: "${bad}"`, () => {
+      const res = AddEntryInput.safeParse({ start: bad });
+      expect(res.success).toBe(false);
+    });
+    it(`rejects end: "${bad}"`, () => {
+      const res = AddEntryInput.safeParse({ end: bad });
+      expect(res.success).toBe(false);
+    });
+  }
+
+  for (const good of ACCEPT_CASES) {
+    it(`accepts start: "${good}"`, () => {
+      const res = AddEntryInput.safeParse({ start: good });
+      // start alone is a valid partial — other fields are .optional() or
+      // .default(); the regex check is the discriminator we're verifying.
+      expect(res.success).toBe(true);
+    });
+    it(`accepts end: "${good}"`, () => {
+      const res = AddEntryInput.safeParse({ end: good });
+      expect(res.success).toBe(true);
+    });
+  }
+
+  it("error message names HH:mm and 24-hour", () => {
+    const res = AddEntryInput.safeParse({ start: "1:30pm" });
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      const flat = res.error.flatten().fieldErrors.start?.[0] ?? "";
+      expect(flat).toContain("HH:mm");
+      expect(flat).toContain("24-hour");
+    }
   });
 });

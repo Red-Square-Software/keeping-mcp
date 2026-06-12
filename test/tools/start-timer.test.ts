@@ -24,7 +24,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { KeepingConfig } from "../../src/config.js";
 import type { KeepingClient } from "../../src/keeping/client.js";
 import { KeepingApiError, MultiOrgError } from "../../src/keeping/errors.js";
-import { registerStartTimer } from "../../src/tools/start-timer.js";
+import { registerStartTimer, StartTimerInput } from "../../src/tools/start-timer.js";
 
 const defaultConfig: KeepingConfig = {
   KEEPING_TOKEN: "kp_test_FAKE",
@@ -305,5 +305,38 @@ describe("keeping_start_timer tool", () => {
     expect(tool?.annotations?.destructiveHint).toBe(true);
     expect(tool?.annotations?.idempotentHint).toBe(false);
     expect(tool?.annotations?.openWorldHint).toBe(true);
+  });
+});
+
+describe("HH:mm regex (CR-02 / D-3-28 gap closure)", () => {
+  // D-3-28 locks strict 24-hour zero-padded HH:mm on the wire. The Zod
+  // schema must reject 12-hour suffixes, hour-overflow, unpadded values,
+  // and seconds segments BEFORE the request reaches Keeping — closes the
+  // CR-02 BLOCKER in 03-VERIFICATION.md / 03-REVIEW.md.
+  const REJECT_CASES = ["1:30pm", "25:00", "9:5", "00:00:00"];
+  const ACCEPT_CASES = ["00:00", "09:05", "13:45", "23:59"];
+
+  for (const bad of REJECT_CASES) {
+    it(`rejects start: "${bad}"`, () => {
+      const res = StartTimerInput.safeParse({ start: bad });
+      expect(res.success).toBe(false);
+    });
+  }
+
+  for (const good of ACCEPT_CASES) {
+    it(`accepts start: "${good}"`, () => {
+      const res = StartTimerInput.safeParse({ start: good });
+      expect(res.success).toBe(true);
+    });
+  }
+
+  it("error message names HH:mm and 24-hour", () => {
+    const res = StartTimerInput.safeParse({ start: "1:30pm" });
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      const flat = res.error.flatten().fieldErrors.start?.[0] ?? "";
+      expect(flat).toContain("HH:mm");
+      expect(flat).toContain("24-hour");
+    }
   });
 });
