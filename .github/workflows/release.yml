@@ -1,0 +1,128 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ci-gate:
+    name: CI gate (${{ matrix.os }}, Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [22, 24]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint and format check
+        run: npx biome check .
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npx vitest run
+
+      - name: Build
+        run: npm run build
+
+      - name: Smoke test — missing KEEPING_TOKEN exits non-zero with empty stdout
+        shell: bash
+        env:
+          KEEPING_TOKEN: ""
+        run: |
+          set +e
+          STDOUT=$(node dist/bin/keeping-mcp.js 2>/tmp/smoke_stderr)
+          EXIT_CODE=$?
+          STDERR=$(cat /tmp/smoke_stderr)
+          set -e
+          if [ "$EXIT_CODE" -eq 0 ]; then echo "FAIL: expected non-zero exit"; exit 1; fi
+          if [ -n "$STDOUT" ]; then echo "FAIL: stdout not empty: $STDOUT"; exit 1; fi
+          EXPECTED="[keeping-mcp] Configuration error: KEEPING_TOKEN must not be empty"
+          echo "$STDERR" | grep -qF "$EXPECTED" || { echo "FAIL: stderr missing expected message"; echo "Got: $STDERR"; exit 1; }
+          echo "Cold-start smoke PASSED"
+
+  publish:
+    name: Publish to npm + MCP Registry
+    needs: ci-gate
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify package shape (allowlist + mcpName binding + no npm ignore file)
+        run: npm run check-publish-shape
+
+      - name: Verify tag matches package.json version
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "FAIL: git tag v$TAG_VERSION does not match package.json version $PKG_VERSION"
+            echo "Bump package.json with 'npm version $TAG_VERSION' before tagging."
+            exit 1
+          fi
+          echo "Tag matches package.json: v$TAG_VERSION"
+
+      - name: Publish to npm (OIDC trusted publishing + provenance)
+        run: npm publish --provenance --access public
+
+      - name: Install mcp-publisher v1.7.9 (pinned)
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/download/v1.7.9/mcp-publisher_linux_amd64.tar.gz" \
+            | tar xz mcp-publisher
+          chmod +x ./mcp-publisher
+          ./mcp-publisher --version
+
+      - name: Inject version into server.json (REL-03)
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          jq --arg v "$VERSION" '.version = $v | .packages[0].version = $v' server.json > server.tmp.json
+          mv server.tmp.json server.json
+          COUNT=$(jq -r --arg v "$VERSION" '[.version, .packages[0].version] | map(select(. == $v)) | length' server.json)
+          if [ "$COUNT" != "2" ]; then
+            echo "FAIL: server.json version desync — expected 2 occurrences of $VERSION, got $COUNT"
+            cat server.json
+            exit 1
+          fi
+          echo "server.json version set to $VERSION (both fields)"
+
+      - name: Authenticate to MCP Registry (OIDC)
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish to MCP Registry
+        run: ./mcp-publisher publish
