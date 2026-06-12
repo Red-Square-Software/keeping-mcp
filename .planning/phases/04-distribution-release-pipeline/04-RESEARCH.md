@@ -598,24 +598,24 @@ The token has full read+write access to your time entries — treat it like a pa
 | A8 | npm's `--provenance` flag is still accepted (not removed) in npm 11.x | Pitfall 1 | LOW — npm has not deprecated the flag; trusted publishing makes it automatic but explicit is still accepted. |
 | A9 | The actual GitHub org name is `red-square-software` not `redsquare-nl` | Throughout | RESOLVED — verified via `git remote -v` output. CLAUDE.md's `redsquare-nl` reference is incorrect / stale (derived from the user's domain redsquare.nl). Plan must NOT touch CLAUDE.md mid-phase but MUST treat `red-square-software` as truth. STATE.md and PROJECT.md already use the correct name. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should the release workflow run the full Phase 1 CI matrix as a gate, or trust that the prior CI on the commit already ran?**
+1. **Should the release workflow run the full Phase 1 CI matrix as a gate, or trust that the prior CI on the commit already ran?** — RESOLVED: full CI gate ([ubuntu, windows] × [22, 24] matrix) — adopted by 04-03 ci-gate job.
    - What we know: GitHub Actions doesn't gate one workflow on another by default; the tag push triggers a fresh event so the prior CI run on the commit doesn't automatically "carry over."
    - What's unclear: We could either re-run the full ubuntu+windows × 22+24 matrix as a gate (slow but safe) or just lint+typecheck+test+build on ubuntu-only (fast but assumes the prior CI was green).
    - Recommendation: For first release (v1.0.0), run the FULL CI gate inside `release.yml`. For confidence after a few releases, can de-scope to ubuntu-only gate later. Either is defensible; plans should make this choice explicit.
 
-2. **Should the workflow auto-create a GitHub Release with notes after a successful publish?**
+2. **Should the workflow auto-create a GitHub Release with notes after a successful publish?** — RESOLVED: defer GitHub Release automation to v2 — 04-03 stops at npm + Registry publish.
    - What we know: `softprops/action-gh-release@v2` is the canonical action.
    - What's unclear: SC doesn't demand a GitHub Release artifact; tag is enough for the registry path. But users do read GitHub Releases for changelog visibility.
    - Recommendation: Add as a nice-to-have post-publish step (no SC dependency, low risk). Plans can include or omit; user discretion.
 
-3. **README example dry-run transcript: should it be a real recording or a hand-crafted illustrative example?**
+3. **README example dry-run transcript: should it be a real recording or a hand-crafted illustrative example?** — RESOLVED: hand-crafted illustrative dry-run transcript in README — adopted by 04-02 (maintenance stability).
    - What we know: SC #4 demands "an example dry-run transcript."
    - What's unclear: A real transcript captured from a live tool call vs. a representative hand-crafted JSON example. The hand-crafted example is easier to maintain and doesn't depend on a live API. A real transcript is more credible.
    - Recommendation: Hand-crafted JSON example with a comment that it is illustrative. Less maintenance risk; easier to keep stable across version bumps.
 
-4. **Should the workflow tolerate `v*-beta`, `v*-rc`, etc. and publish them with `--tag beta`?**
+4. **Should the workflow tolerate `v*-beta`, `v*-rc`, etc. and publish them with `--tag beta`?** — RESOLVED: defer `--tag beta` to v2 — 04-03 publishes everything as `latest`.
    - What we know: `npm publish --tag beta` exists; current SC just says `v*`.
    - What's unclear: User intent — do you want a prerelease channel?
    - Recommendation: Out of scope for v1.0.0 ship. Treat all `v*` tags as `latest`. Add `--tag` discrimination in a v2 follow-up if pre-releases become a real flow.
