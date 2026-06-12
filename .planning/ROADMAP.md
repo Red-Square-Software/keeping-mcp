@@ -142,7 +142,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 - [x] 04-01-PLAN.md — server.json + scripts/check-publish-shape.ts (DIST-04 allowlist guard, DIST-05 namespace binding, REL-03 placeholder shape)
 - [x] 04-02-PLAN.md — README rewrite: Windows-first install UX, token setup, dry-run warning callouts (REL-04, REL-05)
 - [x] 04-03-PLAN.md — .github/workflows/release.yml: tag-triggered OIDC publish to npm + MCP Registry with jq version injection (DIST-04 enforcement, REL-02, REL-03)
-- [ ] 04-04-PLAN.md — autonomous:false — pending-publisher checkpoint + v1.0.0 release + post-publish provenance/registry/Windows-cold-start verification (DIST-05 end-to-end, REL-02 end-to-end, REL-05 cold-start)
+- [x] 04-04-PLAN.md — v1.0.1 SHIPPED to npm + MCP Registry with sigstore provenance; cold-start smoke verified (DIST-05 end-to-end, REL-02 end-to-end, REL-05 cold-start) — completed 2026-06-12
 **UI hint**: no
 
 ---
@@ -155,7 +155,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 | 2. Read Tools & Schema Discovery | 6/6 | Complete    | 2026-06-11 |
 | 2.5. Timer Status Read Tool | 2/2 | Complete   | 2026-06-11 |
 | 3. Write Tools + Conditional Timers | 10/10 | Implementation + both gap closures complete (CR-01 via 03-09, CR-02 via 03-10); awaiting verifier re-pass | 2026-06-12 |
-| 4. Distribution & Release Pipeline | 3/4 | In Progress|  |
+| 4. Distribution & Release Pipeline | 4/4 | Plans complete; v1.0.1 SHIPPED to npm + MCP Registry; awaiting verifier | 2026-06-12 |
 
 ---
 

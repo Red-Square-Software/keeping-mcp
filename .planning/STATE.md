@@ -37,14 +37,14 @@ Plan: 4 of 4
 
 | Field | Value |
 |-------|-------|
-| Current phase | Phase 4 — Distribution & Release Pipeline (executing; 3/4 plans complete after Plan 04-03) |
-| Current plan | Plan 04-03 complete (release.yml workflow — tag-triggered two-job OIDC publish to npm + MCP Registry, REL-02 + DIST-04 enforcement + REL-03 mechanic) |
-| Phase status | Phase 4 IN PROGRESS — Plan 04-01 (server.json + check-publish-shape), Plan 04-02 (README rewrite), and Plan 04-03 (release.yml workflow) complete; Plan 04-04 (autonomous:false human-verify gate for v1.0.0 tag push + post-publish verification) next |
-| Overall progress | 24 of 25 plans complete; Phase 1, 2, 2.5 complete + Phase 3 (10 plans) implementation + gap closures complete + Phase 4 (3 of 4 plans) complete |
+| Current phase | Phase 4 — Distribution & Release Pipeline (4/4 plans complete; v1.0.1 SHIPPED to npm + MCP Registry) |
+| Current plan | Plan 04-04 complete (v1.0.0 → v1.0.1 release end-to-end, sigstore provenance, MCP Registry entry active) |
+| Phase status | Phase 4 PLANS COMPLETE — awaiting verifier re-pass to mark phase Complete |
+| Overall progress | 25 of 25 plans complete |
 
 ```
-Progress: [██████████] 96%
-Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [██████████] · Phase 4 [░░░░░]
+Progress: [██████████] 100%
+Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [██████████] · Phase 4 [████]
 ```
 
 ---
@@ -57,7 +57,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | 2 | Read Tools & Schema Discovery | Complete (2026-06-11) | AUTH-04..05, IDENT-01..03, META-01..02, READ-01..03, SAFE-02..05 |
 | 2.5 | Timer Status Read Tool | Complete (2026-06-11) | TIMER-01 (status-read portion) |
 | 3 | Write Tools + Conditional Timers | Implementation + both gap closures complete (2026-06-12, awaiting verifier re-pass) | WRITE-01..08, TIMER-01 (start/stop/resume), TIMER-02 |
-| 4 | Distribution & Release Pipeline | In Progress (3/4 plans complete — 04-01 + 04-02 + 04-03) | DIST-04..05, REL-02..05 |
+| 4 | Distribution & Release Pipeline | Plans complete (4/4); v1.0.1 SHIPPED to npm + MCP Registry; awaiting verifier (2026-06-12) | DIST-04..05, REL-02..05 |
 
 ---
 
@@ -68,7 +68,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Phases completed | 3 / 4 (Phase 1, 2, 2.5); Phase 3 implementation + BOTH gap-closure plans complete (CR-01 closed via 03-09, CR-02 closed via 03-10); Phase 4 in progress (3/4 plans complete) |
 | Requirements mapped | 38 / 38 |
 | Plans created | 25 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 10 Phase 3 + 4 Phase 4) |
-| Plans completed | 24 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 10 Phase 3 + 3 Phase 4) |
+| Plans completed | 25 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 10 Phase 3 + 4 Phase 4) |
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
@@ -186,7 +186,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 
 ### Blockers
 
-- **04-04-BLOCKER-01 (active 2026-06-12T09:34Z):** npm publish step in release workflow run [27407390166](https://github.com/Red-Square-Software/keeping-mcp/actions/runs/27407390166) failed with `npm error 404 'keeping-mcp@1.0.0' is not in this registry` on PUT https://registry.npmjs.org/keeping-mcp. Tag `v1.0.0` on commit `0a8703a` is pushed and immutable. ci-gate matrix all four combos PASSED. Publish job ran: checkout/build/check-publish-shape/tag-match guard all OK; provenance statement signed (sigstore log index 1801238127) but the npm PUT itself 404'd. Diagnostic: this is the trusted-publisher-not-configured signature (npm falls back to NODE_AUTH_TOKEN placeholder, auths as anonymous, gets 404 on PUT for a new package name). User action required: visit https://www.npmjs.com/settings/<user>/trusted-publishers and confirm a pending trusted publisher row exists for `keeping-mcp` bound to repo `red-square-software/keeping-mcp` + workflow `release.yml`. After configuration, recovery is `gh run rerun --failed 27407390166` (no new tag needed — tag still points at the right commit). External state: npm `keeping-mcp` does NOT exist (verified 404), MCP Registry returns 0 results (verified). No name claimed yet.
+- **04-04-BLOCKER-01 (RESOLVED 2026-06-12T16:14Z):** Original 404 was npm trusted-publisher rule missing. Resolution path: free npm tier did not expose Trusted Publishers UI → switched to classic Automation NPM_TOKEN (workflow commit `09a5730`); `@red-square` scope rename was a misdirection (not owned by publisher) → reverted to unscoped `keeping-mcp` (commit `444215a`); npm E422 on provenance casing → fixed `repository.url` to canonical `Red-Square-Software` (commit `6d7a3a3`); MCP Registry 403 on namespace → fixed `mcpName` + `server.json.name` casing + bump to v1.0.1 (commit `3c1bb1b`). Workflow run [27427989448](https://github.com/Red-Square-Software/keeping-mcp/actions/runs/27427989448) all green: npm `keeping-mcp@1.0.1` + sigstore provenance; MCP Registry `io.github.Red-Square-Software/keeping-mcp@1.0.1` active. Cold-start smoke verified.
 
 ---
 
@@ -197,14 +197,14 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 1. Read `.planning/ROADMAP.md` — phase goals and success criteria
 2. Read `.planning/PROJECT.md` — core value and locked decisions
 3. Read `.planning/REQUIREMENTS.md` — requirement IDs and traceability
-4. Read `.planning/phases/04-distribution-release-pipeline/04-03-SUMMARY.md` for the last completed plan (release.yml two-job OIDC pipeline — tag-triggered npm + MCP Registry publish with jq version injection)
-5. Execute Plan 04-04 next (`/gsd:execute-phase 04` continues to the next plan) — autonomous:false human-verify gate: (a) npm trusted-publisher pre-config on npmjs.com (one-time setup), (b) push the first `v1.0.0` git tag, (c) post-publish verification (provenance badge on npmjs.com, MCP Registry entry visible, Windows-11 cold-start `cmd /c npx -y keeping-mcp` smoke)
-6. Phase 4 complete after 04-04; then milestone v1.0 verification + release
+4. Read `.planning/phases/04-distribution-release-pipeline/04-04-SUMMARY.md` for the v1.0.1 release outcome (npm + MCP Registry both live; sigstore provenance attestations active)
+5. Run `/gsd:verify-phase 04` to confirm phase goal achievement
+6. Milestone v1.0 verification + GitHub release once verifier passes
 
-**Last session:** 2026-06-12T09:14:00.556Z
-**Stopped at:** Completed Phase 4 Plan 03 (release.yml workflow — tag-triggered two-job OIDC pipeline: ci-gate matrix [ubuntu, windows] x [22, 24] gates publish (ubuntu-only) with JOB-LEVEL id-token: write + contents: read; npm publish --provenance --access public + mcp-publisher v1.7.9 pinned + jq dual-field server.json rewrite with COUNT==2 assert + tag/package.json version-match guard + npm run check-publish-shape pre-publish. One Rule-1 deviation: step name dot-drop ('no .npmignore' -> 'no npm ignore file') to break literal-substring contradiction with plan's verify regex Check 18 while preserving semantic intent.)
-**Resume file:** 
-**Next action:** Execute Plan 04-04 (autonomous:false human-verify gate — npm trusted-publisher pre-config + v1.0.0 tag push + post-publish provenance/registry/Windows-cold-start verification).
+**Last session:** 2026-06-12T16:14:14Z
+**Stopped at:** Phase 4 Plan 04 complete — v1.0.1 SHIPPED to npm (`keeping-mcp@1.0.1` + sigstore provenance) and MCP Registry (`io.github.Red-Square-Software/keeping-mcp@1.0.1` active). Three real-world deviations from PLAN.md documented in 04-04-SUMMARY (OIDC trusted-publishing UI unavailable on free tier → NPM_TOKEN fallback; @red-square scope unowned → unscoped name claimed; canonical GitHub org casing required by OIDC subject claim).
+**Resume file:** .planning/phases/04-distribution-release-pipeline/04-04-SUMMARY.md
+**Next action:** Run `/gsd:verify-phase 04` to verify the phase goal and close the phase.
 
 ---
 *State initialized: 2026-06-09 after roadmap creation*

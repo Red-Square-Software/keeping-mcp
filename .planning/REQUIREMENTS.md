@@ -8,10 +8,10 @@
 ### Distribution
 
 - [x] **DIST-01**: Server is installable and runnable via `npx keeping-mcp` with no prior global install
-- [x] **DIST-02**: npm package name is `keeping-mcp` and `package.json` contains `"mcpName": "io.github.red-square-software/keeping-mcp"` for MCP Registry verification
+- [x] **DIST-02**: npm package name is `keeping-mcp` and `package.json` contains `"mcpName": "io.github.Red-Square-Software/keeping-mcp"` for MCP Registry verification (mcpName uses canonical GitHub org casing per OIDC subject claim — amended in Phase 4 Plan 04-04)
 - [x] **DIST-03**: Bin entry has a shebang and works cross-platform (macOS, Linux, Windows 11)
 - [x] **DIST-04**: Published artifact uses a `"files"` whitelist in `package.json` (no `.npmignore`) so secrets, fixtures, and dotfiles cannot leak via `npm publish`
-- [x] **DIST-05**: Server is registered in the official MCP Registry under namespace `io.github.red-square-software/keeping-mcp`
+- [x] **DIST-05**: Server is registered in the official MCP Registry under namespace `io.github.Red-Square-Software/keeping-mcp` (canonical GitHub org casing required by OIDC subject claim — see Phase 4 Plan 04-04 SUMMARY Deviation 3)
 
 ### Authentication & Configuration
 
