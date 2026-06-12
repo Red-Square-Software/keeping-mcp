@@ -21,11 +21,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { KeepingConfig } from "../../src/config.js";
 import type { KeepingClient } from "../../src/keeping/client.js";
-import {
-  KeepingApiError,
-  KeepingAuthError,
-  MultiOrgError,
-} from "../../src/keeping/errors.js";
+import { KeepingApiError, KeepingAuthError, MultiOrgError } from "../../src/keeping/errors.js";
 import { registerAddEntry } from "../../src/tools/add-entry.js";
 
 const defaultConfig: KeepingConfig = {
@@ -253,7 +249,9 @@ describe("keeping_add_entry tool", () => {
     expect(res.isError).toBe(true);
     const content = res.content as Array<{ type: "text"; text: string }>;
     const text = content[0]?.text ?? "";
-    expect(text.startsWith("outcome unknown — verify with keeping_list_entries before retrying.")).toBe(true);
+    expect(
+      text.startsWith("outcome unknown — verify with keeping_list_entries before retrying."),
+    ).toBe(true);
     expect(text).toContain("Keeping API error 503");
     expect(text).toMatch(/\(.*Keeping API error 503.*\)/);
   });
