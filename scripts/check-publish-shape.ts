@@ -55,8 +55,7 @@ const parsed = JSON.parse(packResult.stdout) as Array<{ files: Array<{ path: str
 const actualPaths = parsed[0]?.files.map((f) => f.path).sort() ?? [];
 const expectedPaths = [...ALLOWLIST].sort();
 const driftDetected =
-  actualPaths.length !== expectedPaths.length ||
-  actualPaths.some((p, i) => p !== expectedPaths[i]);
+  actualPaths.length !== expectedPaths.length || actualPaths.some((p, i) => p !== expectedPaths[i]);
 if (driftDetected) {
   fail(
     `tarball contents drift\n  expected: ${JSON.stringify(expectedPaths)}\n  actual:   ${JSON.stringify(actualPaths)}`,
@@ -75,9 +74,7 @@ if (!pkg.mcpName) {
   fail("package.json missing mcpName field — DIST-02 regressed");
 }
 if (pkg.mcpName !== srv.name) {
-  fail(
-    `namespace drift: package.json.mcpName='${pkg.mcpName}' but server.json.name='${srv.name}'`,
-  );
+  fail(`namespace drift: package.json.mcpName='${pkg.mcpName}' but server.json.name='${srv.name}'`);
 }
 ok(`mcpName <-> server.json.name bound to ${pkg.mcpName}`);
 
