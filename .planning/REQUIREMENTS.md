@@ -66,7 +66,7 @@
 ### Release Pipeline & Docs
 
 - [x] **REL-01**: GitHub repo at `red-square-software/keeping-mcp` with MIT license file
-- [ ] **REL-02**: GitHub Actions release workflow triggers on `v*` tags, publishes to npm with provenance via OIDC (no `NPM_TOKEN` secret), and publishes to the MCP Registry via `mcp-publisher login github-oidc`
+- [x] **REL-02**: GitHub Actions release workflow triggers on `v*` tags, publishes to npm with provenance via OIDC (no `NPM_TOKEN` secret), and publishes to the MCP Registry via `mcp-publisher login github-oidc`
 - [x] **REL-03**: `server.json` version is derived from `package.json` at release time (not hand-edited)
 - [x] **REL-04**: README documents token setup (enable developer features in Keeping prefs → generate access token), Claude Code config snippets for **both** Windows (`{ "command": "cmd", "args": ["/c", "npx", "-y", "keeping-mcp"] }`) and macOS/Linux (`{ "command": "npx", "args": ["-y", "keeping-mcp"] }`), env var reference, and the dry-run workflow with an example transcript
 - [x] **REL-05**: README front-and-centre warns that setting `KEEPING_REQUIRE_CONFIRM=false` disables dry-run and writes immediately
@@ -141,7 +141,7 @@ Phase mapping populated during roadmap creation (2026-06-09).
 | SAFE-04 | Phase 2 | Complete |
 | SAFE-05 | Phase 2 | Complete |
 | REL-01 | Phase 1 | Complete |
-| REL-02 | Phase 4 | Pending |
+| REL-02 | Phase 4 | Complete |
 | REL-03 | Phase 4 | Complete |
 | REL-04 | Phase 4 | Complete |
 | REL-05 | Phase 4 | Complete |

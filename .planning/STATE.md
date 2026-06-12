@@ -3,20 +3,20 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_plan
-stopped_at: "Completed Phase 4 Plan 02 (README rewrite for SC #4 + SC #5 — 179-line distribution-ready public README with Windows-first install UX, 6-step token setup, env vars table, illustrative dry-run transcript, doubled KEEPING_REQUIRE_CONFIRM=false callout). Two Rule-1 deviations: rephrased Recommendation line in callouts (KEEPING_REQUIRE_CONFIRM=false grep count = 2 invariant); rephrased local-dev note to use console.error (literal console.log forbidden by plan)"
-last_updated: "2026-06-12T09:03:16.578Z"
+stopped_at: "Completed Phase 4 Plan 03 (release.yml workflow — tag-triggered two-job OIDC pipeline: ci-gate matrix [ubuntu, windows] x [22, 24] gates publish (ubuntu-only) with JOB-LEVEL id-token: write + contents: read; npm publish --provenance --access public + mcp-publisher v1.7.9 pinned + jq dual-field server.json rewrite with COUNT==2 assert + tag/package.json version-match guard + npm run check-publish-shape pre-publish. One Rule-1 deviation: step name dot-drop ('no .npmignore' -> 'no npm ignore file') to break literal-substring contradiction with plan's verify regex Check 18 while preserving semantic intent.)"
+last_updated: "2026-06-12T09:15:52.431Z"
 progress:
-  total_phases: 4
-  completed_phases: 3
+  total_phases: 6
+  completed_phases: 4
   total_plans: 25
-  completed_plans: 23
-  percent: 92
+  completed_plans: 24
+  percent: 67
 ---
 
 # Project State: keeping-mcp
 
 **Last updated:** 2026-06-12  
-**Session boundary:** Phase 4 Plan 02 complete (README rewrite for ROADMAP SC #4 + SC #5). 179-line distribution-ready public README replaces the 7-line placeholder. Windows-first install UX with the `cmd /c npx -y keeping-mcp` config block FIRST per RESEARCH §Pitfall 2, followed by the macOS/Linux block. 6-step token setup (Preferences → "Show features for developers" → Generate token). Four-row env vars table (KEEPING_TOKEN required + KEEPING_REQUIRE_CONFIRM default true + KEEPING_ORG_ID + KEEPING_LOG_LEVEL). Hand-crafted illustrative dry-run transcript (preview + confirm). Provenance verification section (`npm audit signatures` + jq attestations probe). Doubled ⚠ `KEEPING_REQUIRE_CONFIRM=false` callout: one above the fold + one inside Configuration; grep count = 2 exactly. Two Rule-1 deviations resolved plan-spec self-contradictions between verbatim-copy directives and grep-based verification: (a) Recommendation line in both callouts rephrased from `never set KEEPING_REQUIRE_CONFIRM=false` to `never disable this gate` to land grep count = 2, (b) local-dev note rephrased from "Never add console.log" to "Never write diagnostic output to stdout; use console.error" to satisfy the no-console.log literal assertion. All four ```json``` fences parse with JSON.parse; LF-only; 179 lines.
+**Session boundary:** Phase 4 Plan 03 complete (`.github/workflows/release.yml` — tag-triggered two-job OIDC release pipeline). Two-job structure: `ci-gate` matrix [ubuntu-latest, windows-latest] x [22, 24] runs lint + typecheck + tests + build + cold-start smoke (mirrors ci.yml step-for-step on @v5 actions); blocks `publish` (ubuntu-latest, `needs: ci-gate`) until all four matrix combos green. `publish` job has JOB-LEVEL `permissions: { id-token: write, contents: read }` (RESEARCH §Pitfall 5 — both listed explicitly because Actions permissions are replace-not-merge). Sequence: checkout @v5 → setup-node @v5 (Node 22 + `registry-url: https://registry.npmjs.org`) → npm ci → npm run build → npm run check-publish-shape (Plan 04-01 DIST-04 gate) → tag/package.json version-match guard (fails with `npm version X.Y.Z` hint when `git tag v1.0.0` is pushed against package.json reading 0.1.0) → `npm publish --provenance --access public` (no NPM_TOKEN env) → curl-pin mcp-publisher v1.7.9 by exact URL (set -euo pipefail + `./mcp-publisher --version` smoke) → jq dual-field rewrite `.version = $v | .packages[0].version = $v` + post-step COUNT==2 assert (RESEARCH §Pitfall 3) → `./mcp-publisher login github-oidc` → `./mcp-publisher publish`. One Rule-1 deviation: step name dot-drop ('Verify package shape (allowlist + mcpName binding + no .npmignore)' → 'no npm ignore file') to break literal-substring contradiction with plan's verify-block Check 18 regex `!/\.npmignore/.test(y)` while preserving semantic intent (check-publish-shape still enforces .npmignore guard at runtime). All 18 PLAN regex assertions + 6 done-criteria checks pass; YAML parses cleanly via js-yaml; LF-only; 129 lines / 4102 bytes.
 
 ---
 
@@ -33,17 +33,17 @@ progress:
 ## Current Position
 
 Phase: 04 (Distribution & Release Pipeline) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 
 | Field | Value |
 |-------|-------|
-| Current phase | Phase 4 — Distribution & Release Pipeline (executing; 2/4 plans complete after Plan 04-02) |
-| Current plan | Plan 04-02 complete (README rewrite — Windows-first install UX, doubled KEEPING_REQUIRE_CONFIRM=false callout, REL-04 + REL-05) |
-| Phase status | Phase 4 IN PROGRESS — Plan 04-01 (server.json + check-publish-shape) and Plan 04-02 (README rewrite) complete; Plan 04-03 (release.yml workflow) next |
-| Overall progress | 23 of 25 plans complete; Phase 1, 2, 2.5 complete + Phase 3 (10 plans) implementation + gap closures complete + Phase 4 (2 of 4 plans) complete |
+| Current phase | Phase 4 — Distribution & Release Pipeline (executing; 3/4 plans complete after Plan 04-03) |
+| Current plan | Plan 04-03 complete (release.yml workflow — tag-triggered two-job OIDC publish to npm + MCP Registry, REL-02 + DIST-04 enforcement + REL-03 mechanic) |
+| Phase status | Phase 4 IN PROGRESS — Plan 04-01 (server.json + check-publish-shape), Plan 04-02 (README rewrite), and Plan 04-03 (release.yml workflow) complete; Plan 04-04 (autonomous:false human-verify gate for v1.0.0 tag push + post-publish verification) next |
+| Overall progress | 24 of 25 plans complete; Phase 1, 2, 2.5 complete + Phase 3 (10 plans) implementation + gap closures complete + Phase 4 (3 of 4 plans) complete |
 
 ```
-Progress: [█████████░] 92%
+Progress: [██████████] 96%
 Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [██████████] · Phase 4 [░░░░░]
 ```
 
@@ -57,7 +57,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | 2 | Read Tools & Schema Discovery | Complete (2026-06-11) | AUTH-04..05, IDENT-01..03, META-01..02, READ-01..03, SAFE-02..05 |
 | 2.5 | Timer Status Read Tool | Complete (2026-06-11) | TIMER-01 (status-read portion) |
 | 3 | Write Tools + Conditional Timers | Implementation + both gap closures complete (2026-06-12, awaiting verifier re-pass) | WRITE-01..08, TIMER-01 (start/stop/resume), TIMER-02 |
-| 4 | Distribution & Release Pipeline | In Progress (2/4 plans complete — 04-01 + 04-02) | DIST-04..05, REL-02..05 |
+| 4 | Distribution & Release Pipeline | In Progress (3/4 plans complete — 04-01 + 04-02 + 04-03) | DIST-04..05, REL-02..05 |
 
 ---
 
@@ -65,10 +65,10 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 
 | Metric | Value |
 |--------|-------|
-| Phases completed | 3 / 4 (Phase 1, 2, 2.5); Phase 3 implementation + BOTH gap-closure plans complete (CR-01 closed via 03-09, CR-02 closed via 03-10); Phase 4 in progress (2/4 plans complete) |
+| Phases completed | 3 / 4 (Phase 1, 2, 2.5); Phase 3 implementation + BOTH gap-closure plans complete (CR-01 closed via 03-09, CR-02 closed via 03-10); Phase 4 in progress (3/4 plans complete) |
 | Requirements mapped | 38 / 38 |
 | Plans created | 25 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 10 Phase 3 + 4 Phase 4) |
-| Plans completed | 23 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 10 Phase 3 + 2 Phase 4) |
+| Plans completed | 24 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 10 Phase 3 + 3 Phase 4) |
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
@@ -91,6 +91,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Phase 03 P10 | ~6 minutes | 1 task | 6 files |
 | Phase 04 P01 | 5min | 2 tasks | 3 files |
 | Phase 04-distribution-release-pipeline P02 | 5min | 1 tasks | 1 files |
+| Phase 04-distribution-release-pipeline P03 | 5min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -136,6 +137,12 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | README KEEPING_REQUIRE_CONFIRM=false doubled-callout pattern (Plan 04-02, REL-05) | The README ships TWO ⚠ blockquote callouts that name `KEEPING_REQUIRE_CONFIRM=false`: one above the fold (after the lead paragraph, inside the first 60 lines) and one immediately after the Configuration env-vars table. Plan verification command asserts `grep -c KEEPING_REQUIRE_CONFIRM=false == 2`. RESEARCH §Code Examples warning block contains the literal twice per block; verbatim double-paste yields 4 occurrences. Resolution: Recommendation line in BOTH callouts rephrased from `never set `KEEPING_REQUIRE_CONFIRM=false`` to `never disable this gate` — preserves imperative, drops the second literal per callout, lands grep count = 2. The doubled-callout structure (top + Configuration) is the REL-05 "front-and-centre" implementation: a user reading from the top hits it once, a user skimming to Configuration hits it again. Reusable pattern for any safety-critical env var doc in this project. |
 | Windows-first README ordering (Plan 04-02, RESEARCH §Pitfall 2) | The README's `## Install` section places the Windows config block (`command: "cmd", args: ["/c", "npx", "-y", "keeping-mcp"]`) BEFORE the macOS/Linux block — not after, not as a footnote. Rationale: anthropics/claude-code#58510 — `child_process.spawn` on Windows does not resolve `.cmd` extensions via PATHEXT unless `shell: true` is set, which Claude Code does not. A Windows 11 user copy-pasting the Linux/macOS block hits `spawn npx ENOENT` with no obvious cause. By putting the Windows block first AND adding an explanatory note below it (citing the upstream issue), a typical Claude-Code-on-Windows user reading top-to-bottom uses the correct shape on the first try. The explanatory note is sentence-length, not a footnote — it appears immediately below the JSON block where a paste-and-fix user would look for it. |
 | JSON code fences = strict JSON only (Plan 04-02, RESEARCH §Anti-Patterns) | Every ```json``` fence in README.md must parse with `JSON.parse`. No `//` comments inside the fence — RESEARCH explicitly warns: "Don't write README config as JSON5 / with comments — users will paste verbatim." All clarifications (e.g. "Illustrative; actual field names match Keeping's OpenAPI") live in prose OUTSIDE the fence. Plan 04-02 ships four JSON fences (Windows config, macOS/Linux config, dry-run preview transcript, dry-run confirm transcript); all four parse cleanly. Reusable invariant for any future README JSON examples. |
+| Two-job release.yml structure: ci-gate matrix + publish ubuntu-only with JOB-LEVEL id-token: write (Plan 04-03, RESEARCH Open Question #1 + Pitfall 5) | `.github/workflows/release.yml` has TWO jobs. `ci-gate` runs `[ubuntu-latest, windows-latest] × [22, 24]` — mirrors ci.yml's lint+typecheck+test+build+smoke surface but on `@v5` actions. `publish` runs ubuntu-latest ONLY with `needs: ci-gate` so all four matrix combos must be green before any external state is created. The `publish` job's `permissions:` block is at JOB LEVEL (not workflow level) and lists BOTH `id-token: write` AND `contents: read` explicitly — GitHub Actions permissions are replace-not-merge at the job level, so omitting `contents: read` would silently drop checkout's read access (RESEARCH §Pitfall 5). `ci-gate` has NO `permissions:` block — it MUST NOT mint OIDC tokens on the windows matrix combos. Conservative-first defaults per RESEARCH Open Question #1; after 3-5 successful releases this can be de-scoped to ubuntu-only-no-matrix. |
+| jq dual-field server.json rewrite + COUNT==2 desync assertion (Plan 04-03, RESEARCH §Pitfall 3) | The release workflow rewrites `server.json` at publish time via `jq --arg v "$VERSION" '.version = $v | .packages[0].version = $v'` where `VERSION=${GITHUB_REF#refs/tags/v}` — one expression updates BOTH fields. Immediate post-step assertion runs `jq -r --arg v "$VERSION" '[.version, .packages[0].version] | map(select(. == $v)) | length'` and fails the job if the result is not exactly `"2"`. This defends RESEARCH §Pitfall 3 (server.json desync): if either field stays at the old value, mcp-publisher publishes inconsistent metadata to the MCP Registry. `server.json` is never hand-edited; the placeholder `"0.0.0"` in repo source IS the canonical pre-publish state. |
+| Tag/package.json version-match guard before publish (Plan 04-03) | Before `npm publish --provenance --access public`, the workflow runs `TAG_VERSION="${GITHUB_REF#refs/tags/v}"` and `PKG_VERSION=$(node -p "require('./package.json').version")` and fails the job with the literal hint `Bump package.json with 'npm version <X.Y.Z>' before tagging.` when they differ. Prevents the silent wrong-version publish path: `git tag v1.0.0 && git push --follow-tags` against `package.json` reading `0.1.0` would otherwise publish 0.1.0 to npm under the v1.0.0 tag, then jq would write `1.0.0` into server.json — registry/npm version mismatch. The guard fails BEFORE either publish step runs so no external state is created. |
+| mcp-publisher pinned to v1.7.9 by exact URL, never `latest` (Plan 04-03, RESEARCH §Standard Stack + §Anti-Patterns) | The release workflow downloads mcp-publisher from the byte-exact URL `https://github.com/modelcontextprotocol/registry/releases/download/v1.7.9/mcp-publisher_linux_amd64.tar.gz` — NEVER `releases/latest/`. `curl -fsSL` fails the step on HTTP error (404, network) instead of producing an empty binary; `set -euo pipefail` propagates the failure; `./mcp-publisher --version` smoke after extract verifies the binary is intact. No marketplace action for mcp-publisher install — first-party curl is one auditable line. |
+| release.yml step name dot-drop to break plan verify-regex contradiction (Plan 04-03, Rule 1 deviation) | PLAN line 267 specifies the verbatim step name `Verify package shape (allowlist + mcpName binding + no .npmignore)`. The plan's verify-block regex Check 18 asserts `!/\.npmignore/.test(y)` — the substring `.npmignore` MUST NOT appear anywhere in the YAML. A verbatim copy of the step name trips Check 18. Resolution: renamed the step to `Verify package shape (allowlist + mcpName binding + no npm ignore file)` — drops the dot to break the substring match while preserving the semantic intent. The `npm run check-publish-shape` script (called by this step) still enforces the actual `.npmignore` existence check at runtime. Tagged as Rule 1 (Bug): plan-spec self-contradiction between verbatim-copy directive and verify regex. Same family as Plan 04-02's `KEEPING_REQUIRE_CONFIRM=false` grep-count deviation and `console.log` literal deviation. |
+| Deliberate non-mutation of ci.yml during Plan 04-03 (scope_gate) | Plan 04-03's `<scope_gate>` says modify ONLY `.github/workflows/release.yml`. ci.yml still uses `actions/checkout@v4` + `actions/setup-node@v4` while release.yml uses `@v5`. This drift is intentional. RESEARCH §Standard Stack establishes `@v5` as the current correct shape for new workflows; ci.yml's `@v4` continues to work and will be swept to `@v5` in a separate non-phase doc-cleanup commit. No behavioral consequence inside this plan: `ci-gate` (inside release.yml on @v5) is the canonical re-run of the lint/typecheck/test/build/smoke sequence that gates the publish path. |
 
 ### Open Questions (resolve during execution)
 
@@ -175,6 +182,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 - [x] Phase 3 Plan 10: CR-02 gap closure — strict 24-hour HH:mm regex `/^([01]\d|2[0-3]):[0-5]\d$/` + error message `"must be HH:mm (24-hour, zero-padded)"` at five callsites (add-entry start+end, update-entry start+end, start-timer start); exported AddEntryInput / UpdateEntryInput / StartTimerInput; +43 negative/positive tests rejecting `1:30pm`/`25:00`/`9:5`/`00:00:00`; 206/206 tests; closes 03-VERIFICATION.md Gap #2 / 03-REVIEW.md CR-02 (completed 2026-06-12)
 - [x] Phase 4 Plan 01: server.json + scripts/check-publish-shape.ts (DIST-04 allowlist + DIST-05 namespace + REL-03 placeholder) (completed 2026-06-12)
 - [x] Phase 4 Plan 02: README rewrite — Windows-first install UX (cmd /c npx -y), 6-step token setup, env vars table, illustrative dry-run transcript, doubled KEEPING_REQUIRE_CONFIRM=false callout (REL-04 + REL-05) (completed 2026-06-12)
+- [x] Phase 4 Plan 03: `.github/workflows/release.yml` — tag-triggered two-job OIDC pipeline (ci-gate matrix `[ubuntu, windows] × [22, 24]` gates publish ubuntu-only with JOB-LEVEL `id-token: write` + `contents: read`); `npm publish --provenance --access public` + mcp-publisher v1.7.9 pinned + jq dual-field server.json rewrite with COUNT==2 assert + tag/package.json version-match guard + `npm run check-publish-shape` pre-publish; REL-02 + DIST-04 enforcement + REL-03 mechanic (completed 2026-06-12)
 
 ### Blockers
 
@@ -189,15 +197,15 @@ None.
 1. Read `.planning/ROADMAP.md` — phase goals and success criteria
 2. Read `.planning/PROJECT.md` — core value and locked decisions
 3. Read `.planning/REQUIREMENTS.md` — requirement IDs and traceability
-4. Read `.planning/phases/04-distribution-release-pipeline/04-02-SUMMARY.md` for the last completed plan (README rewrite — Windows-first install UX + doubled dry-run callout)
-5. Execute Plan 04-03 next (`/gsd:execute-phase 04` continues to the next plan) — release.yml GitHub Actions workflow (OIDC publish to npm + MCP Registry, jq version injection)
-6. Then Plan 04-04 — autonomous:false human-verify gate for first v1.0.0 release
+4. Read `.planning/phases/04-distribution-release-pipeline/04-03-SUMMARY.md` for the last completed plan (release.yml two-job OIDC pipeline — tag-triggered npm + MCP Registry publish with jq version injection)
+5. Execute Plan 04-04 next (`/gsd:execute-phase 04` continues to the next plan) — autonomous:false human-verify gate: (a) npm trusted-publisher pre-config on npmjs.com (one-time setup), (b) push the first `v1.0.0` git tag, (c) post-publish verification (provenance badge on npmjs.com, MCP Registry entry visible, Windows-11 cold-start `cmd /c npx -y keeping-mcp` smoke)
+6. Phase 4 complete after 04-04; then milestone v1.0 verification + release
 
-**Last session:** 2026-06-12T08:59:49.558Z
-**Stopped at:** Completed Phase 4 Plan 02 (README rewrite for SC #4 + SC #5 — 179-line distribution-ready public README with Windows-first install UX, 6-step token setup, env vars table, illustrative dry-run transcript, doubled KEEPING_REQUIRE_CONFIRM=false callout). Two Rule-1 deviations: rephrased Recommendation line in callouts (KEEPING_REQUIRE_CONFIRM=false grep count = 2 invariant); rephrased local-dev note to use console.error (literal console.log forbidden by plan)
-**Resume file:** None
-**Next action:** Execute Plan 04-03 (release.yml workflow — tag-triggered OIDC publish to npm + MCP Registry with jq version injection per RESEARCH §Pattern 1).
+**Last session:** 2026-06-12T09:14:00.556Z
+**Stopped at:** Completed Phase 4 Plan 03 (release.yml workflow — tag-triggered two-job OIDC pipeline: ci-gate matrix [ubuntu, windows] x [22, 24] gates publish (ubuntu-only) with JOB-LEVEL id-token: write + contents: read; npm publish --provenance --access public + mcp-publisher v1.7.9 pinned + jq dual-field server.json rewrite with COUNT==2 assert + tag/package.json version-match guard + npm run check-publish-shape pre-publish. One Rule-1 deviation: step name dot-drop ('no .npmignore' -> 'no npm ignore file') to break literal-substring contradiction with plan's verify regex Check 18 while preserving semantic intent.)
+**Resume file:** 
+**Next action:** Execute Plan 04-04 (autonomous:false human-verify gate — npm trusted-publisher pre-config + v1.0.0 tag push + post-publish provenance/registry/Windows-cold-start verification).
 
 ---
 *State initialized: 2026-06-09 after roadmap creation*
-*Last updated: 2026-06-12 after Phase 4 Plan 02 (README rewrite for SC #4 + SC #5 — Windows-first install UX, doubled KEEPING_REQUIRE_CONFIRM=false callout) completion*
+*Last updated: 2026-06-12 after Phase 4 Plan 03 (release.yml — tag-triggered two-job OIDC pipeline publishing to npm + MCP Registry) completion*
