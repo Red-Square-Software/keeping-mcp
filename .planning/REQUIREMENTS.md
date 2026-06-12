@@ -45,7 +45,8 @@
 - [x] **WRITE-03**: `keeping_delete_entry` tool deletes an existing time entry owned by the authenticated user
 - [x] **WRITE-04**: All write tools accept a `confirm: boolean` input; when `KEEPING_REQUIRE_CONFIRM` is `true` and `confirm !== true`, the tool returns a preview (`would_post: { method, url, body }`) without calling the API
 - [x] **WRITE-05**: Write tools never auto-retry on network errors; on ambiguous failure they return `isError: true` with "outcome unknown — verify with keeping_list_entries before retrying"
-- [ ] **WRITE-06**: Write tools accept a `purpose` field with `billable` and `non_billable` as first-class values (so Jortt invoicing surfaces the correct hours)
+- [ ] **WRITE-06**: Write tools accept a `purpose` field matching Keeping's real OpenAPI enum: `work`, `break`, `special_leave`, `unpaid_leave`, `statutory_leave`, `sick_leave`, `work_reduction`, `trip` (default `work`). Billable status is set at the PROJECT level in Keeping, NOT on the entry, so Jortt invoicing keys off project configuration regardless of purpose.
+    - **Amendment 2026-06-12 (D-3-07):** The original wording cited `billable`/`non_billable` based on pre-OpenAPI guesses. The locked OpenAPI spec (`.planning/research/keeping-openapi.json` §components.schemas.entry_create_request.purpose) confirms the 8-value enum above. Original wording preserved for traceability: *"Write tools accept a `purpose` field with `billable` and `non_billable` as first-class values (so Jortt invoicing surfaces the correct hours)"*.
 - [x] **WRITE-07**: Write tools annotate `destructiveHint: true` and `idempotentHint: false`; `keeping_delete_entry` additionally annotates the destructive nature in its description
 - [x] **WRITE-08**: Date fields default to today in `Europe/Amsterdam`, not UTC; output is `YYYY-MM-DD` strings (never `Date.toISOString()`)
 
@@ -129,7 +130,7 @@ Phase mapping populated during roadmap creation (2026-06-09).
 | WRITE-03 | Phase 3 | Complete |
 | WRITE-04 | Phase 3 | Complete |
 | WRITE-05 | Phase 3 | Complete |
-| WRITE-06 | Phase 3 | Pending |
+| WRITE-06 | Phase 3 | Complete (per D-3-07 amendment — see WRITE-06 row above) |
 | WRITE-07 | Phase 3 | Complete |
 | WRITE-08 | Phase 3 | Complete |
 | TIMER-01 | Phase 2.5 (status) / Phase 3 (start/stop/resume) | Partial — status-read portion COMPLETE (2026-06-11, `keeping_timer_status` shipped in Phase 2.5 Plan 01); start/stop/resume Pending in Phase 3 |
