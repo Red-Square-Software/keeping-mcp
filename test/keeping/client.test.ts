@@ -370,3 +370,98 @@ describe("KeepingClient", () => {
     expect(meUrl).not.toContain("/organisations/");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Phase 3 foundation surface — D-3-18 + D-3-27.
+//
+// Test C1: DELETE returns 204 No Content → client.delete<unknown>(path) resolves
+//   to null and does NOT throw SyntaxError.
+// Test C2: 500 on DELETE still surfaces a KeepingApiError (204 branch must
+//   sit AFTER the !res.ok guard).
+// Test C3: requestWithHeaders<T> returns { body, headers } and the headers
+//   carry X-Server-Time-Ms verbatim.
+// Test C4: requestWithHeaders<T> shares this.throttle with request<T> (Pitfall 3).
+// ---------------------------------------------------------------------------
+
+describe("KeepingClient — Phase 3 surface (D-3-18, D-3-27)", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    delete process.env.KEEPING_ORG_ID;
+  });
+
+  it("Test C1: DELETE 204 No Content resolves to null without throwing (D-3-27)", async () => {
+    vi.spyOn(global, "fetch").mockResolvedValue(new Response(null, { status: 204 }));
+    const client = new KeepingClient(FAKE_TOKEN, silentLogger());
+
+    const result = await client.delete<unknown>("/47666/time-entries/12345");
+
+    expect(result).toBeNull();
+  });
+
+  it("Test C2: DELETE 500 still throws KeepingApiError — 204 branch only applies to 204 (D-3-27)", async () => {
+    vi.spyOn(global, "fetch").mockResolvedValue(
+      new Response("boom", { status: 500 }),
+    );
+    const client = new KeepingClient(FAKE_TOKEN, silentLogger());
+
+    let captured: unknown;
+    try {
+      await client.delete("/47666/time-entries/12345");
+    } catch (e) {
+      captured = e;
+    }
+    expect(captured).toBeInstanceOf(KeepingApiError);
+    expect((captured as KeepingApiError).status).toBe(500);
+    expect((captured as KeepingApiError).message).toContain("boom");
+  });
+
+  it("Test C3: requestWithHeaders<T> returns { body, headers } with X-Server-Time-Ms accessible (D-3-18)", async () => {
+    vi.spyOn(global, "fetch").mockResolvedValue(
+      new Response('{"time_entry":{"id":99}}', {
+        status: 200,
+        headers: {
+          "X-Server-Time-Ms": "1718202000000",
+          "Content-Type": "application/json",
+        },
+      }),
+    );
+    const client = new KeepingClient(FAKE_TOKEN, silentLogger());
+
+    const result = await client.requestWithHeaders<{ time_entry: { id: number } }>(
+      "PATCH",
+      "/47666/time-entries/99/stop",
+    );
+
+    expect(result.body).toEqual({ time_entry: { id: 99 } });
+    expect(result.headers).toBeDefined();
+    // WHATWG Headers.get is case-insensitive — verify either casing works.
+    expect(result.headers.get("X-Server-Time-Ms")).toBe("1718202000000");
+    expect(result.headers.get("x-server-time-ms")).toBe("1718202000000");
+  });
+
+  it("Test C4: requestWithHeaders<T> shares the same throttle slot allocator as request<T> (Pitfall 3)", async () => {
+    let throttleCalls = 0;
+    vi.spyOn(global, "fetch").mockImplementation(
+      async () => new Response('{"ok":true}', { status: 200, headers: { "Content-Type": "application/json" } }),
+    );
+    const client = new KeepingClient(FAKE_TOKEN, silentLogger());
+
+    // Replace the throttle property with a tracking proxy that delegates to a
+    // pass-through implementation. If BOTH request<T> and requestWithHeaders<T>
+    // route through `this.throttle(...)` the counter should hit 2.
+    const realThrottle = (
+      client as unknown as { throttle: <T>(fn: () => Promise<T>) => () => Promise<T> }
+    ).throttle;
+    (client as unknown as { throttle: <T>(fn: () => Promise<T>) => () => Promise<T> }).throttle = <
+      T,
+    >(fn: () => Promise<T>) => {
+      throttleCalls += 1;
+      return realThrottle(fn);
+    };
+
+    await client.get<unknown>("/x");
+    await client.requestWithHeaders<unknown>("PATCH", "/y");
+
+    expect(throttleCalls).toBe(2);
+  });
+});
