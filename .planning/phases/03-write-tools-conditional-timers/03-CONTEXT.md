@@ -236,6 +236,43 @@ Requirements covered:
   `Date.now()` to `2026-06-12T22:30:00Z`; assert preview body
   `date === "2026-06-13"` (next day in Amsterdam, +02:00 CEST).
 
+### Revisions (2026-06-12, post-research)
+
+Surfaced by `gsd-phase-researcher` reading `keeping-openapi.json` against
+the locked decisions. Ground-truth deltas — record before planning.
+
+- **D-3-27 (amends rawFetch contract):** `DELETE /{orgId}/time-entries/{entry_id}`
+  returns `204 No Content` per OpenAPI. `KeepingClient.rawFetch` at
+  `src/keeping/client.ts:221` currently does `return res.json()`
+  unconditionally for `res.ok`, which throws `SyntaxError: Unexpected end
+  of JSON input` on a 204. **Smallest fix:** in `rawFetch`, after the
+  `res.ok` check, branch on `res.status === 204` and return `null`. The
+  change is one branch in `rawFetch` and is backward-compatible with every
+  existing GET/POST/PATCH caller (none of them currently observe a 204).
+  `keeping_delete_entry`'s actual-call path then returns `{ ok: true }`
+  (or similar) regardless of API body. Without this fix, `keeping_delete_entry`
+  with `confirm: true` will surface a synthetic `SyntaxError` through
+  `toIsErrorContent` even though the delete succeeded — a false-failure
+  envelope that mimics the WRITE-05 "outcome unknown" case but is in fact
+  a definite success. The fix is the first task of the phase.
+- **D-3-28 (amends D-3-13 — request-body time shape):** The request body
+  fields `start` and `end` on `entry_create_request` / `entry_edit_request`
+  are documented as **`HH:mm` time-only strings**, NOT full ISO 8601
+  datetimes. Example from OpenAPI: `"start": "13:45"`. The response shape
+  uses full ISO 8601 with offset (`"start": "2026-06-11T13:45:10+02:00"`)
+  — the read-shape and write-shape are asymmetric. D-3-13's
+  `nowAmsterdamISO()` is the WRONG helper for request bodies. Lock the
+  request-body helper as `nowInAmsterdamHHMM(now?: Date): string` returning
+  `"HH:mm"` (24-hour, zero-padded, no timezone suffix — the API derives the
+  zone from `organisation.time_zone`). `nowAmsterdamISO()` may still be
+  used for non-body purposes (logs, return surfaces) but MUST NOT appear in
+  any request body. DST-correct test (D-3-15) extends: mock `Date.now() =
+  2026-06-12T22:30:00Z` ⇒ preview body `{ date: "2026-06-13", start: "00:30" }`.
+- **D-3-29 (typo correction):** Organisation field name is `time_zone`
+  (underscore), not `timezone`. `src/keeping/types.ts:50` is already correct;
+  this revision is for documentation hygiene only — any planner output
+  citing `organisation.timezone` should use `organisation.time_zone`.
+
 ### Claude's Discretion
 
 - Exact file split inside `src/keeping/` for `write-gate.ts` vs
