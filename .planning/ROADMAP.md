@@ -114,7 +114,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 - [x] 03-02-PLAN.md — `keeping_add_entry` vertical slice (13 tests, 2 commits): dry-run gate via previewOrCall, org-mode-aware body (times vs hours per D-3-08), DST-correct date default per D-3-15/D-3-26, real OpenAPI 8-value purpose enum per D-3-07. server.ts wiring deferred to 03-08. See `03-02-SUMMARY.md`. (completed 2026-06-12)
 - [x] 03-03-PLAN.md — `keeping_update_entry` vertical slice (10 tests, 2 commits): PATCH partial; Zod schema OMITS `date`/`purpose`/`user_id` per OpenAPI `entry_edit_request` (Zod's default `.strip()` enforcement); undefined-skip body builder ensures only supplied fields hit the wire; same dry-run gate + ambiguous-failure envelope as add-entry. server.ts wiring deferred to 03-08. See `03-03-SUMMARY.md`. (completed 2026-06-12)
 - [x] 03-04-PLAN.md — `keeping_delete_entry` vertical slice (10 tests, 2 commits): inline dry-run gate + extra GET for `would_delete` (D-3-03); confirm path proves D-3-27 204-tolerant rawFetch end-to-end (result `?? { ok: true }` wraps the null from `client.delete`); description carries the verbatim `**DESTRUCTIVE: permanently deletes the entry**` marker per D-3-11. server.ts wiring deferred to 03-08. See `03-04-SUMMARY.md`. (completed 2026-06-12)
-- [ ] 03-05-PLAN.md — `keeping_start_timer` vertical slice (9 tests): POST `/{orgId}/time-entries` per D-3-06 with strict `Object.keys` assertion that body OMITS `end` AND `hours`; `timer_id` extracted via verbatim three-clause `Array.isArray` guard (D-2.5-05a); DST default for `date` + `nowInAmsterdamHHMM()` for `start`.
+- [x] 03-05-PLAN.md — `keeping_start_timer` vertical slice (9 tests): POST `/{orgId}/time-entries` per D-3-06 with strict `Object.keys` assertion that body OMITS `end` AND `hours`; `timer_id` extracted via verbatim three-clause `Array.isArray` guard (D-2.5-05a); DST default for `date` + `nowInAmsterdamHHMM()` for `start`.
 - [ ] 03-06-PLAN.md — `keeping_stop_timer` vertical slice (9 tests): PATCH `/{orgId}/time-entries/{entry_id}/stop` per D-3-05 (supersedes D-32-R's POST claim); uses new `client.requestWithHeaders<T>` to read `X-Server-Time-Ms` (TIMER-02, D-3-19); missing/invalid header falls back to `Date.now()` + `log.warn`, NOT an isError.
 - [ ] 03-07-PLAN.md — `keeping_resume_timer` vertical slice (9 tests): POST `/{orgId}/time-entries/{entry_id}/resume` per D-3-05 (resume = POST is unchanged from D-32-R); same `X-Server-Time-Ms` surface as stop-timer; tool does NOT assert `response.time_entry.id === input.entry_id` (Pitfall 6 — resume on new day creates a new entry with different id).
 - [ ] 03-08-PLAN.md — Wrap-up: wire all six write tools into `src/server.ts` + `test/server.test.ts` listTools smoke (asserts the 12-tool sorted name list); amend REQUIREMENTS.md WRITE-06 per D-3-07 (preserve original wording in footnote); add ROADMAP SC #5 footnote citing D-3-07.
@@ -147,7 +147,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 | 1. Foundation & Scaffolding | 3/3 | Complete    | 2026-06-09 |
 | 2. Read Tools & Schema Discovery | 6/6 | Complete    | 2026-06-11 |
 | 2.5. Timer Status Read Tool | 2/2 | Complete   | 2026-06-11 |
-| 3. Write Tools + Conditional Timers | 4/8 | In Progress|  |
+| 3. Write Tools + Conditional Timers | 5/8 | In Progress|  |
 | 4. Distribution & Release Pipeline | 0/? | Not started | - |
 
 ---
