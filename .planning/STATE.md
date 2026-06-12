@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed Phase 3 Plan 06 (keeping_stop_timer vertical slice — 9 tests, 151/151 total)
-last_updated: "2026-06-12T06:44:00.247Z"
+stopped_at: Completed Phase 3 Plan 07 (keeping_resume_timer vertical slice — 10 tests, 161/161 total)
+last_updated: "2026-06-12T08:54:00.000Z"
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 19
-  completed_plans: 17
-  percent: 50
+  completed_plans: 18
+  percent: 53
 ---
 
 # Project State: keeping-mcp
@@ -33,18 +33,18 @@ progress:
 ## Current Position
 
 Phase: 03 (write-tools-conditional-timers) — EXECUTING
-Plan: 6 of 8
+Plan: 7 of 8
 
 | Field | Value |
 |-------|-------|
 | Current phase | Phase 3 — Write Tools + Conditional Timers (executing) |
-| Current plan | Plan 03-06 complete; Plan 03-07 next (keeping_resume_timer) |
-| Phase status | Phase 3 in progress — 6 of 8 plans complete (01 foundation + 02 add-entry + 03 update-entry + 04 delete-entry + 05 start-timer + 06 stop-timer) |
-| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 17 plans complete through Phase 3 Plan 06 |
+| Current plan | Plan 03-07 complete; Plan 03-08 next (server.ts wiring + REQUIREMENTS amendment) |
+| Phase status | Phase 3 in progress — 7 of 8 plans complete (01 foundation + 02 add-entry + 03 update-entry + 04 delete-entry + 05 start-timer + 06 stop-timer + 07 resume-timer) |
+| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 18 plans complete through Phase 3 Plan 07 |
 
 ```
-Progress: [█████████░] 89%
-Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [████░░░░] · Phase 4 [░░░░░]
+Progress: [█████████░] 95%
+Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [█████████░] · Phase 4 [░░░░░]
 ```
 
 ---
@@ -68,7 +68,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Phases completed | 3 / 4 (Phase 1, 2, 2.5) |
 | Requirements mapped | 38 / 38 |
 | Plans created | 19 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 8 Phase 3) |
-| Plans completed | 17 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 6 Phase 3) |
+| Plans completed | 18 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 7 Phase 3) |
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
@@ -85,6 +85,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Phase 03-write-tools-conditional-timers P04 | 3min | 2 tasks | 2 files |
 | Phase 03-write-tools-conditional-timers P05 | ~2 minutes | 2 tasks | 2 files |
 | Phase 03-write-tools-conditional-timers P06 | ~4 minutes | 2 tasks | 2 files |
+| Phase 03-write-tools-conditional-timers P07 | ~3 minutes | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,8 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | INLINE dry-run gate for delete-entry (Plan 03-04, D-3-03) | `src/tools/delete-entry.ts` is the only Phase 3 write tool that does NOT delegate the gate decision entirely to `previewOrCall`. The dry-run branch performs an extra `client.get<unknown>(path)` to populate `would_delete` BEFORE returning the preview; only the confirm branch delegates to `previewOrCall`. The verbatim echo pattern (`would_delete: wouldDelete`) is the plan-locked shape — no strict-wrapper-read step. 4xx on the dry-run GET (e.g. 404 not found) flows through `toIsErrorContent` as definite-fail and the confirm path is NOT attempted (T-03-04-05 mitigation, Test 7 enforces `deletes.length === 0`). 204 path wraps null as `{ ok: true }` via `result ?? { ok: true }` so the user sees a meaningful success surface (D-3-27 end-to-end). |
 | Delete-entry destructive marker locked verbatim (Plan 03-04, D-3-11 + WRITE-07) | `src/tools/delete-entry.ts` description starts with `**DESTRUCTIVE: permanently deletes the entry**` — leading + trailing double-asterisks included as verbatim markdown. Test 10 asserts the literal via `tool?.description?.includes(...)`. The marker is the AI-facing flag that tells the MCP client this tool cannot be reversed. Add, update, and timer write tools do NOT carry this marker — only delete (the only Phase 3 tool whose effect is irreversible). |
 | INLINE dry-run gate for stop-timer (Plan 03-06, D-3-18 + D-3-19) | `src/tools/stop-timer.ts` is the second Phase 3 write tool that does NOT delegate the gate decision entirely to `previewOrCall` (sibling to delete-entry). `previewOrCall` has no header-surface awareness, so the confirm branch calls `client.requestWithHeaders<T>("PATCH", path)` directly to access the `X-Server-Time-Ms` response header (TIMER-02). The dry-run branch constructs the `would_post` envelope inline with `body: null` because PATCH `/stop` has no request body per OpenAPI. D-3-19 fallback: `Number(headers.get("X-Server-Time-Ms"))` gated by `Number.isFinite(parsed) && parsed > 0`; on failure `server_time_ms = Date.now()` AND `client.log.warn("X-Server-Time-Ms header missing on stop response; falling back to local clock")`. NOT an isError surface — the stop succeeded, only the wall-clock anchor is degraded. Response shape spreads `...body` and adds `server_time_ms` as a sibling — verbatim wrapper pass-through (no strict-wrapper-read for `time_entry`, same precedent as delete-entry's `would_delete` echo). |
+| Pitfall 6 — resume id asymmetry (Plan 03-07, D-3-05 + RESEARCH §200-vs-201) | `src/tools/resume-timer.ts` DELIBERATELY does NOT assert `response.time_entry.id === input.entry_id`. When resuming an entry whose original date is no longer "today", Keeping creates a NEW ongoing entry (returns 201 with a different id) rather than modifying the old one. The tool surfaces the server's response wrapper verbatim via `{ ...body, server_time_ms }` — the AI consumer MUST read `time_entry.id` from the response. `grep -c 'input\.entry_id ===' src/tools/resume-timer.ts` returns 0; Test 5 mocks `time_entry.id === 99999` with `input.entry_id === 12345` and asserts the server's id surfaces unchanged. Description copy documents the asymmetry verbatim per PLAN.md directive. Same inline-gate + X-Server-Time-Ms pattern as stop-timer, with verb POST (D-3-05 — D-32-R unchanged for resume) and path `/resume`. Warn message: `"X-Server-Time-Ms header missing on resume response; falling back to local clock"`. |
+| 403 = DEFINITE-FAIL on resume-timer (Plan 03-07, RESEARCH Q3 RESOLVED) | Per the OpenAPI contract, Keeping returns 403 when the caller tries to resume a locked time entry. Per the `classifyAmbiguous` contract (D-3-16), only `status >= 500` is ambiguous; 4xx (including 403) flows through `toIsErrorContent` unchanged so the AI gets the localised error message verbatim. Test 7 mocks `KeepingApiError(403, "cannot resume locked entry")` and asserts: (a) `res.isError === true`, (b) text contains `"Keeping API error 403"`, (c) text contains `"cannot resume locked entry"`, and CRITICALLY (d) text does NOT contain `"outcome unknown"` (which would indicate the ambiguous envelope misfired). This locks the contract that 403 is a server-acknowledged failure, NOT an outcome-unknown case. |
 
 ### Open Questions (resolve during execution)
 
@@ -154,7 +157,8 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 - [x] Phase 3 Plan 04: keeping_delete_entry vertical slice — inline dry-run gate + extra GET for would_delete; 204-tolerant confirm (completed 2026-06-12)
 - [x] Phase 3 Plan 05: keeping_start_timer vertical slice — POST with no end/no hours, timer_id extraction via three-clause guard (completed 2026-06-12)
 - [x] Phase 3 Plan 06: keeping_stop_timer vertical slice — PATCH /stop via requestWithHeaders, X-Server-Time-Ms surfacing + fallback warn (completed 2026-06-12)
-- [ ] Phase 3 Plan 07..08: keeping_resume_timer + server.ts wiring (in progress)
+- [x] Phase 3 Plan 07: keeping_resume_timer vertical slice — POST /resume via requestWithHeaders, Pitfall 6 id asymmetry verbatim pass-through, 403 definite-fail (completed 2026-06-12)
+- [ ] Phase 3 Plan 08: server.ts wiring + REQUIREMENTS.md WRITE-06 amendment (in progress)
 
 ### Blockers
 
@@ -173,10 +177,10 @@ None.
 5. Re-run `/gsd:verify-phase 02.5` to transition VERIFICATION.md from gaps_found 9/10 → complete 10/10 (Truth #3 FAILED → VERIFIED)
 6. Continue with Phase 3 (draft `.planning/phases/03-*/03-CONTEXT.md` first)
 
-**Last session:** 2026-06-12T06:43:26.504Z
-**Stopped at:** Completed Phase 3 Plan 06 (keeping_stop_timer vertical slice — 9 tests, 151/151 total)
+**Last session:** 2026-06-12T08:54:00.000Z
+**Stopped at:** Completed Phase 3 Plan 07 (keeping_resume_timer vertical slice — 10 tests, 161/161 total)
 **Resume file:** None
-**Next action:** `/gsd:execute-phase 3` continues with Plan 03-05 (`keeping_start_timer`)
+**Next action:** `/gsd:execute-phase 3` continues with Plan 03-08 (server.ts wiring + REQUIREMENTS.md WRITE-06 amendment)
 
 ---
 *State initialized: 2026-06-09 after roadmap creation*
