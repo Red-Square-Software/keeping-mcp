@@ -120,7 +120,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 - [x] 03-07-PLAN.md — `keeping_resume_timer` vertical slice (10 tests): POST `/{orgId}/time-entries/{entry_id}/resume` per D-3-05 (resume = POST is unchanged from D-32-R); same `X-Server-Time-Ms` surface as stop-timer; tool does NOT assert `response.time_entry.id === input.entry_id` (Pitfall 6 — resume on new day creates a new entry with different id); 403 on locked entries = DEFINITE-FAIL via toIsErrorContent per RESEARCH Q3.
 - [x] 03-08-PLAN.md — Wrap-up: wire all six write tools into `src/server.ts` + `test/server.test.ts` listTools smoke (asserts the 12-tool sorted name list); amend REQUIREMENTS.md WRITE-06 per D-3-07 (preserve original wording in footnote); add ROADMAP SC #5 footnote citing D-3-07.
 - [x] 03-09-PLAN.md — Gap closure CR-01 (D-3-16 violation): added TimeoutError arm to classifyAmbiguous (`src/keeping/write-gate.ts:104`) — Node 22 `AbortSignal.timeout()` throws `DOMException(name=TimeoutError)`, not `AbortError`. New W12 test constructs real `new DOMException("timeout", "TimeoutError")`. 163/163 tests; closes VERIFICATION.md Gap #1 / Truth #2 / SC #2. (completed 2026-06-12)
-- [ ] 03-10-PLAN.md — Gap closure CR-02 (D-3-28 spirit violation): replace loose HH:mm regex with strict 24-hour zero-padded form across add-entry.ts (start+end), update-entry.ts (start+end), start-timer.ts (start). Export schemas + add negative tests rejecting 1:30pm/25:00/9:5/00:00:00. Closes VERIFICATION.md Truth #6 / SC #6.
+- [x] 03-10-PLAN.md — Gap closure CR-02 (D-3-28 spirit violation): replaced loose HH:mm regex with strict 24-hour zero-padded form `/^([01]\d|2[0-3]):[0-5]\d$/` across add-entry.ts (start+end), update-entry.ts (start+end), start-timer.ts (start). Exported AddEntryInput/UpdateEntryInput/StartTimerInput schemas; added 43 negative+positive tests rejecting `1:30pm`/`25:00`/`9:5`/`00:00:00` and accepting `00:00`/`09:05`/`13:45`/`23:59`. 206/206 tests, tsc+biome clean. Closes VERIFICATION.md Truth #6 / SC #6. (completed 2026-06-12)
 
 ---
 
@@ -150,7 +150,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 | 1. Foundation & Scaffolding | 3/3 | Complete    | 2026-06-09 |
 | 2. Read Tools & Schema Discovery | 6/6 | Complete    | 2026-06-11 |
 | 2.5. Timer Status Read Tool | 2/2 | Complete   | 2026-06-11 |
-| 3. Write Tools + Conditional Timers | 9/10 | Gap closure in progress (CR-01 closed via 03-09; CR-02 pending 03-10) | 2026-06-12 |
+| 3. Write Tools + Conditional Timers | 10/10 | Implementation + both gap closures complete (CR-01 via 03-09, CR-02 via 03-10); awaiting verifier re-pass | 2026-06-12 |
 | 4. Distribution & Release Pipeline | 0/? | Not started | - |
 
 ---
@@ -178,4 +178,4 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 
 ---
 *Roadmap created: 2026-06-09*
-*Last updated: 2026-06-12 — Phase 3 Plan 09 (CR-01 gap closure — TimeoutError arm + W12 regression test) complete; 9/10 Phase 3 plans done (CR-02 / Plan 03-10 remaining)*
+*Last updated: 2026-06-12 — Phase 3 Plan 10 (CR-02 gap closure — strict HH:mm regex + 43 new tests) complete; 10/10 Phase 3 plans done; awaiting verifier re-pass before Phase 4*

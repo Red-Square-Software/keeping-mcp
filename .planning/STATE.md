@@ -3,20 +3,20 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed Phase 3 Plan 09 (CR-01 gap closure — TimeoutError arm added to classifyAmbiguous + W12 regression test constructing real DOMException; 163/163 total; closes 03-VERIFICATION.md Gap #1)
-last_updated: "2026-06-12T07:40:15Z"
+stopped_at: Completed Phase 3 Plan 10 (CR-02 gap closure — strict 24-hour zero-padded HH:mm regex `/^([01]\d|2[0-3]):[0-5]\d$/` at five callsites in add-entry.ts / update-entry.ts / start-timer.ts; exported AddEntryInput / UpdateEntryInput / StartTimerInput schemas; +43 negative/positive tests; 206/206 total; closes 03-VERIFICATION.md Gap #2)
+last_updated: "2026-06-12T09:50:00Z"
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 21
-  completed_plans: 20
-  percent: 53
+  completed_plans: 21
+  percent: 55
 ---
 
 # Project State: keeping-mcp
 
 **Last updated:** 2026-06-12  
-**Session boundary:** Phase 3 Plan 09 complete (gap closure CR-01 — added TimeoutError arm to classifyAmbiguous in src/keeping/write-gate.ts; new W12 regression test constructs real `new DOMException("timeout", "TimeoutError")` to pin the Node 22 AbortSignal.timeout exception shape; 163/163 tests; biome+tsc all green. Closes 03-VERIFICATION.md Gap #1 / 03-REVIEW.md CR-01.)
+**Session boundary:** Phase 3 Plan 10 complete (gap closure CR-02 — replaced loose HH:mm regex `/^\d{1,2}:\d{2}(:\d{2})?(am|pm)?$/i` with strict `/^([01]\d|2[0-3]):[0-5]\d$/` and actionable error message `"must be HH:mm (24-hour, zero-padded)"` at all five callsites: add-entry start+end, update-entry start+end, start-timer start. Exported AddEntryInput / UpdateEntryInput / StartTimerInput so negative tests can `safeParse` directly. +43 tests (17 add-entry + 17 update-entry + 9 start-timer): rejects `"1:30pm"` / `"25:00"` / `"9:5"` / `"00:00:00"`, accepts `"00:00"` / `"09:05"` / `"13:45"` / `"23:59"`, asserts error message contains both `"HH:mm"` and `"24-hour"`. 206/206 tests; tsc+biome all green. Closes 03-VERIFICATION.md Gap #2 / 03-REVIEW.md CR-02 / honors D-3-28.)
 
 ---
 
@@ -32,19 +32,19 @@ progress:
 
 ## Current Position
 
-Phase: 03 (write-tools-conditional-timers) — EXECUTING
-Plan: 9 of 10
+Phase: 03 (write-tools-conditional-timers) — IMPLEMENTATION COMPLETE, AWAITING VERIFIER RE-PASS
+Plan: 10 of 10
 
 | Field | Value |
 |-------|-------|
-| Current phase | Phase 3 — Write Tools + Conditional Timers (executing — gap closure wave) |
-| Current plan | Plan 03-09 complete (CR-01 gap closure — TimeoutError arm + W12 regression test); Plan 03-10 (CR-02 strict HH:mm regex) is the parallel Wave 1 sibling |
-| Phase status | Phase 3 IMPLEMENTATION COMPLETE + 1 of 2 gap-closure plans done (CR-01); CR-02 (Plan 03-10) remaining |
-| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 20 plans complete through Phase 3 Plan 09 — Phase 4 (distribution & release) blocked until Plan 03-10 + verifier re-pass |
+| Current phase | Phase 3 — Write Tools + Conditional Timers (all 10 plans complete; awaiting verifier re-pass) |
+| Current plan | Plan 03-10 complete (CR-02 gap closure — strict HH:mm regex + 43 new tests); both gap closures landed |
+| Phase status | Phase 3 IMPLEMENTATION + BOTH GAP CLOSURES COMPLETE (CR-01 via 03-09, CR-02 via 03-10); verifier re-pass next |
+| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 21 plans complete through Phase 3 Plan 10 — Phase 4 (distribution & release) blocked until verifier re-pass on Phase 3 |
 
 ```
 Progress: [██████████] 100%
-Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [█████████░] · Phase 4 [░░░░░]
+Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [██████████] · Phase 4 [░░░░░]
 ```
 
 ---
@@ -56,7 +56,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | 1 | Foundation & Scaffolding | Complete (2026-06-09) | DIST-01..03, AUTH-01..03, SAFE-01, REL-01 |
 | 2 | Read Tools & Schema Discovery | Complete (2026-06-11) | AUTH-04..05, IDENT-01..03, META-01..02, READ-01..03, SAFE-02..05 |
 | 2.5 | Timer Status Read Tool | Complete (2026-06-11) | TIMER-01 (status-read portion) |
-| 3 | Write Tools + Conditional Timers | Implementation complete (2026-06-12, awaiting verifier) | WRITE-01..08, TIMER-01 (start/stop/resume), TIMER-02 |
+| 3 | Write Tools + Conditional Timers | Implementation + both gap closures complete (2026-06-12, awaiting verifier re-pass) | WRITE-01..08, TIMER-01 (start/stop/resume), TIMER-02 |
 | 4 | Distribution & Release Pipeline | Not started | DIST-04..05, REL-02..05 |
 
 ---
@@ -65,10 +65,10 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 
 | Metric | Value |
 |--------|-------|
-| Phases completed | 3 / 4 (Phase 1, 2, 2.5); Phase 3 implementation + 1 of 2 gap-closure plans complete (CR-01 closed; CR-02 pending Plan 03-10) |
+| Phases completed | 3 / 4 (Phase 1, 2, 2.5); Phase 3 implementation + BOTH gap-closure plans complete (CR-01 closed via 03-09, CR-02 closed via 03-10) |
 | Requirements mapped | 38 / 38 |
 | Plans created | 21 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 10 Phase 3) |
-| Plans completed | 20 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 9 Phase 3) |
+| Plans completed | 21 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 10 Phase 3) |
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
@@ -88,6 +88,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Phase 03-write-tools-conditional-timers P07 | ~3 minutes | 2 tasks | 2 files |
 | Phase 03 P08 | 4min | 2 tasks | 3 files |
 | Phase 03 P09 | ~5 minutes | 1 task | 2 files |
+| Phase 03 P10 | ~6 minutes | 1 task | 6 files |
 
 ## Accumulated Context
 
@@ -129,6 +130,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | 12-tool wiring smoke uses sorted-name list (Plan 03-08, T-03-08-01) | `test/server.test.ts` builds an `InMemoryTransport.createLinkedPair()`, drives `createServer(client, { KEEPING_TOKEN, KEEPING_REQUIRE_CONFIRM: true, KEEPING_LOG_LEVEL: "error" }, log)`, calls `mcpClient.listTools()`, then `names.sort()` and `expect(names).toEqual([12-alphabetised-name-array])`. Sorted comparison is order-insensitive (stable against cosmetic reorderings of register calls in src/server.ts) but still catches: drop (length shrinks below 12), accidental add (length grows above 12), typo (`keeping_resume_tmer` mismatches the alphabetised reference). Future plans that add tools MUST extend both src/server.ts AND the test's expected array — the smoke is the canonical regression guard against forgotten registrations. |
 | WRITE-06 amendment preserves original wording (Plan 03-08, D-3-07) | REQUIREMENTS.md WRITE-06 bullet was rewritten in-line with the real 8-value OpenAPI enum (`work`, `break`, `special_leave`, `unpaid_leave`, `statutory_leave`, `sick_leave`, `work_reduction`, `trip`, default `work`); the original `billable`/`non_billable` wording is preserved verbatim in an `**Amendment 2026-06-12 (D-3-07):**` sub-bullet that cites the decision ID. Same pattern for ROADMAP SC #5 — original sentence untouched, blockquote footnote appended one indent level deeper. The supersession-with-footnote idiom: a superseded line is NEVER silently overwritten; the new wording goes in-line AND the old wording survives in a footnote referencing the decision ID so a future reader can audit the change. Reusable template for any future REQUIREMENTS / ROADMAP correction. |
 | WRITE-06 traceability row flipped Complete; checkbox stays [ ] (Plan 03-08) | Two trackers for the same requirement: the in-line bullet checkbox (`- [ ] **WRITE-06**: ...`) and the traceability table row. Plan 03-08's brief said "keep the checkbox `[ ]` — the verify-phase agent ticks it" but the orchestration `<plan_specifics>` said "Mark WRITE-06 as Complete in the traceability table." Resolution: respect both. Checkbox stays `[ ]` (verifier owns the tick), traceability row flipped to `Complete (per D-3-07 amendment — see WRITE-06 row above)` because Plan 03-02 demonstrably shipped the 8-value enum and the traceability table tracks "which phase delivered this?" — a separate semantic axis from the v1-requirements checkbox. |
+| Strict HH:mm regex with named error message (Plan 03-10, CR-02) | The replacement regex is the single literal `/^([01]\d|2[0-3]):[0-5]\d$/` applied verbatim at all five callsites (add-entry start+end, update-entry start+end, start-timer start). The Zod `.regex(pattern, message)` second argument is the literal string `"must be HH:mm (24-hour, zero-padded)"` — names both the format AND the constraint so a confused LLM caller receives actionable guidance instead of a generic `invalid_string` surface. Schemas (`AddEntryInput`, `UpdateEntryInput`, `StartTimerInput`) are exported solely to enable schema-direct `safeParse` negative tests — minimal test-surface widening; runtime tool registration unchanged. The default-path output of `nowInAmsterdamHHMM()` (always zero-padded 24-hour HH:mm via `Intl.DateTimeFormat("sv-SE", { hour: "2-digit", minute: "2-digit", hour12: false })`) continues to parse through the new regex — DST default tests (add-entry Test 11, start-timer Test 4) remain green. |
 
 ### Open Questions (resolve during execution)
 
@@ -165,7 +167,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 - [x] Phase 3 Plan 07: keeping_resume_timer vertical slice — POST /resume via requestWithHeaders, Pitfall 6 id asymmetry verbatim pass-through, 403 definite-fail (completed 2026-06-12)
 - [x] Phase 3 Plan 08: server wiring (six register* + _config→config rename) + listTools 12-tool smoke + REQUIREMENTS.md WRITE-06 amendment + ROADMAP SC #5 footnote per D-3-07 (completed 2026-06-12)
 - [x] Phase 3 Plan 09: CR-01 gap closure — TimeoutError arm in classifyAmbiguous (`src/keeping/write-gate.ts:104`) + W12 regression test constructing real `new DOMException("timeout", "TimeoutError")`; 163/163 tests; closes 03-VERIFICATION.md Gap #1 (completed 2026-06-12)
-- [ ] Phase 3 Plan 10: CR-02 gap closure — strict 24-hour HH:mm regex in add-entry.ts (start+end), update-entry.ts (start+end), start-timer.ts (start) + negative tests rejecting `1:30pm`, `25:00`, `9:5`, `00:00:00` (parallel Wave 1 sibling to 03-09)
+- [x] Phase 3 Plan 10: CR-02 gap closure — strict 24-hour HH:mm regex `/^([01]\d|2[0-3]):[0-5]\d$/` + error message `"must be HH:mm (24-hour, zero-padded)"` at five callsites (add-entry start+end, update-entry start+end, start-timer start); exported AddEntryInput / UpdateEntryInput / StartTimerInput; +43 negative/positive tests rejecting `1:30pm`/`25:00`/`9:5`/`00:00:00`; 206/206 tests; closes 03-VERIFICATION.md Gap #2 / 03-REVIEW.md CR-02 (completed 2026-06-12)
 
 ### Blockers
 
@@ -180,16 +182,15 @@ None.
 1. Read `.planning/ROADMAP.md` — phase goals and success criteria
 2. Read `.planning/PROJECT.md` — core value and locked decisions
 3. Read `.planning/REQUIREMENTS.md` — requirement IDs and traceability
-4. Read `.planning/phases/03-write-tools-conditional-timers/03-09-SUMMARY.md` for the last completed plan (CR-01 closure)
-5. Execute Plan 03-10 (CR-02 strict HH:mm regex — parallel Wave 1 sibling)
-6. After 03-10 lands, re-run `/gsd:verify-phase 03` to transition Phase 3 VERIFICATION.md to complete (Truth #2 and Truth #6 → VERIFIED)
-7. Then plan Phase 4 (`gsd:plan-phase 4`) — distribution & release pipeline
+4. Read `.planning/phases/03-write-tools-conditional-timers/03-10-SUMMARY.md` for the last completed plan (CR-02 closure — strict HH:mm regex)
+5. Run `/gsd:verify-phase 03` to transition Phase 3 VERIFICATION.md to complete (Truth #2 and Truth #6 → VERIFIED — both gap-closure plans 03-09 and 03-10 have landed)
+6. Then plan Phase 4 (`gsd:plan-phase 4`) — distribution & release pipeline
 
-**Last session:** 2026-06-12T07:40:15Z
-**Stopped at:** Completed Phase 3 Plan 09 (CR-01 gap closure — TimeoutError arm added to classifyAmbiguous + W12 regression test constructing real DOMException; 163/163 total; closes 03-VERIFICATION.md Gap #1)
+**Last session:** 2026-06-12T09:50:00Z
+**Stopped at:** Completed Phase 3 Plan 10 (CR-02 gap closure — strict 24-hour zero-padded HH:mm regex `/^([01]\d|2[0-3]):[0-5]\d$/` at five callsites in add-entry.ts / update-entry.ts / start-timer.ts; exported AddEntryInput / UpdateEntryInput / StartTimerInput schemas; +43 negative/positive tests; 206/206 total; closes 03-VERIFICATION.md Gap #2)
 **Resume file:** None
-**Next action:** Execute Plan 03-10 (CR-02 strict HH:mm regex gap closure) — parallel Wave 1 sibling to 03-09. Then verifier pass on Phase 3.
+**Next action:** Run `/gsd:verify-phase 03` — both Phase 3 gap closures (CR-01 via 03-09, CR-02 via 03-10) are complete; verifier should flip Truth #2 and Truth #6 to VERIFIED, unblocking Phase 4 (distribution & release).
 
 ---
 *State initialized: 2026-06-09 after roadmap creation*
-*Last updated: 2026-06-12 after Phase 3 Plan 09 (CR-01 gap closure — TimeoutError arm + W12 regression test) completion*
+*Last updated: 2026-06-12 after Phase 3 Plan 10 (CR-02 gap closure — strict HH:mm regex + 43 new tests) completion*
