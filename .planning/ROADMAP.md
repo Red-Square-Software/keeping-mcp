@@ -1,4 +1,4 @@
-﻿# ROADMAP: keeping-mcp
+# ROADMAP: keeping-mcp
 
 **Project:** keeping-mcp — TypeScript MCP server wrapping the Keeping time-tracking API  
 **Mode:** MVP (vertical slices; each phase ships a runnable increment)  
@@ -109,7 +109,15 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 5. Write tools accept a `purpose` field with `"billable"` and `"non_billable"` as first-class values (matching the confirmed Keeping enum); the `confirm` parameter description explicitly states it must be set by the user after reviewing the preview, not autonomously by the model.
 6. *(Conditional — only if Phase 2 probe returned non-404)* `keeping_start_timer` starts a running timer and returns a `timer_id`; `keeping_stop_timer` stops it and creates the corresponding time entry; elapsed time uses `X-Server-Time-Ms` from the response header; if the probe returned 404, this criterion is marked "not applicable" and the omission is documented.
 
-**Plans**: TBD
+**Plans**: 8 plans
+- [ ] 03-01-PLAN.md — Foundation: rawFetch 204 fix (D-3-27), `requestWithHeaders<T>` (D-3-18), `src/keeping/date.ts` (`todayInAmsterdam` + `nowInAmsterdamHHMM`), `src/keeping/write-gate.ts` (`previewOrCall` + `classifyAmbiguous` + byte-locked `AMBIGUOUS_TEXT`), types append. TDD with 20+ tests across three test files.
+- [ ] 03-02-PLAN.md — `keeping_add_entry` vertical slice (Zod schema + handler + 11+ tests): dry-run gate, org-mode-aware body (times vs hours per D-3-08), DST-correct date default per D-3-15/D-3-26, real OpenAPI 8-value purpose enum per D-3-07. server.ts wiring deferred to 03-08 for parallelism.
+- [ ] 03-03-PLAN.md — `keeping_update_entry` vertical slice (9 tests): PATCH partial; `date`/`purpose`/`user_id` immutable per OpenAPI `entry_edit_request`; only supplied fields in body.
+- [ ] 03-04-PLAN.md — `keeping_delete_entry` vertical slice (10 tests): inline dry-run gate + extra GET for `would_delete` (D-3-03); confirm path proves D-3-27 204-tolerant rawFetch end-to-end; description carries the `**DESTRUCTIVE: permanently deletes the entry**` marker per D-3-11.
+- [ ] 03-05-PLAN.md — `keeping_start_timer` vertical slice (9 tests): POST `/{orgId}/time-entries` per D-3-06 with strict `Object.keys` assertion that body OMITS `end` AND `hours`; `timer_id` extracted via verbatim three-clause `Array.isArray` guard (D-2.5-05a); DST default for `date` + `nowInAmsterdamHHMM()` for `start`.
+- [ ] 03-06-PLAN.md — `keeping_stop_timer` vertical slice (9 tests): PATCH `/{orgId}/time-entries/{entry_id}/stop` per D-3-05 (supersedes D-32-R's POST claim); uses new `client.requestWithHeaders<T>` to read `X-Server-Time-Ms` (TIMER-02, D-3-19); missing/invalid header falls back to `Date.now()` + `log.warn`, NOT an isError.
+- [ ] 03-07-PLAN.md — `keeping_resume_timer` vertical slice (9 tests): POST `/{orgId}/time-entries/{entry_id}/resume` per D-3-05 (resume = POST is unchanged from D-32-R); same `X-Server-Time-Ms` surface as stop-timer; tool does NOT assert `response.time_entry.id === input.entry_id` (Pitfall 6 — resume on new day creates a new entry with different id).
+- [ ] 03-08-PLAN.md — Wrap-up: wire all six write tools into `src/server.ts` + `test/server.test.ts` listTools smoke (asserts the 12-tool sorted name list); amend REQUIREMENTS.md WRITE-06 per D-3-07 (preserve original wording in footnote); add ROADMAP SC #5 footnote citing D-3-07.
 
 ---
 
@@ -139,7 +147,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 | 1. Foundation & Scaffolding | 3/3 | Complete    | 2026-06-09 |
 | 2. Read Tools & Schema Discovery | 6/6 | Complete    | 2026-06-11 |
 | 2.5. Timer Status Read Tool | 2/2 | Complete   | 2026-06-11 |
-| 3. Write Tools + Conditional Timers | 0/? | Not started | - |
+| 3. Write Tools + Conditional Timers | 0/8 | Planned (8 plans, 3 waves) | - |
 | 4. Distribution & Release Pipeline | 0/? | Not started | - |
 
 ---
@@ -167,4 +175,4 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 
 ---
 *Roadmap created: 2026-06-09*
-*Next: `/gsd:plan-phase 1`*
+*Last updated: 2026-06-12 — Phase 3 plans drafted (8 plans, 3 waves)*
