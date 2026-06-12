@@ -36,7 +36,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 **Success Criteria** (what must be TRUE):
 1. `npm run build` produces a `dist/` bundle with a shebang-injected bin entry; `npx keeping-mcp` exits non-zero with a clear stderr message (`[keeping-mcp] Configuration error: KEEPING_TOKEN must not be empty`) when `KEEPING_TOKEN` is unset — no tools are invoked, no API is called.
 2. Running the CI smoke test (pipe a minimal `initialize` JSON-RPC request to the built binary) produces stdout that is entirely valid JSON-RPC — zero non-JSON lines — confirming no stdout pollution.
-3. `package.json` contains `"mcpName": "io.github.red-square-software/keeping-mcp"`, `"bin": { "keeping-mcp": "./dist/..." }`, and the shebang works on macOS, Linux, and Windows 11 (Node resolves `.cmd` wrapper via npm).
+3. `package.json` contains `"mcpName": "io.github.Red-Square-Software/keeping-mcp"`, `"bin": { "keeping-mcp": "./dist/..." }`, and the shebang works on macOS, Linux, and Windows 11 (Node resolves `.cmd` wrapper via npm).
 4. GitHub repo exists at `red-square-software/keeping-mcp` with MIT `LICENSE` file committed and CI workflow passing on push to `main`.
 5. A unit test asserts that no tool handler output or error path contains the string value of a known fake test token (`kp_test_FAKE`), verifying token redaction from day one.
 
@@ -133,8 +133,8 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 
 **Success Criteria** (what must be TRUE):
 1. `npm pack --dry-run` output contains only `dist/`, `README.md`, and `LICENSE` — no `.env`, test fixtures, `.github/`, or dotfiles appear; the `files` whitelist in `package.json` is the sole mechanism (no `.npmignore`).
-2. Pushing a `v*` tag triggers the GitHub Actions release workflow; npm publishes with OIDC (no `NPM_TOKEN` secret) and a provenance attestation badge appears on the npm package page; `mcp-publisher` publishes to the MCP Registry under `io.github.red-square-software/keeping-mcp`; the `server.json` version is derived from `package.json` at publish time (not hand-edited).
-3. The MCP Registry entry is discoverable at `io.github.red-square-software/keeping-mcp` and a user can add keeping-mcp to Claude Code using the registry entry.
+2. Pushing a `v*` tag triggers the GitHub Actions release workflow; npm publishes with OIDC (no `NPM_TOKEN` secret) and a provenance attestation badge appears on the npm package page; `mcp-publisher` publishes to the MCP Registry under `io.github.Red-Square-Software/keeping-mcp`; the `server.json` version is derived from `package.json` at publish time (not hand-edited).
+3. The MCP Registry entry is discoverable at `io.github.Red-Square-Software/keeping-mcp` and a user can add keeping-mcp to Claude Code using the registry entry.
 4. README contains a Windows-specific Claude Code config block (`{ "command": "cmd", "args": ["/c", "npx", "-y", "keeping-mcp"] }`) alongside the macOS/Linux block, a step-by-step token setup section (enable developer features in Keeping prefs → generate access token), env var reference, and an example dry-run transcript.
 5. README contains a prominent warning that `KEEPING_REQUIRE_CONFIRM=false` disables the dry-run gate and writes are immediate; a cold-start `npx keeping-mcp` smoke test on Windows 11 passes (no `ENOENT` or silent failure).
 

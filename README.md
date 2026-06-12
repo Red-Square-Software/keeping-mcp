@@ -115,7 +115,7 @@ Step 1 — preview (no `confirm`, no API call made). Illustrative; actual field 
   "response": {
     "would_post": {
       "method": "POST",
-      "url": "/v1/organisations/456/time_entries",
+      "url": "https://api.keeping.nl/v1/456/time-entries",
       "body": {
         "description": "Phase 4 release prep",
         "hours": 1.5,

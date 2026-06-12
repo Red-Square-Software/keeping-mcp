@@ -11,7 +11,7 @@ Open-source Model Context Protocol (MCP) server that exposes the Keeping (api.ke
 
 - **Tech stack**: TypeScript on Node.js, official `@modelcontextprotocol/sdk`, Zod for tool input schemas. — User's first MCP server; matches the dominant ecosystem and registry tooling.
 - **License**: MIT. — Standard for MCP servers; permissive enough for downstream packaging.
-- **Hosting / namespace**: GitHub repo under the `redsquare-nl` org; npm package name aligns with `io.github.redsquare-nl/keeping-mcp` registry namespace. — Required by the MCP registry's GitHub-verified namespace model.
+- **Hosting / namespace**: GitHub repo under the `Red-Square-Software` org; npm package name `keeping-mcp` (unscoped) and MCP Registry namespace `io.github.Red-Square-Software/keeping-mcp`. Canonical GitHub org casing is required by the OIDC subject claim. — Required by the MCP registry's GitHub-verified namespace model.
 - **Security**: Personal access token must never appear in logs, tool output, or commits. Read only from env var. — Billable-hours data and a write-capable API token; leak is high-impact.
 - **API**: Must respect Keeping's 120 req/min rate limit, and must scope writes to the authenticated user (only admins can write other users' entries; v1 deliberately does not target that path).
 - **Platform**: User runs Claude Code on Windows 11. Server must work on Windows + macOS + Linux (Node.js + npx covers this, but path/env handling needs to stay portable).
