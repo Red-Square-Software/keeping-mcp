@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed Phase 3 Plan 04 (keeping_delete_entry vertical slice — 10 tests, 133/133 total)
-last_updated: "2026-06-12T06:34:41.672Z"
+stopped_at: Completed Phase 3 Plan 06 (keeping_stop_timer vertical slice — 9 tests, 151/151 total)
+last_updated: "2026-06-12T06:44:00.247Z"
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 19
-  completed_plans: 16
+  completed_plans: 17
   percent: 50
 ---
 
@@ -33,17 +33,17 @@ progress:
 ## Current Position
 
 Phase: 03 (write-tools-conditional-timers) — EXECUTING
-Plan: 5 of 8
+Plan: 6 of 8
 
 | Field | Value |
 |-------|-------|
 | Current phase | Phase 3 — Write Tools + Conditional Timers (executing) |
-| Current plan | Plan 03-04 complete; Plan 03-05 next (keeping_start_timer) |
-| Phase status | Phase 3 in progress — 4 of 8 plans complete (01 foundation + 02 add-entry + 03 update-entry + 04 delete-entry) |
-| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 15 plans complete through Phase 3 Plan 04 |
+| Current plan | Plan 03-06 complete; Plan 03-07 next (keeping_resume_timer) |
+| Phase status | Phase 3 in progress — 6 of 8 plans complete (01 foundation + 02 add-entry + 03 update-entry + 04 delete-entry + 05 start-timer + 06 stop-timer) |
+| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 17 plans complete through Phase 3 Plan 06 |
 
 ```
-Progress: [████████░░] 84%
+Progress: [█████████░] 89%
 Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [████░░░░] · Phase 4 [░░░░░]
 ```
 
@@ -68,7 +68,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Phases completed | 3 / 4 (Phase 1, 2, 2.5) |
 | Requirements mapped | 38 / 38 |
 | Plans created | 19 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 8 Phase 3) |
-| Plans completed | 15 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 4 Phase 3) |
+| Plans completed | 17 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 6 Phase 3) |
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
@@ -84,6 +84,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Phase 03-write-tools-conditional-timers P03 | 3min | 2 tasks | 2 files |
 | Phase 03-write-tools-conditional-timers P04 | 3min | 2 tasks | 2 files |
 | Phase 03-write-tools-conditional-timers P05 | ~2 minutes | 2 tasks | 2 files |
+| Phase 03-write-tools-conditional-timers P06 | ~4 minutes | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Strict wrapper guard MUST pair typeof with Array.isArray (Plan 02.5-02, D-2.5-05a re-enforced) | `extractTimeEntry` guard now reads `candidate === null \|\| typeof candidate !== "object" \|\| Array.isArray(candidate)`. Closes the array-drift gap from `02.5-VERIFICATION.md` (REVIEW.md WR-01): `typeof [] === "object"` is `true` in JS, so the original two-clause guard silently accepted `{ time_entry: [] }` and `{ time_entry: [{...}] }` as valid wrappers — contradicting the source-comment contract (lines 17-22 / 53-56). Test 11 + Test 12 in `test/tools/timer-status.test.ts` are the regression gates (`toEqual({ time_entry: null, is_running: false })`). Phase 3 write tools that read entry shapes MUST reuse this three-clause guard pattern verbatim. |
 | INLINE dry-run gate for delete-entry (Plan 03-04, D-3-03) | `src/tools/delete-entry.ts` is the only Phase 3 write tool that does NOT delegate the gate decision entirely to `previewOrCall`. The dry-run branch performs an extra `client.get<unknown>(path)` to populate `would_delete` BEFORE returning the preview; only the confirm branch delegates to `previewOrCall`. The verbatim echo pattern (`would_delete: wouldDelete`) is the plan-locked shape — no strict-wrapper-read step. 4xx on the dry-run GET (e.g. 404 not found) flows through `toIsErrorContent` as definite-fail and the confirm path is NOT attempted (T-03-04-05 mitigation, Test 7 enforces `deletes.length === 0`). 204 path wraps null as `{ ok: true }` via `result ?? { ok: true }` so the user sees a meaningful success surface (D-3-27 end-to-end). |
 | Delete-entry destructive marker locked verbatim (Plan 03-04, D-3-11 + WRITE-07) | `src/tools/delete-entry.ts` description starts with `**DESTRUCTIVE: permanently deletes the entry**` — leading + trailing double-asterisks included as verbatim markdown. Test 10 asserts the literal via `tool?.description?.includes(...)`. The marker is the AI-facing flag that tells the MCP client this tool cannot be reversed. Add, update, and timer write tools do NOT carry this marker — only delete (the only Phase 3 tool whose effect is irreversible). |
+| INLINE dry-run gate for stop-timer (Plan 03-06, D-3-18 + D-3-19) | `src/tools/stop-timer.ts` is the second Phase 3 write tool that does NOT delegate the gate decision entirely to `previewOrCall` (sibling to delete-entry). `previewOrCall` has no header-surface awareness, so the confirm branch calls `client.requestWithHeaders<T>("PATCH", path)` directly to access the `X-Server-Time-Ms` response header (TIMER-02). The dry-run branch constructs the `would_post` envelope inline with `body: null` because PATCH `/stop` has no request body per OpenAPI. D-3-19 fallback: `Number(headers.get("X-Server-Time-Ms"))` gated by `Number.isFinite(parsed) && parsed > 0`; on failure `server_time_ms = Date.now()` AND `client.log.warn("X-Server-Time-Ms header missing on stop response; falling back to local clock")`. NOT an isError surface — the stop succeeded, only the wall-clock anchor is degraded. Response shape spreads `...body` and adds `server_time_ms` as a sibling — verbatim wrapper pass-through (no strict-wrapper-read for `time_entry`, same precedent as delete-entry's `would_delete` echo). |
 
 ### Open Questions (resolve during execution)
 
@@ -150,7 +152,9 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 - [x] Phase 3 Plan 02: keeping_add_entry vertical slice — dry-run gate, org-mode-aware body, DST default (completed 2026-06-12)
 - [x] Phase 3 Plan 03: keeping_update_entry vertical slice — PATCH partial-body, immutable-field strip, dry-run gate (completed 2026-06-12)
 - [x] Phase 3 Plan 04: keeping_delete_entry vertical slice — inline dry-run gate + extra GET for would_delete; 204-tolerant confirm (completed 2026-06-12)
-- [ ] Phase 3 Plan 05..08: remaining write tools (timers) + server.ts wiring (in progress)
+- [x] Phase 3 Plan 05: keeping_start_timer vertical slice — POST with no end/no hours, timer_id extraction via three-clause guard (completed 2026-06-12)
+- [x] Phase 3 Plan 06: keeping_stop_timer vertical slice — PATCH /stop via requestWithHeaders, X-Server-Time-Ms surfacing + fallback warn (completed 2026-06-12)
+- [ ] Phase 3 Plan 07..08: keeping_resume_timer + server.ts wiring (in progress)
 
 ### Blockers
 
@@ -169,8 +173,8 @@ None.
 5. Re-run `/gsd:verify-phase 02.5` to transition VERIFICATION.md from gaps_found 9/10 → complete 10/10 (Truth #3 FAILED → VERIFIED)
 6. Continue with Phase 3 (draft `.planning/phases/03-*/03-CONTEXT.md` first)
 
-**Last session:** 2026-06-12T06:34:35.369Z
-**Stopped at:** Completed Phase 3 Plan 04 (keeping_delete_entry vertical slice — 10 tests, 133/133 total)
+**Last session:** 2026-06-12T06:43:26.504Z
+**Stopped at:** Completed Phase 3 Plan 06 (keeping_stop_timer vertical slice — 9 tests, 151/151 total)
 **Resume file:** None
 **Next action:** `/gsd:execute-phase 3` continues with Plan 03-05 (`keeping_start_timer`)
 
