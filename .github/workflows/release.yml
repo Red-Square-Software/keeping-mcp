@@ -96,8 +96,10 @@ jobs:
           fi
           echo "Tag matches package.json: v$TAG_VERSION"
 
-      - name: Publish to npm (OIDC trusted publishing + provenance)
+      - name: Publish to npm (granular token + sigstore provenance)
         run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Install mcp-publisher v1.7.9 (pinned)
         run: |
