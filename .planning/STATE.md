@@ -3,20 +3,20 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_plan
-stopped_at: "Completed Phase 3 Plan 10 (CR-02 gap closure — strict 24-hour zero-padded HH:mm regex `/^([01]\d|2[0-3]):[0-5]\d$/` at five callsites in add-entry.ts / update-entry.ts / start-timer.ts; exported AddEntryInput / UpdateEntryInput / StartTimerInput schemas; +43 negative/positive tests; 206/206 total; closes 03-VERIFICATION.md Gap #2)"
-last_updated: "2026-06-12T08:51:02.118Z"
+stopped_at: "Completed Phase 4 Plan 02 (README rewrite for SC #4 + SC #5 — 179-line distribution-ready public README with Windows-first install UX, 6-step token setup, env vars table, illustrative dry-run transcript, doubled KEEPING_REQUIRE_CONFIRM=false callout). Two Rule-1 deviations: rephrased Recommendation line in callouts (KEEPING_REQUIRE_CONFIRM=false grep count = 2 invariant); rephrased local-dev note to use console.error (literal console.log forbidden by plan)"
+last_updated: "2026-06-12T09:03:16.578Z"
 progress:
-  total_phases: 6
-  completed_phases: 4
+  total_phases: 4
+  completed_phases: 3
   total_plans: 25
-  completed_plans: 22
-  percent: 67
+  completed_plans: 23
+  percent: 92
 ---
 
 # Project State: keeping-mcp
 
 **Last updated:** 2026-06-12  
-**Session boundary:** Phase 3 Plan 10 complete (gap closure CR-02 — replaced loose HH:mm regex `/^\d{1,2}:\d{2}(:\d{2})?(am|pm)?$/i` with strict `/^([01]\d|2[0-3]):[0-5]\d$/` and actionable error message `"must be HH:mm (24-hour, zero-padded)"` at all five callsites: add-entry start+end, update-entry start+end, start-timer start. Exported AddEntryInput / UpdateEntryInput / StartTimerInput so negative tests can `safeParse` directly. +43 tests (17 add-entry + 17 update-entry + 9 start-timer): rejects `"1:30pm"` / `"25:00"` / `"9:5"` / `"00:00:00"`, accepts `"00:00"` / `"09:05"` / `"13:45"` / `"23:59"`, asserts error message contains both `"HH:mm"` and `"24-hour"`. 206/206 tests; tsc+biome all green. Closes 03-VERIFICATION.md Gap #2 / 03-REVIEW.md CR-02 / honors D-3-28.)
+**Session boundary:** Phase 4 Plan 02 complete (README rewrite for ROADMAP SC #4 + SC #5). 179-line distribution-ready public README replaces the 7-line placeholder. Windows-first install UX with the `cmd /c npx -y keeping-mcp` config block FIRST per RESEARCH §Pitfall 2, followed by the macOS/Linux block. 6-step token setup (Preferences → "Show features for developers" → Generate token). Four-row env vars table (KEEPING_TOKEN required + KEEPING_REQUIRE_CONFIRM default true + KEEPING_ORG_ID + KEEPING_LOG_LEVEL). Hand-crafted illustrative dry-run transcript (preview + confirm). Provenance verification section (`npm audit signatures` + jq attestations probe). Doubled ⚠ `KEEPING_REQUIRE_CONFIRM=false` callout: one above the fold + one inside Configuration; grep count = 2 exactly. Two Rule-1 deviations resolved plan-spec self-contradictions between verbatim-copy directives and grep-based verification: (a) Recommendation line in both callouts rephrased from `never set KEEPING_REQUIRE_CONFIRM=false` to `never disable this gate` to land grep count = 2, (b) local-dev note rephrased from "Never add console.log" to "Never write diagnostic output to stdout; use console.error" to satisfy the no-console.log literal assertion. All four ```json``` fences parse with JSON.parse; LF-only; 179 lines.
 
 ---
 
@@ -33,17 +33,17 @@ progress:
 ## Current Position
 
 Phase: 04 (Distribution & Release Pipeline) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 
 | Field | Value |
 |-------|-------|
-| Current phase | Phase 3 — Write Tools + Conditional Timers (all 10 plans complete; awaiting verifier re-pass) |
-| Current plan | Plan 03-10 complete (CR-02 gap closure — strict HH:mm regex + 43 new tests); both gap closures landed |
-| Phase status | Phase 3 IMPLEMENTATION + BOTH GAP CLOSURES COMPLETE (CR-01 via 03-09, CR-02 via 03-10); verifier re-pass next |
-| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 21 plans complete through Phase 3 Plan 10 — Phase 4 (distribution & release) blocked until verifier re-pass on Phase 3 |
+| Current phase | Phase 4 — Distribution & Release Pipeline (executing; 2/4 plans complete after Plan 04-02) |
+| Current plan | Plan 04-02 complete (README rewrite — Windows-first install UX, doubled KEEPING_REQUIRE_CONFIRM=false callout, REL-04 + REL-05) |
+| Phase status | Phase 4 IN PROGRESS — Plan 04-01 (server.json + check-publish-shape) and Plan 04-02 (README rewrite) complete; Plan 04-03 (release.yml workflow) next |
+| Overall progress | 23 of 25 plans complete; Phase 1, 2, 2.5 complete + Phase 3 (10 plans) implementation + gap closures complete + Phase 4 (2 of 4 plans) complete |
 
 ```
-Progress: [█████████░] 88%
+Progress: [█████████░] 92%
 Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [██████████] · Phase 4 [░░░░░]
 ```
 
@@ -57,7 +57,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | 2 | Read Tools & Schema Discovery | Complete (2026-06-11) | AUTH-04..05, IDENT-01..03, META-01..02, READ-01..03, SAFE-02..05 |
 | 2.5 | Timer Status Read Tool | Complete (2026-06-11) | TIMER-01 (status-read portion) |
 | 3 | Write Tools + Conditional Timers | Implementation + both gap closures complete (2026-06-12, awaiting verifier re-pass) | WRITE-01..08, TIMER-01 (start/stop/resume), TIMER-02 |
-| 4 | Distribution & Release Pipeline | Not started | DIST-04..05, REL-02..05 |
+| 4 | Distribution & Release Pipeline | In Progress (2/4 plans complete — 04-01 + 04-02) | DIST-04..05, REL-02..05 |
 
 ---
 
@@ -65,10 +65,10 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 
 | Metric | Value |
 |--------|-------|
-| Phases completed | 3 / 4 (Phase 1, 2, 2.5); Phase 3 implementation + BOTH gap-closure plans complete (CR-01 closed via 03-09, CR-02 closed via 03-10) |
+| Phases completed | 3 / 4 (Phase 1, 2, 2.5); Phase 3 implementation + BOTH gap-closure plans complete (CR-01 closed via 03-09, CR-02 closed via 03-10); Phase 4 in progress (2/4 plans complete) |
 | Requirements mapped | 38 / 38 |
-| Plans created | 21 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 10 Phase 3) |
-| Plans completed | 21 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 10 Phase 3) |
+| Plans created | 25 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 10 Phase 3 + 4 Phase 4) |
+| Plans completed | 23 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 10 Phase 3 + 2 Phase 4) |
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
@@ -90,6 +90,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Phase 03 P09 | ~5 minutes | 1 task | 2 files |
 | Phase 03 P10 | ~6 minutes | 1 task | 6 files |
 | Phase 04 P01 | 5min | 2 tasks | 3 files |
+| Phase 04-distribution-release-pipeline P02 | 5min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -132,6 +133,9 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | WRITE-06 amendment preserves original wording (Plan 03-08, D-3-07) | REQUIREMENTS.md WRITE-06 bullet was rewritten in-line with the real 8-value OpenAPI enum (`work`, `break`, `special_leave`, `unpaid_leave`, `statutory_leave`, `sick_leave`, `work_reduction`, `trip`, default `work`); the original `billable`/`non_billable` wording is preserved verbatim in an `**Amendment 2026-06-12 (D-3-07):**` sub-bullet that cites the decision ID. Same pattern for ROADMAP SC #5 — original sentence untouched, blockquote footnote appended one indent level deeper. The supersession-with-footnote idiom: a superseded line is NEVER silently overwritten; the new wording goes in-line AND the old wording survives in a footnote referencing the decision ID so a future reader can audit the change. Reusable template for any future REQUIREMENTS / ROADMAP correction. |
 | WRITE-06 traceability row flipped Complete; checkbox stays [ ] (Plan 03-08) | Two trackers for the same requirement: the in-line bullet checkbox (`- [ ] **WRITE-06**: ...`) and the traceability table row. Plan 03-08's brief said "keep the checkbox `[ ]` — the verify-phase agent ticks it" but the orchestration `<plan_specifics>` said "Mark WRITE-06 as Complete in the traceability table." Resolution: respect both. Checkbox stays `[ ]` (verifier owns the tick), traceability row flipped to `Complete (per D-3-07 amendment — see WRITE-06 row above)` because Plan 03-02 demonstrably shipped the 8-value enum and the traceability table tracks "which phase delivered this?" — a separate semantic axis from the v1-requirements checkbox. |
 | Strict HH:mm regex with named error message (Plan 03-10, CR-02) | The replacement regex is the single literal `/^([01]\d|2[0-3]):[0-5]\d$/` applied verbatim at all five callsites (add-entry start+end, update-entry start+end, start-timer start). The Zod `.regex(pattern, message)` second argument is the literal string `"must be HH:mm (24-hour, zero-padded)"` — names both the format AND the constraint so a confused LLM caller receives actionable guidance instead of a generic `invalid_string` surface. Schemas (`AddEntryInput`, `UpdateEntryInput`, `StartTimerInput`) are exported solely to enable schema-direct `safeParse` negative tests — minimal test-surface widening; runtime tool registration unchanged. The default-path output of `nowInAmsterdamHHMM()` (always zero-padded 24-hour HH:mm via `Intl.DateTimeFormat("sv-SE", { hour: "2-digit", minute: "2-digit", hour12: false })`) continues to parse through the new regex — DST default tests (add-entry Test 11, start-timer Test 4) remain green. |
+| README KEEPING_REQUIRE_CONFIRM=false doubled-callout pattern (Plan 04-02, REL-05) | The README ships TWO ⚠ blockquote callouts that name `KEEPING_REQUIRE_CONFIRM=false`: one above the fold (after the lead paragraph, inside the first 60 lines) and one immediately after the Configuration env-vars table. Plan verification command asserts `grep -c KEEPING_REQUIRE_CONFIRM=false == 2`. RESEARCH §Code Examples warning block contains the literal twice per block; verbatim double-paste yields 4 occurrences. Resolution: Recommendation line in BOTH callouts rephrased from `never set `KEEPING_REQUIRE_CONFIRM=false`` to `never disable this gate` — preserves imperative, drops the second literal per callout, lands grep count = 2. The doubled-callout structure (top + Configuration) is the REL-05 "front-and-centre" implementation: a user reading from the top hits it once, a user skimming to Configuration hits it again. Reusable pattern for any safety-critical env var doc in this project. |
+| Windows-first README ordering (Plan 04-02, RESEARCH §Pitfall 2) | The README's `## Install` section places the Windows config block (`command: "cmd", args: ["/c", "npx", "-y", "keeping-mcp"]`) BEFORE the macOS/Linux block — not after, not as a footnote. Rationale: anthropics/claude-code#58510 — `child_process.spawn` on Windows does not resolve `.cmd` extensions via PATHEXT unless `shell: true` is set, which Claude Code does not. A Windows 11 user copy-pasting the Linux/macOS block hits `spawn npx ENOENT` with no obvious cause. By putting the Windows block first AND adding an explanatory note below it (citing the upstream issue), a typical Claude-Code-on-Windows user reading top-to-bottom uses the correct shape on the first try. The explanatory note is sentence-length, not a footnote — it appears immediately below the JSON block where a paste-and-fix user would look for it. |
+| JSON code fences = strict JSON only (Plan 04-02, RESEARCH §Anti-Patterns) | Every ```json``` fence in README.md must parse with `JSON.parse`. No `//` comments inside the fence — RESEARCH explicitly warns: "Don't write README config as JSON5 / with comments — users will paste verbatim." All clarifications (e.g. "Illustrative; actual field names match Keeping's OpenAPI") live in prose OUTSIDE the fence. Plan 04-02 ships four JSON fences (Windows config, macOS/Linux config, dry-run preview transcript, dry-run confirm transcript); all four parse cleanly. Reusable invariant for any future README JSON examples. |
 
 ### Open Questions (resolve during execution)
 
@@ -169,6 +173,8 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 - [x] Phase 3 Plan 08: server wiring (six register* + _config→config rename) + listTools 12-tool smoke + REQUIREMENTS.md WRITE-06 amendment + ROADMAP SC #5 footnote per D-3-07 (completed 2026-06-12)
 - [x] Phase 3 Plan 09: CR-01 gap closure — TimeoutError arm in classifyAmbiguous (`src/keeping/write-gate.ts:104`) + W12 regression test constructing real `new DOMException("timeout", "TimeoutError")`; 163/163 tests; closes 03-VERIFICATION.md Gap #1 (completed 2026-06-12)
 - [x] Phase 3 Plan 10: CR-02 gap closure — strict 24-hour HH:mm regex `/^([01]\d|2[0-3]):[0-5]\d$/` + error message `"must be HH:mm (24-hour, zero-padded)"` at five callsites (add-entry start+end, update-entry start+end, start-timer start); exported AddEntryInput / UpdateEntryInput / StartTimerInput; +43 negative/positive tests rejecting `1:30pm`/`25:00`/`9:5`/`00:00:00`; 206/206 tests; closes 03-VERIFICATION.md Gap #2 / 03-REVIEW.md CR-02 (completed 2026-06-12)
+- [x] Phase 4 Plan 01: server.json + scripts/check-publish-shape.ts (DIST-04 allowlist + DIST-05 namespace + REL-03 placeholder) (completed 2026-06-12)
+- [x] Phase 4 Plan 02: README rewrite — Windows-first install UX (cmd /c npx -y), 6-step token setup, env vars table, illustrative dry-run transcript, doubled KEEPING_REQUIRE_CONFIRM=false callout (REL-04 + REL-05) (completed 2026-06-12)
 
 ### Blockers
 
@@ -183,15 +189,15 @@ None.
 1. Read `.planning/ROADMAP.md` — phase goals and success criteria
 2. Read `.planning/PROJECT.md` — core value and locked decisions
 3. Read `.planning/REQUIREMENTS.md` — requirement IDs and traceability
-4. Read `.planning/phases/03-write-tools-conditional-timers/03-10-SUMMARY.md` for the last completed plan (CR-02 closure — strict HH:mm regex)
-5. Run `/gsd:verify-phase 03` to transition Phase 3 VERIFICATION.md to complete (Truth #2 and Truth #6 → VERIFIED — both gap-closure plans 03-09 and 03-10 have landed)
-6. Then plan Phase 4 (`gsd:plan-phase 4`) — distribution & release pipeline
+4. Read `.planning/phases/04-distribution-release-pipeline/04-02-SUMMARY.md` for the last completed plan (README rewrite — Windows-first install UX + doubled dry-run callout)
+5. Execute Plan 04-03 next (`/gsd:execute-phase 04` continues to the next plan) — release.yml GitHub Actions workflow (OIDC publish to npm + MCP Registry, jq version injection)
+6. Then Plan 04-04 — autonomous:false human-verify gate for first v1.0.0 release
 
-**Last session:** 2026-06-12T08:50:29.854Z
-**Stopped at:** Completed Phase 3 Plan 10 (CR-02 gap closure — strict 24-hour zero-padded HH:mm regex `/^([01]\d|2[0-3]):[0-5]\d$/` at five callsites in add-entry.ts / update-entry.ts / start-timer.ts; exported AddEntryInput / UpdateEntryInput / StartTimerInput schemas; +43 negative/positive tests; 206/206 total; closes 03-VERIFICATION.md Gap #2)
+**Last session:** 2026-06-12T08:59:49.558Z
+**Stopped at:** Completed Phase 4 Plan 02 (README rewrite for SC #4 + SC #5 — 179-line distribution-ready public README with Windows-first install UX, 6-step token setup, env vars table, illustrative dry-run transcript, doubled KEEPING_REQUIRE_CONFIRM=false callout). Two Rule-1 deviations: rephrased Recommendation line in callouts (KEEPING_REQUIRE_CONFIRM=false grep count = 2 invariant); rephrased local-dev note to use console.error (literal console.log forbidden by plan)
 **Resume file:** None
-**Next action:** Run `/gsd:verify-phase 03` — both Phase 3 gap closures (CR-01 via 03-09, CR-02 via 03-10) are complete; verifier should flip Truth #2 and Truth #6 to VERIFIED, unblocking Phase 4 (distribution & release).
+**Next action:** Execute Plan 04-03 (release.yml workflow — tag-triggered OIDC publish to npm + MCP Registry with jq version injection per RESEARCH §Pattern 1).
 
 ---
 *State initialized: 2026-06-09 after roadmap creation*
-*Last updated: 2026-06-12 after Phase 3 Plan 10 (CR-02 gap closure — strict HH:mm regex + 43 new tests) completion*
+*Last updated: 2026-06-12 after Phase 4 Plan 02 (README rewrite for SC #4 + SC #5 — Windows-first install UX, doubled KEEPING_REQUIRE_CONFIRM=false callout) completion*
