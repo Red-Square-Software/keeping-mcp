@@ -191,4 +191,19 @@ describe("src/keeping/write-gate.ts", () => {
       "outcome unknown — verify with keeping_list_entries before retrying.",
     );
   });
+
+  // ---------------------------------------------------------------------------
+  // classifyAmbiguous — real Node 22 timeout shape (CR-01 / D-3-16 gap closure)
+  // ---------------------------------------------------------------------------
+
+  it("Test W12: classifyAmbiguous returns true for DOMException TimeoutError (Node 22 AbortSignal.timeout shape)", () => {
+    // Node 22's AbortSignal.timeout() throws DOMException with name="TimeoutError",
+    // NOT AbortError. Confirmed at runtime per 03-VERIFICATION.md Gap #1 evidence.
+    // The classifier MUST catch this exception shape — it is the single most
+    // important failure mode WRITE-05 / D-3-16 was designed to surface as
+    // ambiguous (write fired, network dropped, outcome unknown).
+    const err = new DOMException("timeout", "TimeoutError");
+    expect(err.name).toBe("TimeoutError");
+    expect(classifyAmbiguous(err)).toBe(true);
+  });
 });

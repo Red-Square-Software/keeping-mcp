@@ -92,7 +92,7 @@ export const AMBIGUOUS_TEXT = "outcome unknown — verify with keeping_list_entr
  * determined from the client side:
  *
  *   - `KeepingApiError` (or any object with a numeric `status >= 500`)
- *   - `AbortError` (10-second timeout fired)
+ *   - `AbortError` (manual AbortController.abort) OR `TimeoutError` (10-second AbortSignal.timeout fired in Node 22)
  *   - raw `TypeError` (network / DNS / TLS failure surfaced by fetch)
  *
  * Duck-typing on `.status` avoids a runtime import of `KeepingApiError` and
@@ -101,7 +101,7 @@ export const AMBIGUOUS_TEXT = "outcome unknown — verify with keeping_list_entr
  */
 export function classifyAmbiguous(err: unknown): boolean {
   if (err instanceof Error) {
-    if (err.name === "AbortError") return true;
+    if (err.name === "AbortError" || err.name === "TimeoutError") return true;
     if (err instanceof TypeError) return true;
   }
   if (
