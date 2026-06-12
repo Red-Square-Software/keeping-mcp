@@ -40,7 +40,7 @@
 
 ### Write Tools
 
-- [ ] **WRITE-01**: `keeping_add_entry` tool creates a new time entry for the authenticated user
+- [x] **WRITE-01**: `keeping_add_entry` tool creates a new time entry for the authenticated user
 - [ ] **WRITE-02**: `keeping_update_entry` tool edits an existing time entry owned by the authenticated user
 - [ ] **WRITE-03**: `keeping_delete_entry` tool deletes an existing time entry owned by the authenticated user
 - [x] **WRITE-04**: All write tools accept a `confirm: boolean` input; when `KEEPING_REQUIRE_CONFIRM` is `true` and `confirm !== true`, the tool returns a preview (`would_post: { method, url, body }`) without calling the API
@@ -124,7 +124,7 @@ Phase mapping populated during roadmap creation (2026-06-09).
 | READ-01 | Phase 2 | Complete |
 | READ-02 | Phase 2 | Complete |
 | READ-03 | Phase 2 | Complete |
-| WRITE-01 | Phase 3 | Pending |
+| WRITE-01 | Phase 3 | Complete |
 | WRITE-02 | Phase 3 | Pending |
 | WRITE-03 | Phase 3 | Pending |
 | WRITE-04 | Phase 3 | Complete |
