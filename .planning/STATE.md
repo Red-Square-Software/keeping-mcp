@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 3 Plan 03 complete (keeping_update_entry vertical slice)
-last_updated: "2026-06-12T08:18:00.000Z"
+stopped_at: Phase 3 Plan 04 complete (keeping_delete_entry vertical slice)
+last_updated: "2026-06-12T08:23:00.000Z"
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 19
-  completed_plans: 14
-  percent: 58
+  completed_plans: 15
+  percent: 63
 ---
 
 # Project State: keeping-mcp
@@ -38,13 +38,13 @@ Plan: 4 of 8
 | Field | Value |
 |-------|-------|
 | Current phase | Phase 3 — Write Tools + Conditional Timers (executing) |
-| Current plan | Plan 03-03 complete; Plan 03-04 next (keeping_delete_entry) |
-| Phase status | Phase 3 in progress — 3 of 8 plans complete (01 foundation + 02 add-entry + 03 update-entry) |
-| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 14 plans complete through Phase 3 Plan 03 |
+| Current plan | Plan 03-04 complete; Plan 03-05 next (keeping_start_timer) |
+| Phase status | Phase 3 in progress — 4 of 8 plans complete (01 foundation + 02 add-entry + 03 update-entry + 04 delete-entry) |
+| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 15 plans complete through Phase 3 Plan 04 |
 
 ```
-Progress: [███████░░░] 67%
-Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [███░░░░░] · Phase 4 [░░░░░]
+Progress: [████████░░] 71%
+Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [████░░░░] · Phase 4 [░░░░░]
 ```
 
 ---
@@ -68,7 +68,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Phases completed | 3 / 4 (Phase 1, 2, 2.5) |
 | Requirements mapped | 38 / 38 |
 | Plans created | 19 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 8 Phase 3) |
-| Plans completed | 14 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 3 Phase 3) |
+| Plans completed | 15 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 4 Phase 3) |
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
@@ -82,6 +82,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Phase 03-write-tools-conditional-timers P01 | 5min | 2 tasks | 7 files |
 | Phase 03-write-tools-conditional-timers P02 | 5min | 2 tasks | 2 files |
 | Phase 03-write-tools-conditional-timers P03 | 3min | 2 tasks | 2 files |
+| Phase 03-write-tools-conditional-timers P04 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,8 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Strict wrapper extractor locked (Plan 02.5-01, D-2.5-05a) | `src/tools/timer-status.ts:extractTimeEntry(raw)` accepts ONLY when `raw && typeof raw === 'object' && raw.time_entry && typeof raw.time_entry === 'object'`. No multi-key fallback (`entries[0]`, bare-array, aliases). Differs intentionally from `entries-list.ts:normaliseEntries` because the OpenAPI spec now authoritatively locks the singular `time_entry` wrapper post-Plan-02-06. Drift fails loudly via D-2.5-13 tests 5/6 (`toEqual({ time_entry: null, ... })`) rather than being masked. |
 | 404-as-graceful-empty pattern locked (Plan 02.5-01, D-2.5-03 + D-2.5-04a) | `keeping_timer_status` catches `err instanceof KeepingApiError && err.status === 404` and returns `{ time_entry: null, is_running: false }` with NO `isError` key. Same payload as the strict-extractor "no usable time_entry" branch — one empty-state surface regardless of cause. Sibling pattern to Phase 2's "feature not enabled for this organisation" graceful empty (META-01, META-02). Reusable template for Phase 3's `keeping_resume_timer` "no recent entry to resume" sentinel. |
 | Strict wrapper guard MUST pair typeof with Array.isArray (Plan 02.5-02, D-2.5-05a re-enforced) | `extractTimeEntry` guard now reads `candidate === null \|\| typeof candidate !== "object" \|\| Array.isArray(candidate)`. Closes the array-drift gap from `02.5-VERIFICATION.md` (REVIEW.md WR-01): `typeof [] === "object"` is `true` in JS, so the original two-clause guard silently accepted `{ time_entry: [] }` and `{ time_entry: [{...}] }` as valid wrappers — contradicting the source-comment contract (lines 17-22 / 53-56). Test 11 + Test 12 in `test/tools/timer-status.test.ts` are the regression gates (`toEqual({ time_entry: null, is_running: false })`). Phase 3 write tools that read entry shapes MUST reuse this three-clause guard pattern verbatim. |
+| INLINE dry-run gate for delete-entry (Plan 03-04, D-3-03) | `src/tools/delete-entry.ts` is the only Phase 3 write tool that does NOT delegate the gate decision entirely to `previewOrCall`. The dry-run branch performs an extra `client.get<unknown>(path)` to populate `would_delete` BEFORE returning the preview; only the confirm branch delegates to `previewOrCall`. The verbatim echo pattern (`would_delete: wouldDelete`) is the plan-locked shape — no strict-wrapper-read step. 4xx on the dry-run GET (e.g. 404 not found) flows through `toIsErrorContent` as definite-fail and the confirm path is NOT attempted (T-03-04-05 mitigation, Test 7 enforces `deletes.length === 0`). 204 path wraps null as `{ ok: true }` via `result ?? { ok: true }` so the user sees a meaningful success surface (D-3-27 end-to-end). |
+| Delete-entry destructive marker locked verbatim (Plan 03-04, D-3-11 + WRITE-07) | `src/tools/delete-entry.ts` description starts with `**DESTRUCTIVE: permanently deletes the entry**` — leading + trailing double-asterisks included as verbatim markdown. Test 10 asserts the literal via `tool?.description?.includes(...)`. The marker is the AI-facing flag that tells the MCP client this tool cannot be reversed. Add, update, and timer write tools do NOT carry this marker — only delete (the only Phase 3 tool whose effect is irreversible). |
 
 ### Open Questions (resolve during execution)
 
@@ -145,7 +148,8 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 - [x] Phase 3 Plan 01: foundation — date helpers, write-gate, requestWithHeaders, 204 fix (completed 2026-06-12)
 - [x] Phase 3 Plan 02: keeping_add_entry vertical slice — dry-run gate, org-mode-aware body, DST default (completed 2026-06-12)
 - [x] Phase 3 Plan 03: keeping_update_entry vertical slice — PATCH partial-body, immutable-field strip, dry-run gate (completed 2026-06-12)
-- [ ] Phase 3 Plan 04..08: remaining write tools (delete, timers) + server.ts wiring (in progress)
+- [x] Phase 3 Plan 04: keeping_delete_entry vertical slice — inline dry-run gate + extra GET for would_delete; 204-tolerant confirm (completed 2026-06-12)
+- [ ] Phase 3 Plan 05..08: remaining write tools (timers) + server.ts wiring (in progress)
 
 ### Blockers
 
@@ -164,10 +168,10 @@ None.
 5. Re-run `/gsd:verify-phase 02.5` to transition VERIFICATION.md from gaps_found 9/10 → complete 10/10 (Truth #3 FAILED → VERIFIED)
 6. Continue with Phase 3 (draft `.planning/phases/03-*/03-CONTEXT.md` first)
 
-**Last session:** 2026-06-12T08:18:00.000Z
-**Stopped at:** Completed Phase 3 Plan 03 (keeping_update_entry vertical slice — 10 tests, 123/123 total)
+**Last session:** 2026-06-12T08:23:00.000Z
+**Stopped at:** Completed Phase 3 Plan 04 (keeping_delete_entry vertical slice — 10 tests, 133/133 total)
 **Resume file:** None
-**Next action:** `/gsd:execute-phase 3` continues with Plan 03-04 (`keeping_delete_entry`)
+**Next action:** `/gsd:execute-phase 3` continues with Plan 03-05 (`keeping_start_timer`)
 
 ---
 *State initialized: 2026-06-09 after roadmap creation*

@@ -42,11 +42,11 @@
 
 - [x] **WRITE-01**: `keeping_add_entry` tool creates a new time entry for the authenticated user
 - [x] **WRITE-02**: `keeping_update_entry` tool edits an existing time entry owned by the authenticated user
-- [ ] **WRITE-03**: `keeping_delete_entry` tool deletes an existing time entry owned by the authenticated user
+- [x] **WRITE-03**: `keeping_delete_entry` tool deletes an existing time entry owned by the authenticated user
 - [x] **WRITE-04**: All write tools accept a `confirm: boolean` input; when `KEEPING_REQUIRE_CONFIRM` is `true` and `confirm !== true`, the tool returns a preview (`would_post: { method, url, body }`) without calling the API
 - [x] **WRITE-05**: Write tools never auto-retry on network errors; on ambiguous failure they return `isError: true` with "outcome unknown — verify with keeping_list_entries before retrying"
 - [ ] **WRITE-06**: Write tools accept a `purpose` field with `billable` and `non_billable` as first-class values (so Jortt invoicing surfaces the correct hours)
-- [ ] **WRITE-07**: Write tools annotate `destructiveHint: true` and `idempotentHint: false`; `keeping_delete_entry` additionally annotates the destructive nature in its description
+- [x] **WRITE-07**: Write tools annotate `destructiveHint: true` and `idempotentHint: false`; `keeping_delete_entry` additionally annotates the destructive nature in its description
 - [x] **WRITE-08**: Date fields default to today in `Europe/Amsterdam`, not UTC; output is `YYYY-MM-DD` strings (never `Date.toISOString()`)
 
 ### Timer Tools (conditional)
@@ -126,11 +126,11 @@ Phase mapping populated during roadmap creation (2026-06-09).
 | READ-03 | Phase 2 | Complete |
 | WRITE-01 | Phase 3 | Complete |
 | WRITE-02 | Phase 3 | Complete |
-| WRITE-03 | Phase 3 | Pending |
+| WRITE-03 | Phase 3 | Complete |
 | WRITE-04 | Phase 3 | Complete |
 | WRITE-05 | Phase 3 | Complete |
 | WRITE-06 | Phase 3 | Pending |
-| WRITE-07 | Phase 3 | Pending |
+| WRITE-07 | Phase 3 | Complete |
 | WRITE-08 | Phase 3 | Complete |
 | TIMER-01 | Phase 2.5 (status) / Phase 3 (start/stop/resume) | Partial — status-read portion COMPLETE (2026-06-11, `keeping_timer_status` shipped in Phase 2.5 Plan 01); start/stop/resume Pending in Phase 3 |
 | TIMER-02 | Phase 3 | Complete |
