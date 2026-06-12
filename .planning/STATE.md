@@ -3,20 +3,20 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed Phase 3 Plan 08 (server wiring + listTools 12-tool smoke + WRITE-06 amendment per D-3-07 — 162/162 total; Phase 3 implementation complete)
-last_updated: "2026-06-12T07:08:10.453Z"
+stopped_at: Completed Phase 3 Plan 09 (CR-01 gap closure — TimeoutError arm added to classifyAmbiguous + W12 regression test constructing real DOMException; 163/163 total; closes 03-VERIFICATION.md Gap #1)
+last_updated: "2026-06-12T07:40:15Z"
 progress:
   total_phases: 6
-  completed_phases: 4
-  total_plans: 19
-  completed_plans: 19
-  percent: 67
+  completed_phases: 3
+  total_plans: 21
+  completed_plans: 20
+  percent: 53
 ---
 
 # Project State: keeping-mcp
 
 **Last updated:** 2026-06-12  
-**Session boundary:** Phase 3 Plan 08 complete (server wiring — six register* calls + _config→config rename in src/server.ts; test/server.test.ts listTools 12-tool smoke; REQUIREMENTS.md WRITE-06 amended per D-3-07 with original wording preserved in footnote; ROADMAP SC #5 footnote appended. 162/162 tests; biome+tsc+build all green. Phase 3 implementation complete pending verifier pass.)
+**Session boundary:** Phase 3 Plan 09 complete (gap closure CR-01 — added TimeoutError arm to classifyAmbiguous in src/keeping/write-gate.ts; new W12 regression test constructs real `new DOMException("timeout", "TimeoutError")` to pin the Node 22 AbortSignal.timeout exception shape; 163/163 tests; biome+tsc all green. Closes 03-VERIFICATION.md Gap #1 / 03-REVIEW.md CR-01.)
 
 ---
 
@@ -33,14 +33,14 @@ progress:
 ## Current Position
 
 Phase: 03 (write-tools-conditional-timers) — EXECUTING
-Plan: 8 of 8
+Plan: 9 of 10
 
 | Field | Value |
 |-------|-------|
-| Current phase | Phase 3 — Write Tools + Conditional Timers (executing) |
-| Current plan | Plan 03-08 complete (server wiring + REQUIREMENTS WRITE-06 amendment + ROADMAP SC #5 footnote — all 8 Phase 3 plans shipped) |
-| Phase status | Phase 3 IMPLEMENTATION COMPLETE — 8 of 8 plans shipped; awaiting verifier pass to mark Phase 3 done in ROADMAP |
-| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 19 plans complete through Phase 3 Plan 08 — Phase 4 (distribution & release) is next |
+| Current phase | Phase 3 — Write Tools + Conditional Timers (executing — gap closure wave) |
+| Current plan | Plan 03-09 complete (CR-01 gap closure — TimeoutError arm + W12 regression test); Plan 03-10 (CR-02 strict HH:mm regex) is the parallel Wave 1 sibling |
+| Phase status | Phase 3 IMPLEMENTATION COMPLETE + 1 of 2 gap-closure plans done (CR-01); CR-02 (Plan 03-10) remaining |
+| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 20 plans complete through Phase 3 Plan 09 — Phase 4 (distribution & release) blocked until Plan 03-10 + verifier re-pass |
 
 ```
 Progress: [██████████] 100%
@@ -65,10 +65,10 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 
 | Metric | Value |
 |--------|-------|
-| Phases completed | 3 / 4 (Phase 1, 2, 2.5); Phase 3 implementation complete pending verifier |
+| Phases completed | 3 / 4 (Phase 1, 2, 2.5); Phase 3 implementation + 1 of 2 gap-closure plans complete (CR-01 closed; CR-02 pending Plan 03-10) |
 | Requirements mapped | 38 / 38 |
-| Plans created | 19 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 8 Phase 3) |
-| Plans completed | 19 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 8 Phase 3) |
+| Plans created | 21 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 10 Phase 3) |
+| Plans completed | 20 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 9 Phase 3) |
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
@@ -87,6 +87,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Phase 03-write-tools-conditional-timers P06 | ~4 minutes | 2 tasks | 2 files |
 | Phase 03-write-tools-conditional-timers P07 | ~3 minutes | 2 tasks | 2 files |
 | Phase 03 P08 | 4min | 2 tasks | 3 files |
+| Phase 03 P09 | ~5 minutes | 1 task | 2 files |
 
 ## Accumulated Context
 
@@ -163,7 +164,8 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 - [x] Phase 3 Plan 06: keeping_stop_timer vertical slice — PATCH /stop via requestWithHeaders, X-Server-Time-Ms surfacing + fallback warn (completed 2026-06-12)
 - [x] Phase 3 Plan 07: keeping_resume_timer vertical slice — POST /resume via requestWithHeaders, Pitfall 6 id asymmetry verbatim pass-through, 403 definite-fail (completed 2026-06-12)
 - [x] Phase 3 Plan 08: server wiring (six register* + _config→config rename) + listTools 12-tool smoke + REQUIREMENTS.md WRITE-06 amendment + ROADMAP SC #5 footnote per D-3-07 (completed 2026-06-12)
-- [ ] Phase 3 Plan 08: server.ts wiring + REQUIREMENTS.md WRITE-06 amendment (in progress)
+- [x] Phase 3 Plan 09: CR-01 gap closure — TimeoutError arm in classifyAmbiguous (`src/keeping/write-gate.ts:104`) + W12 regression test constructing real `new DOMException("timeout", "TimeoutError")`; 163/163 tests; closes 03-VERIFICATION.md Gap #1 (completed 2026-06-12)
+- [ ] Phase 3 Plan 10: CR-02 gap closure — strict 24-hour HH:mm regex in add-entry.ts (start+end), update-entry.ts (start+end), start-timer.ts (start) + negative tests rejecting `1:30pm`, `25:00`, `9:5`, `00:00:00` (parallel Wave 1 sibling to 03-09)
 
 ### Blockers
 
@@ -178,15 +180,16 @@ None.
 1. Read `.planning/ROADMAP.md` — phase goals and success criteria
 2. Read `.planning/PROJECT.md` — core value and locked decisions
 3. Read `.planning/REQUIREMENTS.md` — requirement IDs and traceability
-4. Read `.planning/phases/02.5-timer-status-read-tool/02.5-02-SUMMARY.md` for the last completed plan (gap closure)
-5. Re-run `/gsd:verify-phase 02.5` to transition VERIFICATION.md from gaps_found 9/10 → complete 10/10 (Truth #3 FAILED → VERIFIED)
-6. Continue with Phase 3 (draft `.planning/phases/03-*/03-CONTEXT.md` first)
+4. Read `.planning/phases/03-write-tools-conditional-timers/03-09-SUMMARY.md` for the last completed plan (CR-01 closure)
+5. Execute Plan 03-10 (CR-02 strict HH:mm regex — parallel Wave 1 sibling)
+6. After 03-10 lands, re-run `/gsd:verify-phase 03` to transition Phase 3 VERIFICATION.md to complete (Truth #2 and Truth #6 → VERIFIED)
+7. Then plan Phase 4 (`gsd:plan-phase 4`) — distribution & release pipeline
 
-**Last session:** 2026-06-12T07:08:10.438Z
-**Stopped at:** Completed Phase 3 Plan 08 (server wiring + listTools 12-tool smoke + WRITE-06 amendment per D-3-07 — 162/162 total; Phase 3 implementation complete)
+**Last session:** 2026-06-12T07:40:15Z
+**Stopped at:** Completed Phase 3 Plan 09 (CR-01 gap closure — TimeoutError arm added to classifyAmbiguous + W12 regression test constructing real DOMException; 163/163 total; closes 03-VERIFICATION.md Gap #1)
 **Resume file:** None
-**Next action:** Phase 3 verifier pass to flip WRITE-06 checkbox `[ ]` → `[x]`, then plan Phase 4 (`gsd:plan-phase 4`) — distribution & release pipeline (DIST-04, DIST-05, REL-02..05)
+**Next action:** Execute Plan 03-10 (CR-02 strict HH:mm regex gap closure) — parallel Wave 1 sibling to 03-09. Then verifier pass on Phase 3.
 
 ---
 *State initialized: 2026-06-09 after roadmap creation*
-*Last updated: 2026-06-12 after Phase 3 Plan 08 (server wiring + WRITE-06 amendment) completion*
+*Last updated: 2026-06-12 after Phase 3 Plan 09 (CR-01 gap closure — TimeoutError arm + W12 regression test) completion*
