@@ -3,20 +3,20 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed Phase 3 Plan 07 (keeping_resume_timer vertical slice — 10 tests, 161/161 total)
-last_updated: "2026-06-12T08:54:00.000Z"
+stopped_at: Completed Phase 3 Plan 08 (server wiring + listTools 12-tool smoke + WRITE-06 amendment per D-3-07 — 162/162 total; Phase 3 implementation complete)
+last_updated: "2026-06-12T07:08:10.453Z"
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 19
-  completed_plans: 18
-  percent: 53
+  completed_plans: 19
+  percent: 67
 ---
 
 # Project State: keeping-mcp
 
-**Last updated:** 2026-06-11  
-**Session boundary:** Phase 2.5 Plan 02 complete (gap-closure — Array.isArray guard added to extractTimeEntry; bare-array time_entry now collapses to graceful empty; 2 new RED→GREEN tests; 79/79 total; src/keeping/ + src/server.ts untouched; D-2.5-05a re-enforced; REVIEW.md WR-01 closed; VERIFICATION.md Truth #3 transitions FAILED→VERIFIED on re-verify)
+**Last updated:** 2026-06-12  
+**Session boundary:** Phase 3 Plan 08 complete (server wiring — six register* calls + _config→config rename in src/server.ts; test/server.test.ts listTools 12-tool smoke; REQUIREMENTS.md WRITE-06 amended per D-3-07 with original wording preserved in footnote; ROADMAP SC #5 footnote appended. 162/162 tests; biome+tsc+build all green. Phase 3 implementation complete pending verifier pass.)
 
 ---
 
@@ -33,17 +33,17 @@ progress:
 ## Current Position
 
 Phase: 03 (write-tools-conditional-timers) — EXECUTING
-Plan: 7 of 8
+Plan: 8 of 8
 
 | Field | Value |
 |-------|-------|
 | Current phase | Phase 3 — Write Tools + Conditional Timers (executing) |
-| Current plan | Plan 03-07 complete; Plan 03-08 next (server.ts wiring + REQUIREMENTS amendment) |
-| Phase status | Phase 3 in progress — 7 of 8 plans complete (01 foundation + 02 add-entry + 03 update-entry + 04 delete-entry + 05 start-timer + 06 stop-timer + 07 resume-timer) |
-| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 18 plans complete through Phase 3 Plan 07 |
+| Current plan | Plan 03-08 complete (server wiring + REQUIREMENTS WRITE-06 amendment + ROADMAP SC #5 footnote — all 8 Phase 3 plans shipped) |
+| Phase status | Phase 3 IMPLEMENTATION COMPLETE — 8 of 8 plans shipped; awaiting verifier pass to mark Phase 3 done in ROADMAP |
+| Overall progress | 3 / 4 phases complete (Phase 1, 2, 2.5); 19 plans complete through Phase 3 Plan 08 — Phase 4 (distribution & release) is next |
 
 ```
-Progress: [█████████░] 95%
+Progress: [██████████] 100%
 Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [█████████░] · Phase 4 [░░░░░]
 ```
 
@@ -56,7 +56,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | 1 | Foundation & Scaffolding | Complete (2026-06-09) | DIST-01..03, AUTH-01..03, SAFE-01, REL-01 |
 | 2 | Read Tools & Schema Discovery | Complete (2026-06-11) | AUTH-04..05, IDENT-01..03, META-01..02, READ-01..03, SAFE-02..05 |
 | 2.5 | Timer Status Read Tool | Complete (2026-06-11) | TIMER-01 (status-read portion) |
-| 3 | Write Tools + Conditional Timers | Not started | WRITE-01..08, TIMER-01 (start/stop/resume), TIMER-02 |
+| 3 | Write Tools + Conditional Timers | Implementation complete (2026-06-12, awaiting verifier) | WRITE-01..08, TIMER-01 (start/stop/resume), TIMER-02 |
 | 4 | Distribution & Release Pipeline | Not started | DIST-04..05, REL-02..05 |
 
 ---
@@ -65,10 +65,10 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 
 | Metric | Value |
 |--------|-------|
-| Phases completed | 3 / 4 (Phase 1, 2, 2.5) |
+| Phases completed | 3 / 4 (Phase 1, 2, 2.5); Phase 3 implementation complete pending verifier |
 | Requirements mapped | 38 / 38 |
 | Plans created | 19 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 8 Phase 3) |
-| Plans completed | 18 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 7 Phase 3) |
+| Plans completed | 19 (3 Phase 1 + 6 Phase 2 + 2 Phase 2.5 + 8 Phase 3) |
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
@@ -86,6 +86,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | Phase 03-write-tools-conditional-timers P05 | ~2 minutes | 2 tasks | 2 files |
 | Phase 03-write-tools-conditional-timers P06 | ~4 minutes | 2 tasks | 2 files |
 | Phase 03-write-tools-conditional-timers P07 | ~3 minutes | 2 tasks | 2 files |
+| Phase 03 P08 | 4min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -124,6 +125,9 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 | INLINE dry-run gate for stop-timer (Plan 03-06, D-3-18 + D-3-19) | `src/tools/stop-timer.ts` is the second Phase 3 write tool that does NOT delegate the gate decision entirely to `previewOrCall` (sibling to delete-entry). `previewOrCall` has no header-surface awareness, so the confirm branch calls `client.requestWithHeaders<T>("PATCH", path)` directly to access the `X-Server-Time-Ms` response header (TIMER-02). The dry-run branch constructs the `would_post` envelope inline with `body: null` because PATCH `/stop` has no request body per OpenAPI. D-3-19 fallback: `Number(headers.get("X-Server-Time-Ms"))` gated by `Number.isFinite(parsed) && parsed > 0`; on failure `server_time_ms = Date.now()` AND `client.log.warn("X-Server-Time-Ms header missing on stop response; falling back to local clock")`. NOT an isError surface — the stop succeeded, only the wall-clock anchor is degraded. Response shape spreads `...body` and adds `server_time_ms` as a sibling — verbatim wrapper pass-through (no strict-wrapper-read for `time_entry`, same precedent as delete-entry's `would_delete` echo). |
 | Pitfall 6 — resume id asymmetry (Plan 03-07, D-3-05 + RESEARCH §200-vs-201) | `src/tools/resume-timer.ts` DELIBERATELY does NOT assert `response.time_entry.id === input.entry_id`. When resuming an entry whose original date is no longer "today", Keeping creates a NEW ongoing entry (returns 201 with a different id) rather than modifying the old one. The tool surfaces the server's response wrapper verbatim via `{ ...body, server_time_ms }` — the AI consumer MUST read `time_entry.id` from the response. `grep -c 'input\.entry_id ===' src/tools/resume-timer.ts` returns 0; Test 5 mocks `time_entry.id === 99999` with `input.entry_id === 12345` and asserts the server's id surfaces unchanged. Description copy documents the asymmetry verbatim per PLAN.md directive. Same inline-gate + X-Server-Time-Ms pattern as stop-timer, with verb POST (D-3-05 — D-32-R unchanged for resume) and path `/resume`. Warn message: `"X-Server-Time-Ms header missing on resume response; falling back to local clock"`. |
 | 403 = DEFINITE-FAIL on resume-timer (Plan 03-07, RESEARCH Q3 RESOLVED) | Per the OpenAPI contract, Keeping returns 403 when the caller tries to resume a locked time entry. Per the `classifyAmbiguous` contract (D-3-16), only `status >= 500` is ambiguous; 4xx (including 403) flows through `toIsErrorContent` unchanged so the AI gets the localised error message verbatim. Test 7 mocks `KeepingApiError(403, "cannot resume locked entry")` and asserts: (a) `res.isError === true`, (b) text contains `"Keeping API error 403"`, (c) text contains `"cannot resume locked entry"`, and CRITICALLY (d) text does NOT contain `"outcome unknown"` (which would indicate the ambiguous envelope misfired). This locks the contract that 403 is a server-acknowledged failure, NOT an outcome-unknown case. |
+| 12-tool wiring smoke uses sorted-name list (Plan 03-08, T-03-08-01) | `test/server.test.ts` builds an `InMemoryTransport.createLinkedPair()`, drives `createServer(client, { KEEPING_TOKEN, KEEPING_REQUIRE_CONFIRM: true, KEEPING_LOG_LEVEL: "error" }, log)`, calls `mcpClient.listTools()`, then `names.sort()` and `expect(names).toEqual([12-alphabetised-name-array])`. Sorted comparison is order-insensitive (stable against cosmetic reorderings of register calls in src/server.ts) but still catches: drop (length shrinks below 12), accidental add (length grows above 12), typo (`keeping_resume_tmer` mismatches the alphabetised reference). Future plans that add tools MUST extend both src/server.ts AND the test's expected array — the smoke is the canonical regression guard against forgotten registrations. |
+| WRITE-06 amendment preserves original wording (Plan 03-08, D-3-07) | REQUIREMENTS.md WRITE-06 bullet was rewritten in-line with the real 8-value OpenAPI enum (`work`, `break`, `special_leave`, `unpaid_leave`, `statutory_leave`, `sick_leave`, `work_reduction`, `trip`, default `work`); the original `billable`/`non_billable` wording is preserved verbatim in an `**Amendment 2026-06-12 (D-3-07):**` sub-bullet that cites the decision ID. Same pattern for ROADMAP SC #5 — original sentence untouched, blockquote footnote appended one indent level deeper. The supersession-with-footnote idiom: a superseded line is NEVER silently overwritten; the new wording goes in-line AND the old wording survives in a footnote referencing the decision ID so a future reader can audit the change. Reusable template for any future REQUIREMENTS / ROADMAP correction. |
+| WRITE-06 traceability row flipped Complete; checkbox stays [ ] (Plan 03-08) | Two trackers for the same requirement: the in-line bullet checkbox (`- [ ] **WRITE-06**: ...`) and the traceability table row. Plan 03-08's brief said "keep the checkbox `[ ]` — the verify-phase agent ticks it" but the orchestration `<plan_specifics>` said "Mark WRITE-06 as Complete in the traceability table." Resolution: respect both. Checkbox stays `[ ]` (verifier owns the tick), traceability row flipped to `Complete (per D-3-07 amendment — see WRITE-06 row above)` because Plan 03-02 demonstrably shipped the 8-value enum and the traceability table tracks "which phase delivered this?" — a separate semantic axis from the v1-requirements checkbox. |
 
 ### Open Questions (resolve during execution)
 
@@ -158,6 +162,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 - [x] Phase 3 Plan 05: keeping_start_timer vertical slice — POST with no end/no hours, timer_id extraction via three-clause guard (completed 2026-06-12)
 - [x] Phase 3 Plan 06: keeping_stop_timer vertical slice — PATCH /stop via requestWithHeaders, X-Server-Time-Ms surfacing + fallback warn (completed 2026-06-12)
 - [x] Phase 3 Plan 07: keeping_resume_timer vertical slice — POST /resume via requestWithHeaders, Pitfall 6 id asymmetry verbatim pass-through, 403 definite-fail (completed 2026-06-12)
+- [x] Phase 3 Plan 08: server wiring (six register* + _config→config rename) + listTools 12-tool smoke + REQUIREMENTS.md WRITE-06 amendment + ROADMAP SC #5 footnote per D-3-07 (completed 2026-06-12)
 - [ ] Phase 3 Plan 08: server.ts wiring + REQUIREMENTS.md WRITE-06 amendment (in progress)
 
 ### Blockers
@@ -177,11 +182,11 @@ None.
 5. Re-run `/gsd:verify-phase 02.5` to transition VERIFICATION.md from gaps_found 9/10 → complete 10/10 (Truth #3 FAILED → VERIFIED)
 6. Continue with Phase 3 (draft `.planning/phases/03-*/03-CONTEXT.md` first)
 
-**Last session:** 2026-06-12T08:54:00.000Z
-**Stopped at:** Completed Phase 3 Plan 07 (keeping_resume_timer vertical slice — 10 tests, 161/161 total)
+**Last session:** 2026-06-12T07:08:10.438Z
+**Stopped at:** Completed Phase 3 Plan 08 (server wiring + listTools 12-tool smoke + WRITE-06 amendment per D-3-07 — 162/162 total; Phase 3 implementation complete)
 **Resume file:** None
-**Next action:** `/gsd:execute-phase 3` continues with Plan 03-08 (server.ts wiring + REQUIREMENTS.md WRITE-06 amendment)
+**Next action:** Phase 3 verifier pass to flip WRITE-06 checkbox `[ ]` → `[x]`, then plan Phase 4 (`gsd:plan-phase 4`) — distribution & release pipeline (DIST-04, DIST-05, REL-02..05)
 
 ---
 *State initialized: 2026-06-09 after roadmap creation*
-*Last updated: 2026-06-11 after Phase 2.5 Plan 02 (gap closure) completion*
+*Last updated: 2026-06-12 after Phase 3 Plan 08 (server wiring + WRITE-06 amendment) completion*

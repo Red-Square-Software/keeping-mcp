@@ -19,7 +19,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 - [x] **Phase 1: Foundation & Scaffolding** — Project skeleton, KeepingClient, stderr-only logger, fail-fast token validation, CI pipeline green. No MCP tools yet; server does not start. Observable output: CI workflow exits green on every push. (completed 2026-06-09)
 - [x] **Phase 2: Read Tools & Schema Discovery** — Server runnable via `npx keeping-mcp`; all identity, metadata, and read tools operational; live-API session locked POST body schema (via the published OpenAPI spec at `developer.keeping.nl/openapi.json`, mirrored locally) and probed timer endpoint; rate-limit, retry, and identity caching in place. (completed 2026-06-11)
 - [x] **Phase 2.5: Timer Status Read Tool** — Single read-only `keeping_timer_status` tool backed by `GET /{org_id}/time-entries/last` + the `ongoing` flag. Carved out per D-32-R / D-33-R: timer functionality is verified-in-scope but writes (start/stop/resume) stay in Phase 3 to keep the dry-run-by-default pattern consistent. (completed 2026-06-11)
-- [ ] **Phase 3: Write Tools + Conditional Timers** — Full CRUD (`add`, `update`, `delete`) with dry-run gate, tool annotations, Amsterdam timezone default, and `purpose` field. Timer write tools (`start`, `stop`, `resume`) ship alongside per D-33-R.
+- [x] **Phase 3: Write Tools + Conditional Timers** — Full CRUD (`add`, `update`, `delete`) with dry-run gate, tool annotations, Amsterdam timezone default, and `purpose` field. Timer write tools (`start`, `stop`, `resume`) ship alongside per D-33-R. (completed 2026-06-12)
 - [ ] **Phase 4: Distribution & Release Pipeline** — `files` whitelist, `npm pack --dry-run` audit, dual-platform README, GitHub Actions OIDC publish to npm + MCP Registry on `v*` tag, provenance attestation verified.
 
 ---
@@ -118,7 +118,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 - [x] 03-05-PLAN.md — `keeping_start_timer` vertical slice (9 tests): POST `/{orgId}/time-entries` per D-3-06 with strict `Object.keys` assertion that body OMITS `end` AND `hours`; `timer_id` extracted via verbatim three-clause `Array.isArray` guard (D-2.5-05a); DST default for `date` + `nowInAmsterdamHHMM()` for `start`.
 - [x] 03-06-PLAN.md — `keeping_stop_timer` vertical slice (9 tests): PATCH `/{orgId}/time-entries/{entry_id}/stop` per D-3-05 (supersedes D-32-R's POST claim); uses new `client.requestWithHeaders<T>` to read `X-Server-Time-Ms` (TIMER-02, D-3-19); missing/invalid header falls back to `Date.now()` + `log.warn`, NOT an isError.
 - [x] 03-07-PLAN.md — `keeping_resume_timer` vertical slice (10 tests): POST `/{orgId}/time-entries/{entry_id}/resume` per D-3-05 (resume = POST is unchanged from D-32-R); same `X-Server-Time-Ms` surface as stop-timer; tool does NOT assert `response.time_entry.id === input.entry_id` (Pitfall 6 — resume on new day creates a new entry with different id); 403 on locked entries = DEFINITE-FAIL via toIsErrorContent per RESEARCH Q3.
-- [ ] 03-08-PLAN.md — Wrap-up: wire all six write tools into `src/server.ts` + `test/server.test.ts` listTools smoke (asserts the 12-tool sorted name list); amend REQUIREMENTS.md WRITE-06 per D-3-07 (preserve original wording in footnote); add ROADMAP SC #5 footnote citing D-3-07.
+- [x] 03-08-PLAN.md — Wrap-up: wire all six write tools into `src/server.ts` + `test/server.test.ts` listTools smoke (asserts the 12-tool sorted name list); amend REQUIREMENTS.md WRITE-06 per D-3-07 (preserve original wording in footnote); add ROADMAP SC #5 footnote citing D-3-07.
 
 ---
 
@@ -148,7 +148,7 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 | 1. Foundation & Scaffolding | 3/3 | Complete    | 2026-06-09 |
 | 2. Read Tools & Schema Discovery | 6/6 | Complete    | 2026-06-11 |
 | 2.5. Timer Status Read Tool | 2/2 | Complete   | 2026-06-11 |
-| 3. Write Tools + Conditional Timers | 7/8 | In Progress|  |
+| 3. Write Tools + Conditional Timers | 8/8 | Complete   | 2026-06-12 |
 | 4. Distribution & Release Pipeline | 0/? | Not started | - |
 
 ---
@@ -176,4 +176,4 @@ The research SUMMARY suggested 6 phases including a separate conditional Phase 4
 
 ---
 *Roadmap created: 2026-06-09*
-*Last updated: 2026-06-12 — Phase 3 Plan 07 (keeping_resume_timer) complete; 7/8 plans done*
+*Last updated: 2026-06-12 — Phase 3 Plan 08 (server wiring + WRITE-06 amendment per D-3-07) complete; Phase 3 implementation done 8/8 plans*
