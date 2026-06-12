@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: milestone_complete
-stopped_at: Milestone complete (Phase 04 was final phase)
-last_updated: 2026-06-12T16:24:13.011Z
+status: Awaiting next milestone
+stopped_at: Phase 4 Plan 04 complete — v1.0.1 SHIPPED to npm (`keeping-mcp@1.0.1` + sigstore provenance) and MCP Registry (`io.github.Red-Square-Software/keeping-mcp@1.0.1` active). Three real-world deviations from PLAN.md documented in 04-04-SUMMARY (OIDC trusted-publishing UI unavailable on free tier → NPM_TOKEN fallback; @red-square scope unowned → unscoped name claimed; canonical GitHub org casing required by OIDC subject claim).
+last_updated: "2026-06-12T17:15:44.283Z"
+last_activity: 2026-06-12 — Milestone v1.0 completed and archived
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 25
   completed_plans: 25
-  percent: 67
+  percent: 83
 ---
 
 # Project State: keeping-mcp
@@ -32,22 +33,10 @@ progress:
 
 ## Current Position
 
-Phase: 04
-Plan: Not started
-
-| Field | Value |
-|-------|-------|
-| Current phase | Phase 4 — Distribution & Release Pipeline (4/4 plans complete; v1.0.1 SHIPPED to npm + MCP Registry) |
-| Current plan | Plan 04-04 complete (v1.0.0 → v1.0.1 release end-to-end, sigstore provenance, MCP Registry entry active) |
-| Phase status | Phase 4 PLANS COMPLETE — awaiting verifier re-pass to mark phase Complete |
-| Overall progress | 25 of 25 plans complete |
-
-```
-Progress: [██████████] 100%
-Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · Phase 3 [██████████] · Phase 4 [████]
-```
-
----
+Phase: Milestone v1.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-06-12 — Milestone v1.0 completed and archived
 
 ## Phase Summary
 
@@ -209,3 +198,7 @@ Phase 1 [█████] · Phase 2 [██████] · Phase 2.5 [█] · 
 ---
 *State initialized: 2026-06-09 after roadmap creation*
 *Last updated: 2026-06-12 after Phase 4 Plan 03 (release.yml — tag-triggered two-job OIDC pipeline publishing to npm + MCP Registry) completion*
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone
